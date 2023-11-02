@@ -1,0 +1,6 @@
+[submodule "modules/unity"]
+	path = modules/unity
+	url = git@github.com:ThrowTheSwitch/Unity.git
+[submodule "modules/log.c"]
+	path = modules/log.c
+	url = https://github.com/rxi/log.c

@@ -1,0 +1,9 @@
+*.o
+*.out
+.dir-locals.el
+valgrind-*.txt
+*.dsv
+notebook/
+tmp/
+build/
+*.log
