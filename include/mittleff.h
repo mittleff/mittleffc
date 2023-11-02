@@ -1,5 +1,5 @@
 /*
- * This file is part of mittleffc.
+ * This file is part of mittleffc (https://github.com/mittleff/mittleffc).
  *
  * mittleffc is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -55,8 +55,8 @@
  */
 int
 mittleff_cmplx (double* res,
-                double alpha, double beta,
-                double re_z, double im_z,
-                double tol);
+                const double alpha, const double beta,
+                const double re_z, const double im_z,
+                const double tol);
 
 #endif /* __ML_MITTLEFF_H__ */

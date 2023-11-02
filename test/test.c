@@ -1,6 +1,7 @@
 #include <assert.h>
 
 #include "unity.h"
+#include "log.h"
 #include "mittleff.h"
 
 #include <complex.h>
@@ -37,6 +38,9 @@ void
 test_exp_small_z (void)
 {
     const double complex z = 0.9;
+
+    log_trace("[%s] Testing wheter E(1, 1, %g%+gj) == exp(%g%+gj)",
+              __func__, z, z);
 
     const double complex expected = cexp(z);   
     const double complex computed = mittleff(1, 1, z);
