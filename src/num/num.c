@@ -147,7 +147,6 @@ num_to_double (const num_t _self)
       
     if (num_is_real(_self))
     {
-        //log_trace("%g", self->dat[0]);
         return self->dat[0];
     }
 
@@ -401,14 +400,11 @@ num_pow (const num_t _self, const num_t _other)
     return res;
 }
 
-/* /\* Logical *\/ */
+/* Logical */
 
 bool
 num_eq (const num_t _self, const num_t _other)
 {
-    /* const double eps = num_to_double(num_abs(num_sub(_self, _other))); */    
-    /* return fabs(eps) < _TOLERANCE; */
-
     bool res;
     acb_t self, other;
 
@@ -425,8 +421,7 @@ bool
 num_lt (const num_t _self, const num_t _other)
 {
     assert(num_is_real(_self) && num_is_real(_other));
-    /* const double x = num_to_double(num_sub(_self, _other)); */
-    /* return x < 0; */
+    
     bool res;
     arb_t self, other;
 
@@ -443,8 +438,7 @@ bool
 num_gt (const num_t _self, const num_t _other)
 {
     assert(num_is_real(_self) && num_is_real(_other));
-    /* const double x = num_to_double(num_sub(_self, _other)); */
-    /* return x > 0; */
+    
     bool res;
     arb_t self, other;
 
@@ -461,7 +455,7 @@ bool
 num_le (const num_t _self, const num_t _other)
 {
     assert(num_is_real(_self) && num_is_real(_other));
-    /* return num_lt(_self, _other) || num_eq(_self, _other); */
+   
     bool res;
     arb_t self, other;
 

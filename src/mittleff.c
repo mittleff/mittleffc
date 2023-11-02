@@ -45,21 +45,41 @@ mittleff (const num_t alpha,
               num_imag_d(z),
               acc);
 
+    num_t zero = new(num, 0.0, 0.0);
     num_t one = new(num, 1.0, 0.0);
+    num_t res = zero;
+    
     if (in_region_G0(z))
     {
         log_info("[%s] z=(%+.5e, %+.5e) in region G0. Applying Taylor series",
                  __func__, num_real_d(z), num_imag_d(z));
-        return mittleff0(alpha, beta, z, acc);
+        res = mittleff0(alpha, beta, z, acc);
     }
     else if (num_gt(alpha, one))
     {
-        return new(num, 1.0, 0.0);
+        // apply recursive relation (2.2)
+        log_info("[%s] applying recursive relation", __func__);
+        /* m = int(num_to_double(num_add(num_ceil(num_div(num_sub(alpha, one), two)), one))) */
+
+            
+        /* m_num = Numeric(m, 0.0) */
+        /* s = zero */
+        /* for h in range(-m, m+1):                        */
+        /*     znew = num_to_complex(num_mul(num_pow(z, num_div(one, num_add(num_mul(two, m_num), one))), */
+        /*             num_exp(num_div(Numeric(0.0, 2.0 * M_PI * h), num_add(num_mul(two, m_num), one))))) */
+        /*     ml = _wrap_mittleff(_alpha/(2*m + 1), _beta, znew, _tol) */
+        /*     s = num_add(s, ml)  */
+        /* return num_mul(num_div(one, num_add(num_mul(two, m_num), one)), s) */
+        /* return new(num, 1.0, 0.0); */
     }
     else
     {
         return new(num, 0.0, 0.0);
     }
+
+    delete(zero); delete(one);
+
+    return res;
 }
 
 /* Main function of the library */
