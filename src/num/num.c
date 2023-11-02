@@ -39,6 +39,8 @@
 /* #define _TOLERANCE 1.0e-8 */
 /* #endif */
 
+const int prec = 53;
+
 #define NCOMP 2
 
 struct num {
@@ -107,6 +109,20 @@ num_imag (const num_t _self)
 	return new(num, self->dat[1], scalar_zero);
 }
 
+double
+num_real_d (const num_t _self)
+{
+    const struct num* self = _self;
+	return self->dat[0];
+}
+
+double
+num_imag_d (const num_t _self)
+{
+    const struct num* self = _self;
+	return self->dat[1];
+}
+
 /* Predicates */
 bool
 num_is_zero (const num_t _self)
@@ -145,6 +161,30 @@ num_to_complex (const num_t _self)
     return self->dat[0] + self->dat[1] * I;
 }
 
+// Converts an arb_t number to double.
+static double
+arbtod (const arb_t x)
+{
+    return arf_get_d(arb_midref(x), ARF_RND_NEAR) ;
+}
+
+static num_t
+num_from_acb (const acb_t x)
+{
+    arb_t re, im;
+    
+    arb_init(re); arb_init(im);
+    acb_get_real(re, x);
+    acb_get_imag(im, x);
+    return new(num, arbtod(re), arbtod(im));
+}
+
+static num_t
+num_from_arb (const arb_t x)
+{
+    return new(num, arbtod(x), 0.0);
+}
+
 /* void */
 /* num_to_pair (double* res, const num_t _self) */
 /* { */
@@ -168,11 +208,18 @@ num_to_complex (const num_t _self)
 num_t
 num_abs (const num_t _self)
 {
-    const struct num* self = _self;
-    const double x = self->dat[0];
-    const double y = self->dat[1];
+    num_t res;
+    acb_t self;
+    arb_t _res;
+    
+    acb_init(self); arb_init(_res);
+    acb_set_d_d(self, num_real_d(_self), num_imag_d(_self));
+    arb_set_d(_res, 0.0);
+    acb_abs(_res, self, prec);
+    res = num_from_arb(_res);
+    acb_clear(self); arb_clear(_res);
 
-    return new(num, hypot(x, y), 0.0);
+    return res;
 }
 
 /* num_t */
@@ -379,7 +426,7 @@ num_rgamma (const num_t z)
     /*          num_to_double(num_real_part(z)), */
     /*          num_to_double(num_imag_part(z))); */
 
-    const int prec = 53;
+    //const int prec = 53;
     arb_t res, x;    
     arb_init(res); arb_init(x);
     arb_set_d(x, num_to_double(z));

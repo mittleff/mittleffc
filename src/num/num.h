@@ -58,6 +58,18 @@ num_real (const num_t _self);
 num_t
 num_imag (const num_t _self);
 
+/**
+ * Returns the real part of \p _self (\f$x\f$), \f$\mathrm{Re}(x)\f$, as machine double.
+ */
+double
+num_real_d (const num_t _self);
+
+/**
+ * Returns the imaginary part of \p _self (\f$x\f$), \f$\mathrm{Im}(x)\f$, as machine double.
+ */
+double
+num_imag_d (const num_t _self);
+
 /**************/
 /* Predicates */
 /**************/

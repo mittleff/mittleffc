@@ -38,6 +38,14 @@ tearDown (void)
     // clean stuff up here
 }
 
+/********************************/
+/* Tests for the bignum library */
+/********************************/
+
+/*******************************/
+/* Tests for the main function */
+/*******************************/
+
 void
 test_exp_small_z (void)
 {
