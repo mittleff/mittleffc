@@ -20,6 +20,7 @@
  * @brief Implementation of the main functions of the library.
  */
 #include <stdlib.h>
+#include <math.h>
 #include <complex.h>
 #include <assert.h>
 
@@ -37,16 +38,21 @@ mittleff (const num_t alpha,
           const num_t z,
           const num_t acc)
 {
+    const double _alpha = num_to_double(alpha);
+    const double _beta = num_to_double(beta);
+    const double _acc = num_to_double(acc);
+         
     log_trace("[%s] (alpha, beta, z, acc) = (%g, %g, %g%+gj, %g)",
               __func__,
-              num_to_double(alpha),
-              num_to_double(beta),
+              _alpha,
+              _beta,
               num_real_d(z),
               num_imag_d(z),
-              acc);
+              _acc);
 
     num_t zero = new(num, 0.0, 0.0);
     num_t one = new(num, 1.0, 0.0);
+    num_t two = new(num, 2.0, 0.0);
     num_t res = zero;
     
     if (in_region_G0(z))
@@ -59,9 +65,25 @@ mittleff (const num_t alpha,
     {
         // apply recursive relation (2.2)
         log_info("[%s] applying recursive relation", __func__);
-        /* m = int(num_to_double(num_add(num_ceil(num_div(num_sub(alpha, one), two)), one))) */
+        const int m = (int) (ceil((_alpha - 1)/2.0) + 1);
+        num_t m_num = new(num, (double)m, 0.0);
 
-            
+        num_t sum = zero;
+        for (int h = -m; h <= m; h++)
+        {
+            num_t znew = num_mul(num_pow(z, num_div(one, num_add(num_mul(two, m_num), one))),
+                                 num_exp(num_div(new(num, 0.0, 2.0 * M_PI * h), num_add(num_mul(two, m_num), one))));
+            num_t ml = mittleff(new(num, (double)_alpha/(2*m + 1), 0.0), beta, znew, acc);
+            sum = num_add(sum, ml);
+            log_debug("[%s] %g %g", __func__, num_real_d(sum), num_imag_d(sum));
+        }
+        delete(m_num);
+        log_info("[%s] %g %g", __func__, num_real_d(sum), num_imag_d(sum));
+
+        return num_mul(num_div(one, num_add(num_mul(two, m_num), one)), sum);
+
+
+        
         /* m_num = Numeric(m, 0.0) */
         /* s = zero */
         /* for h in range(-m, m+1):                        */

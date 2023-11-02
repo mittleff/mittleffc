@@ -258,15 +258,23 @@ num_arg (const num_t _self)
 /*     return new(num, sqrt_r * cos(half_arg_z), sqrt_r * sin(half_arg_z));      */
 /* } */
 
-/* num_t */
-/* num_exp (const num_t _self) */
-/* { */
-/*     const struct num * self = _self; */
-/*     const double x = self->dat[0]; */
-/*     const double y = self->dat[1]; */
+num_t
+num_exp (const num_t _self)
+{
+    num_t res;
+    acb_t _res, self;
 
-/*     return new(num, exp(x)*cos(y), exp(x)*sin(y)); */
-/* } */
+    acb_init(self);
+    acb_set_d_d(self, num_real_d(_self), num_imag_d(_self));
+    
+    acb_exp(_res, self, prec);
+    
+    res = num_from_acb(_res);
+    
+    acb_clear(self);
+
+    return res;
+}
 
 num_t
 num_log (const num_t _self)

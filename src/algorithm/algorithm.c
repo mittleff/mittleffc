@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "algorithm.h"
 #include "log.h"
 #include "new.h"

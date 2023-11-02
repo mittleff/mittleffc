@@ -145,11 +145,11 @@ num_arg (const num_t _self);
 /* num_t */
 /* num_sqrt (const num_t _self); */
 
-/* /\** */
-/*  * Returns the exponential of the number */
-/*  *\/ */
-/* num_t */
-/* num_exp (const num_t _self); */
+/**
+ * Returns the exponential of the number
+ */
+num_t
+num_exp (const num_t _self);
 
 /**
  * Returns the logarithm of the number

@@ -13,9 +13,7 @@ const double acc = 1.0e-10;
 /* Wrapper around the library function */
 double complex
 mittleff (const double alpha, const double beta, const double complex z)
-{
-    
-    
+{        
     double res[2];    
     const int status = mittleff_cmplx(
         res,
@@ -106,6 +104,18 @@ test_cosh_small_z (void)
     TEST_VALUE(expected, computed);
 }
 
+void
+test_sin_recurrence (void)
+{
+    const double complex z = 1.01;
+
+    log_info("[%s] Testing whether z*E(2, 2, -z**2) == sin(z)", __func__);
+
+    const double complex expected = csin(z);   
+    const double complex computed = z*mittleff(2, 2, -z*z);
+    TEST_VALUE(expected, computed);
+}
+
 int
 main (void)
 {
@@ -116,6 +126,7 @@ main (void)
     RUN_TEST(test_cos_small_z);
     RUN_TEST(test_sinh_small_z);
     RUN_TEST(test_cosh_small_z);
+    RUN_TEST(test_sin_recurrence);
 
     return UNITY_END();
 }
