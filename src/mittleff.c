@@ -41,15 +41,15 @@ mittleff (const num_t alpha,
               num_to_double(beta),
               num_to_complex(z), acc);
     num_t zero = new(num, 0.0, 0.0);
-    num_t one = new(num, 1.0, 0.0);
+    num_t one = new(num, 1.0, 0.0);    
     num_t sum = num_rgamma(beta);
     num_t prev = num_rgamma(beta);
     num_t curr = zero;
     num_t k = one;
     while (true)
     {
-        log_debug("[%s] k = %g, sum = %g", __func__,
-                  num_to_double(k),
+        log_debug("[%s] k = %d,\t partial_sum = %+.8e", __func__,
+                  (int)num_to_double(k),
                   num_to_double(sum));
         curr = num_mul(
             num_pow(z, k),
@@ -63,7 +63,11 @@ mittleff (const num_t alpha,
         prev = curr;
         k = num_add(k, one);
     }
+    log_trace("[%s] Summed %d terms: %+.8e", __func__,
+                  (int)num_to_double(k),
+                  num_to_double(sum));
     
+    delete(zero); delete(one); delete(prev); delete(curr); delete(k);
     return sum;
 }
 
