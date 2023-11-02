@@ -143,14 +143,9 @@ num_is_real (const num_t _self)
 double
 num_to_double (const num_t _self)
 {
+    assert(num_is_real(_self));
     const struct num* self = _self;
-      
-    if (num_is_real(_self))
-    {
-        return self->dat[0];
-    }
-
-    return NAN;
+    return self->dat[0];
 }
 
 double complex
@@ -273,17 +268,40 @@ num_arg (const num_t _self)
 /*     return new(num, exp(x)*cos(y), exp(x)*sin(y)); */
 /* } */
 
-/* num_t */
-/* num_log (const num_t _self) */
-/* { */
-/*     const struct num * self = _self; */
-/*     const double x = self->dat[0]; */
-/*     const double y = self->dat[1]; */
-/*     const double _abs = hypot(x, y); */
-/*     const double _th = atan2(y, x); */
+num_t
+num_log (const num_t _self)
+{
+    //assert(num_is_real(_self));
 
-/*     return new(num, log(_abs), _th); */
-/* } */
+    /* num_t res; */
+    /* arb_t _res, self, other; */
+
+    /* arb_init(self); */
+    /* arb_set_d(self, num_real_d(_self)); */
+    /* arb_log(_res, self, prec); */
+    /* res = num_from_arb(_res); */
+    /* arb_clear(self); arb_clear(_res); */
+
+    /* return res; */
+
+    num_t res;
+    acb_t _res, self;
+
+    acb_init(self);
+    acb_set_d_d(self, num_real_d(_self), num_imag_d(_self));
+    
+    acb_log(_res, self, prec);
+
+    
+    res = num_from_acb(_res);
+    
+    acb_clear(self); //acb_clear(_res);
+    //log_trace("%g %g", num_real_d(res), num_imag_d(res));
+
+    return res;
+
+    
+}
 
 /* /\* sin(x+iy) = sin(x) cosh(y) + i cos(x) sinh(y)) *\/ */
 /* num_t */
@@ -520,22 +538,7 @@ num_ceil (const num_t _self)
     return res;
 }
 
-num_t
-num_log (const num_t _self)
-{
-    assert(num_is_real(_self));
 
-    num_t res;
-    arb_t _res, self, other;
-
-    arb_init(self); 
-    arb_set_d(self, num_real_d(_self));    
-    arb_log(_res, self, prec);
-    res = num_from_arb(_res);
-    arb_clear(self); arb_clear(_res);
-
-    return res;
-}
 
 num_t
 num_rgamma (const num_t z)
