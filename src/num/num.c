@@ -241,11 +241,18 @@ num_abs (const num_t _self)
 num_t
 num_arg (const num_t _self)
 {
-    const struct num * self = _self;
-    const double x = self->dat[0];
-    const double y = self->dat[1];
+    num_t res;
+    acb_t self;
+    arb_t _res;
 
-    return new(num, atan2(y, x), 0.0);
+    acb_init(self); arb_init(_res);
+    acb_set_d_d(self, num_real_d(_self), num_imag_d(_self));
+    arb_set_d(_res, 0.0);       
+    acb_arg(_res, self, prec);
+    res = num_from_arb(_res);
+    acb_clear(self); arb_clear(_res);
+
+    return res;
 }
 
 /* num_t */
