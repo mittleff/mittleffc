@@ -165,7 +165,7 @@ num_to_complex (const num_t _self)
 static double
 arbtod (const arb_t x)
 {
-    return arf_get_d(arb_midref(x), ARF_RND_NEAR) ;
+    return arf_get_d(arb_midref(x), ARF_RND_NEAR);
 }
 
 static num_t
@@ -315,50 +315,68 @@ num_arg (const num_t _self)
 num_t
 num_add (const num_t _self, const num_t _other)
 {
-    const struct num* self  = _self;
-    const struct num* other = _other;
+    num_t res;
+    acb_t self, other;
+    acb_t _res;
+    
+    acb_init(self); acb_init(other); acb_init(_res);
+    acb_set_d_d(self, num_real_d(_self), num_imag_d(_self));
+    acb_set_d_d(other, num_real_d(_other), num_imag_d(_other));
+    acb_add(_res, self, other, prec);
+    res = num_from_acb(_res);
+    acb_clear(self); acb_clear(other); acb_clear(_res);
 
-    return new(num, self->dat[0] + other->dat[0], self->dat[1] + other->dat[1]);
+    return res;
 }
 
 num_t
 num_sub (const num_t _self, const num_t _other)
 {
-    const struct num* self  = _self;
-    const struct num* other = _other;
+    num_t res;
+    acb_t self, other;
+    acb_t _res;
+    
+    acb_init(self); acb_init(other); acb_init(_res);
+    acb_set_d_d(self, num_real_d(_self), num_imag_d(_self));
+    acb_set_d_d(other, num_real_d(_other), num_imag_d(_other));
+    acb_sub(_res, self, other, prec);
+    res = num_from_acb(_res);
+    acb_clear(self); acb_clear(other); acb_clear(_res);
 
-    return new(num, self->dat[0] - other->dat[0], self->dat[1] - other->dat[1]);
+    return res;
 }
 
 num_t
 num_mul (const num_t _self, const num_t _other)
 {
-    const struct num * self  = _self;
-    const struct num * other = _other;
+    num_t res;
+    acb_t self, other, _res;
     
-    const double a = self->dat[0];
-    const double b = self->dat[1];
-    const double c = other->dat[0];
-    const double d = other->dat[1];
+    acb_init(self); acb_init(other); acb_init(_res);
+    acb_set_d_d(self, num_real_d(_self), num_imag_d(_self));
+    acb_set_d_d(other, num_real_d(_other), num_imag_d(_other));
+    acb_mul(_res, self, other, prec);
+    res = num_from_acb(_res);
+    acb_clear(self); acb_clear(other); acb_clear(_res);
 
-    return new(num, a * c - b * d, a * d + b * c);
+    return res;
 }
 
-/* num_t */
-/* num_div (const num_t _self, const num_t _other) */
-/* { */
-/*     const struct num* self  = _self; */
-/*     const struct num* other = _other; */
+num_t
+num_div (const num_t _self, const num_t _other)
+{
+    num_t res;
+    acb_t self, other, _res;
     
-/*     const double a = self->dat[0]; */
-/*     const double b = self->dat[1]; */
-/*     const double c = other->dat[0]; */
-/*     const double d = other->dat[1]; */
-    
-/*     const double abs2_other = c * c + d * d; */
+    acb_init(self); acb_init(other); acb_init(_res);
+    acb_set_d_d(self, num_real_d(_self), num_imag_d(_self));
+    acb_set_d_d(other, num_real_d(_other), num_imag_d(_other));
+    acb_div(_res, self, other, prec);
+    res = num_from_acb(_res);
+    acb_clear(self); acb_clear(other); acb_clear(_res);
 
-/*     return new(num, (a * c + b * d)/abs2_other, (b * c - a * d)/abs2_other); */
-/* } */
+    return res;
+}
 
 /* num_t */
 /* num_fmod (const num_t _self, const num_t _other) */
@@ -370,17 +388,17 @@ num_mul (const num_t _self, const num_t _other)
 num_t
 num_pow (const num_t _self, const num_t _other)
 {
-    const struct num* other = _other;
+    num_t res;
+    acb_t self, other, _res;
+    
+    acb_init(self); acb_init(other); acb_init(_res);
+    acb_set_d_d(self, num_real_d(_self), num_imag_d(_self));
+    acb_set_d_d(other, num_real_d(_other), num_imag_d(_other));
+    acb_pow(_res, self, other, prec);
+    res = num_from_acb(_res);
+    acb_clear(self); acb_clear(other); acb_clear(_res);
 
-    const double r = num_to_double(num_abs(_self));
-    const double th = num_to_double(num_arg(_self));
-    const double a = other->dat[0];
-    const double b = other->dat[1];
-
-    const double pow_r = pow(r, a) * exp(-th * b);
-    const double scale_arg_z = a * th + b * log(r);
-
-    return new(num, pow_r * cos(scale_arg_z), pow_r * sin(scale_arg_z));
+    return res;
 }
 
 /* /\* Logical *\/ */

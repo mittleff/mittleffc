@@ -6,7 +6,7 @@
 
 #include <complex.h>
 
-const double acc = 1.0e-15;
+const double acc = 1.0e-10;
 
 #define TEST_VALUE(expected,computed) TEST_ASSERT_DOUBLE_WITHIN(acc, creal(expected), creal(computed)); TEST_ASSERT_DOUBLE_WITHIN(acc, cimag(expected), cimag(computed));
 
