@@ -28,6 +28,8 @@
 #include "mittleff.h"
 #include "num/new.h"
 #include "num/num.h"
+#include "partition/partition.h"
+#include "algorithm/algorithm.h"
 
 static num_t
 mittleff (const num_t alpha,
@@ -39,36 +41,25 @@ mittleff (const num_t alpha,
               __func__,
               num_to_double(alpha),
               num_to_double(beta),
-              num_to_complex(z), acc);
-    num_t zero = new(num, 0.0, 0.0);
-    num_t one = new(num, 1.0, 0.0);    
-    num_t sum = num_rgamma(beta);
-    num_t prev = num_rgamma(beta);
-    num_t curr = zero;
-    num_t k = one;
-    while (true)
+              num_real_d(z),
+              num_imag_d(z),
+              acc);
+
+    num_t one = new(num, 1.0, 0.0);
+    if (in_region_G0(z))
     {
-        log_debug("[%s] k = %d,\t partial_sum = %+.8e", __func__,
-                  (int)num_to_double(k),
-                  num_to_double(sum));
-        curr = num_mul(
-            num_pow(z, k),
-            num_rgamma(
-                num_add(
-                    num_mul(alpha, k),
-                    beta)));
-        sum = num_add(sum, curr);
-        if (num_le(num_abs(num_sub(curr, prev)), acc))
-            break;
-        prev = curr;
-        k = num_add(k, one);
+        log_info("[%s] z=(%+.5e, %+.5e) in region G0. Applying Taylor series",
+                 __func__, num_real_d(z), num_imag_d(z));
+        return mittleff0(alpha, beta, z, acc);
     }
-    log_trace("[%s] Summed %d terms: %+.8e", __func__,
-                  (int)num_to_double(k),
-                  num_to_double(sum));
-    
-    delete(zero); delete(one); delete(prev); delete(curr); delete(k);
-    return sum;
+    else if (num_gt(alpha, one))
+    {
+        return new(num, 1.0, 0.0);
+    }
+    else
+    {
+        return new(num, 0.0, 0.0);
+    }
 }
 
 /* Main function of the library */
@@ -85,8 +76,8 @@ mittleff_cmplx (double* res,
     num_t _beta  = new(num, beta,  0.0);
     num_t _z     = new(num, re_z, im_z);
     num_t _acc   = new(num, acc, 0.0);
-    const double complex ml = num_to_complex(mittleff(_alpha, _beta, _z, _acc));
-    res[0] = creal(ml); res[1] = cimag(ml);
+    num_t ml = mittleff(_alpha, _beta, _z, _acc);    
+    res[0] = num_real_d(ml); res[1] = num_imag_d(ml);
     delete(_alpha); delete(_beta); delete(_z); delete(_acc);
     
     return EXIT_SUCCESS;

@@ -99,8 +99,8 @@ num_to_double (const num_t _self);
 /**
  * Converts numeric types to machine's complex double.
  */
-double complex
-num_to_complex (const num_t _self);
+/* double complex */
+/* num_to_complex (const num_t _self); */
 
 /* void */
 /* num_to_pair (double* res, const num_t _self); */
@@ -151,11 +151,11 @@ num_arg (const num_t _self);
 /* num_t */
 /* num_exp (const num_t _self); */
 
-/* /\** */
-/*  * Returns the logarithm of the number */
-/*  *\/ */
-/* num_t */
-/* num_log (const num_t _self); */
+/**
+ * Returns the logarithm of the number
+ */
+num_t
+num_log (const num_t _self);
 
 /* /\** */
 /*  * Returns the sine of the number */
@@ -241,5 +241,11 @@ num_le (const num_t _self, const num_t _other);
 /*********************/
 num_t
 num_rgamma(const num_t _self);
+
+num_t
+num_max(const num_t _self, const num_t _other);
+
+num_t
+num_ceil (const num_t _self);
 
 #endif /* __NUM_H__ */

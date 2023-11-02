@@ -478,7 +478,7 @@ bool
 num_ge (const num_t _self, const num_t _other)
 {
     assert(num_is_real(_self) && num_is_real(_other));
-    /* return num_gt(_self, _other) || num_eq(_self, _other); */
+
     bool res;
     arb_t self, other;
 
@@ -492,27 +492,68 @@ num_ge (const num_t _self, const num_t _other)
 }
 
 num_t
+num_max (const num_t _self, const num_t _other)
+{
+    assert(num_is_real(_self) && num_is_real(_other));
+    
+    num_t res;
+    arb_t _res, self, other;
+
+    arb_init(self); arb_init(other);
+    arb_set_d(self, num_real_d(_self));
+    arb_set_d(other, num_real_d(_other));
+    arb_max(_res, self, other, prec);
+    res = num_from_arb(_res);
+    arb_clear(self); arb_clear(other); arb_clear(_res);
+
+    return res;
+}
+
+num_t
+num_ceil (const num_t _self)
+{
+    assert(num_is_real(_self));
+
+    num_t res;
+    arb_t _res, self, other;
+
+    arb_init(self); 
+    arb_set_d(self, num_real_d(_self));    
+    arb_ceil(_res, self, prec);
+    res = num_from_arb(_res);
+    arb_clear(self); arb_clear(_res);
+
+    return res;
+}
+
+num_t
+num_log (const num_t _self)
+{
+    assert(num_is_real(_self));
+
+    num_t res;
+    arb_t _res, self, other;
+
+    arb_init(self); 
+    arb_set_d(self, num_real_d(_self));    
+    arb_log(_res, self, prec);
+    res = num_from_arb(_res);
+    arb_clear(self); arb_clear(_res);
+
+    return res;
+}
+
+num_t
 num_rgamma (const num_t z)
 {
     assert(num_is_real(z));
 
-    /* log_trace("[%s] calling with z=(%+.5e, %+.5e)", */
-    /*          __func__, */
-    /*          num_to_double(num_real_part(z)), */
-    /*          num_to_double(num_imag_part(z))); */
-
-    //const int prec = 53;
     arb_t res, x;    
     arb_init(res); arb_init(x);
     arb_set_d(x, num_to_double(z));
     arb_hypgeom_rgamma(res, x,  prec);
-    const double ret = arf_get_d(arb_midref(res), ARF_RND_NEAR) ;
-    /* log_trace("[%s] result: %+.5e", __func__, ret); */
+    const double ret = arbtod(res);
     arb_clear(res); arb_clear(x);
 
     return new(num, ret, 0.0);
 }
-
-/* #ifdef _TOLERANCE */
-/* #undef _TOLERANCE */
-/* #endif */
