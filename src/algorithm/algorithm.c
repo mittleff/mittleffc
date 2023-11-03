@@ -63,6 +63,8 @@ mittleff5 (const num_t alpha,
     const num_t one = new(num, 1.0, 0.0);
     const num_t two = new(num, 2.0, 0.0);
     const num_t half = new(num, 0.5, 0.0);
+
+    log_trace("Before compute rmax");
     
     num_t res = zero;
     
@@ -84,12 +86,13 @@ mittleff5 (const num_t alpha,
                     num_mul(two,
                             num_log(new(num, M_PI*eps/(6.0*(fabs(_beta)+2.0)*pow(2*fabs(_beta), _beta)), 0.0)))),
                 alpha));
-
+    log_trace("After compute rmax: %g %g", num_real_d(rmax), num_imag_d(rmax));
     num_t a_value = A(z, alpha, beta, zero);
     num_t pi_alpha = num_mul(pi, alpha);
-    num_t integ_b;
-    num_t integ_c;
-    
+    num_t integ_b = zero;
+    num_t integ_c = zero;
+
+    log_trace("Before compute integrals");
     if (num_le(beta, one)) /* Equation (4.25) */
     {
         integ_b = integrate_B(alpha, beta, z, pi_alpha, zero, rmax);
@@ -101,8 +104,14 @@ mittleff5 (const num_t alpha,
         integ_c = integrate_C(alpha, beta, z, half, num_negative(pi_alpha), pi_alpha);
         res = num_add(a_value, num_add(integ_b, integ_c));         
     }
+    log_trace("After compute integrals");
 
-    delete(pi_alpha); delete(a_value); delete(integ_b); delete(integ_c);
+    delete(pi_alpha);
+    delete(a_value);
+    delete(integ_b);
+    delete(integ_c);
+
+    log_trace("Before return function");
 
     return res;
 }

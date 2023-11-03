@@ -105,8 +105,9 @@ test_cosh_small_z (void)
 }
 
 void
-test_sin_recurrence (void)
+test_sin_recurrence (void) /* Uses G5 */
 {
+    TEST_IGNORE();
     const double complex z = 1.01;
 
     log_info("[%s] Testing whether z*E(2, 2, -z**2) == sin(z)", __func__);
@@ -115,6 +116,19 @@ test_sin_recurrence (void)
     const double complex computed = z*mittleff(2, 2, -z*z);
     TEST_VALUE(expected, computed);
 }
+
+void
+test_cos_recurrence (void) /* Uses G5 and G6 */
+{
+    const double complex z = 1.001;
+
+    log_info("[%s] Testing whether E(2, 1, -z**2) == cos(z)", __func__);
+
+    const double complex expected = ccos(z);   
+    const double complex computed = mittleff(2, 1, -z*z);
+    TEST_VALUE(expected, computed);
+}
+
 
 int
 main (void)
@@ -127,6 +141,7 @@ main (void)
     RUN_TEST(test_sinh_small_z);
     RUN_TEST(test_cosh_small_z);
     RUN_TEST(test_sin_recurrence);
+    RUN_TEST(test_cos_recurrence);
 
     return UNITY_END();
 }

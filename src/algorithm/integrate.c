@@ -144,7 +144,7 @@ integrate_B (const num_t alpha,
     acb_calc_integrate_opt_init(options);
 
     prec = 53;
-    goal = 10;
+    goal = 20;
     
     acb_init(_from);
     acb_init(_to);
@@ -159,7 +159,6 @@ integrate_B (const num_t alpha,
     int status = acb_calc_integrate(_res, f_wrap_B, &p, _from, _to, goal, tol, options, prec);
 
     num_t res = num_from_acb(_res);
-    //log_trace("===================>%d %g %g", status, num_real_d(res), num_imag_d(res));
 
     acb_clear(_res);
     acb_clear(t);
@@ -188,7 +187,7 @@ integrate_C (const num_t alpha,
     acb_calc_integrate_opt_init(options);
 
     prec = 53;
-    goal = 10;
+    goal = 20;
     
     acb_init(_from);
     acb_init(_to);
