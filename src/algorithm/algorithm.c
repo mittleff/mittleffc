@@ -144,17 +144,17 @@ mittleff6 (const num_t alpha,
     else // TODO Check with Hansjoerg whether the brackets mean "ceil" here
         rmax = num_max(
             num_max(
-                num_pow(num_ceil(num_mul(two, num_add(num_abs(beta), 1))), alpha),
+                num_pow(num_ceil(num_mul(two, num_add(num_abs(beta), one))), alpha),
                 num_mul(two, num_abs(z))),
             num_pow(
                 num_ceil(
                     num_negative(
                         new(num, log((M_PI*pow(2.0,_beta)*eps)/(12*(fabs(_beta)+2)*pow(4*fabs(_beta), fabs(_beta)))), 0.0))), alpha));
 
-    num_t res = zero;
+    num_t res = clone(zero);
 
-    num_t integ_b;
-    num_t integ_c;
+    num_t integ_b = clone(zero);
+    num_t integ_c = clone(zero);
     num_t v = new(num, 2.0 * M_PI * _alpha/3.0, 0.0);
         
     if (num_le(beta, one)) /* Equation (4.31) */
@@ -168,7 +168,14 @@ mittleff6 (const num_t alpha,
         res = num_add(integ_b, integ_c);         
     }
 
-    delete(integ_b); delete(integ_c); delete(v);
+    delete(zero);
+    delete(one);
+    delete(two);
+    delete(half);
+    
+    delete(integ_b);
+    delete(integ_c);
+    delete(v);
 
     return res;
 }

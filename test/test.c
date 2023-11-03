@@ -107,8 +107,8 @@ test_cosh_small_z (void)
 void
 test_sin_recurrence (void) /* Uses G5 */
 {
-    TEST_IGNORE();
-    const double complex z = 1.01;
+    //TEST_IGNORE();
+    const double complex z = 1.001;
 
     log_info("[%s] Testing whether z*E(2, 2, -z**2) == sin(z)", __func__);
 
