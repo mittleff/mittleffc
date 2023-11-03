@@ -127,6 +127,12 @@ num_abs (const num_t _self);
 num_t
 num_negative (const num_t _self);
 
+/**
+ * Returns the inverse of \p _self (\f$x\f$), \f$1/x\f$.
+ */
+num_t
+num_inverse (const num_t _self);
+
 /* /\** */
 /*  * Returns the complex conjugate of \p _self (\f$x\f$), \f$x^\ast\f$. */
 /*  *\/ */
@@ -157,17 +163,17 @@ num_exp (const num_t _self);
 num_t
 num_log (const num_t _self);
 
-/* /\** */
-/*  * Returns the sine of the number */
-/*  *\/ */
-/* num_t */
-/* num_sin (const num_t _self); */
+/**
+ * Returns the sine of the number
+ */
+num_t
+num_sin (const num_t _self);
 
-/* /\** */
-/*  * Returns the cosine of the number */
-/*  *\/ */
-/* num_t */
-/* num_cos (const num_t _self); */
+/**
+ * Returns the cosine of the number
+ */
+num_t
+num_cos (const num_t _self);
 
 /* /\*********************\/ */
 /* /\* Binary operations *\/ */

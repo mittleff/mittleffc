@@ -224,6 +224,25 @@ num_negative (const num_t _self)
 	return new(num, -1 * self->dat[0], -1 * self->dat[1]);
 }
 
+num_t
+num_inverse (const num_t _self)
+{
+    assert(!num_is_zero(_self));
+    num_t res;
+    acb_t _res, self;
+
+    acb_init(self);
+    acb_set_d_d(self, num_real_d(_self), num_imag_d(_self));
+    
+    acb_inv(_res, self, prec);
+    
+    res = num_from_acb(_res);
+    
+    acb_clear(self);
+
+    return res;
+}
+
 /* num_t */
 /* num_conjugate (const num_t _self) */
 /* { */
@@ -278,27 +297,30 @@ num_exp (const num_t _self)
 
 num_t
 num_log (const num_t _self)
-{
-    //assert(num_is_real(_self));
-
-    /* num_t res; */
-    /* arb_t _res, self, other; */
-
-    /* arb_init(self); */
-    /* arb_set_d(self, num_real_d(_self)); */
-    /* arb_log(_res, self, prec); */
-    /* res = num_from_arb(_res); */
-    /* arb_clear(self); arb_clear(_res); */
-
-    /* return res; */
-
+{    
     num_t res;
+    acb_t _res, self;
+
+    acb_init(self); acb_init(_res);
+    acb_set_d_d(self, num_real_d(_self), num_imag_d(_self));    
+    acb_log_analytic(_res, self, 1, prec);
+    res = num_from_acb(_res);
+    acb_clear(self); acb_clear(_res);
+
+    return res;
+}
+
+/* sin(x+iy) = sin(x) cosh(y) + i cos(x) sinh(y)) */
+num_t
+num_sin (const num_t _self)
+{
+      num_t res;
     acb_t _res, self;
 
     acb_init(self);
     acb_set_d_d(self, num_real_d(_self), num_imag_d(_self));
     
-    acb_log(_res, self, prec);
+    acb_sin(_res, self, prec);
 
     
     res = num_from_acb(_res);
@@ -307,31 +329,28 @@ num_log (const num_t _self)
     //log_trace("%g %g", num_real_d(res), num_imag_d(res));
 
     return res;
-
-    
 }
 
-/* /\* sin(x+iy) = sin(x) cosh(y) + i cos(x) sinh(y)) *\/ */
-/* num_t */
-/* num_sin (const num_t _self) */
-/* { */
-/*     const struct num * self = _self; */
-/*     const double x = self->dat[0]; */
-/*     const double y = self->dat[1]; */
+/* cos(x+iy)=cos(x) cosh(y) − i sin(x) sinh(y) */
+num_t
+num_cos (const num_t _self)
+{
+    num_t res;
+    acb_t _res, self;
 
-/*     return new(num, sin(x) * cosh(y), cos(x) * sinh(y)); */
-/* } */
+    acb_init(self);
+    acb_set_d_d(self, num_real_d(_self), num_imag_d(_self));
+    
+    acb_cos(_res, self, prec);
 
-/* /\* cos(x+iy)=cos(x) cosh(y) − i sin(x) sinh(y) *\/ */
-/* num_t */
-/* num_cos (const num_t _self) */
-/* { */
-/*     const struct num * self = _self; */
-/*     const double x = self->dat[0]; */
-/*     const double y = self->dat[1]; */
+    
+    res = num_from_acb(_res);
+    
+    acb_clear(self); //acb_clear(_res);
+    //log_trace("%g %g", num_real_d(res), num_imag_d(res));
 
-/*     return new(num, cos(x) * cosh(y), -1 * sin(x) * sinh(y)); */
-/* } */
+    return res;
+}
 
 /* Binary operations */
 
