@@ -27,10 +27,10 @@
 #include "log.h"
 
 #include "mittleff.h"
-#include "num/new.h"
-#include "num/num.h"
-#include "partition/partition.h"
-#include "algorithm/algorithm.h"
+#include "new.h"
+#include "num.h"
+#include "partition.h"
+#include "algorithm.h"
 
 static num_t
 mittleff (const num_t alpha,

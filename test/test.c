@@ -3,6 +3,7 @@
 #include "unity.h"
 #include "log.h"
 #include "mittleff.h"
+//#include "sf/sf.h"
 
 #include <complex.h>
 
@@ -126,6 +127,19 @@ test_cos_recurrence (void) /* Uses G5 and G6 */
 
     const double complex expected = ccos(z);   
     const double complex computed = mittleff(2, 1, -z*z);
+    TEST_VALUE(expected, computed);
+}
+
+
+void
+test_erf_small_z (void) /* Uses G5 and G6 */
+{
+    const double complex x = 0.9;
+
+    log_info("[%s] Testing whether E(1/2, 1, x) == exp(x**2)*(1 + erf(x))", __func__);
+
+    const double complex expected = cexp(x*x)*(1.0 + num_to_double(num_erf(new())));
+    const double complex computed = mittleff(0.5, 1.0, x);
     TEST_VALUE(expected, computed);
 }
 
