@@ -1,6 +1,7 @@
 #include <math.h>
 
 #include "algorithm.h"
+#include "integrate.h"
 #include "log.h"
 #include "new.h"
 
@@ -91,24 +92,22 @@ mittleff5 (const num_t alpha,
                     num_mul(two,
                             num_log(new(num, M_PI*eps/(6.0*(fabs(_beta)+2.0)*pow(2*fabs(_beta), _beta)), 0.0)))),
                 alpha));
-    
 
     num_t a_value = A(z, alpha, beta, zero);
-    num_t integ_b = zero;
+    num_t integ_b = integrate_B();
     num_t integ_c = zero;
-    if (num_le(beta, one))
+    
+    if (num_le(beta, one)) /* Equation (4.25) */
     {
-        res = num_add(a_value, integ_b);
+        res = num_add(a_value, integ_b);        
     }
-    else
-    {
-        res = num_add(a_value, num_add(integ_b, integ_c));
+    else /* Equation (4.26) */
+    {       
+        res = num_add(a_value, num_add(integ_b, integ_c));         
     }
-
-
+    
     return res;
 }
-
 
 num_t
 mittleff6 (const num_t alpha,
