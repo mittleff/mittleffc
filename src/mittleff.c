@@ -134,8 +134,6 @@ mittleff (const num_t alpha,
         
     }
 
-    log_info("[%s] res = %+g%+gj", __func__, num_real_d(res), num_imag_d(res));
-
     delete(zero); delete(one);
 
     return res;
@@ -162,7 +160,5 @@ mittleff_cmplx (double* res,
     
     delete(_alpha); delete(_beta); delete(_z); delete(_acc);
 
-    
-    
     return EXIT_SUCCESS;
 }

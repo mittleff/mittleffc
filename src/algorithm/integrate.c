@@ -84,13 +84,6 @@ B (const num_t r,
    const num_t z,
    const num_t phi)
 {
-    /* log_trace("=====> (%g %g (%g %g) %g)", */
-    /*           num_to_double(alpha), */
-    /*           num_to_double(beta), */
-    /*           num_real_d(z), */
-    /*           num_imag_d(z), */
-    /*           num_to_double(phi)); */
-    
     num_t two = new(num, 2.0, 0.0);
     num_t one_over_pi = new(num, 1.0/M_PI, 0.0);
     num_t num, den;
@@ -143,13 +136,6 @@ integrate_B (const num_t alpha,
              const num_t from,
              const num_t to)
 {
-    log_trace("integrate B called");
-    log_trace("%g %g (%g %g) %g",
-              num_to_double(alpha),
-              num_to_double(beta),
-              num_real_d(z),
-              num_imag_d(z),
-              num_to_double(phi));
     acb_t _res, t, _from, _to;
     mag_t tol;
     slong prec, goal;
