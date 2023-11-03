@@ -33,4 +33,22 @@ mittleff0 (const num_t alpha,
            const num_t z,
            const num_t acc);
 
+/**
+ * Compute ML function in region G_5
+ */
+num_t
+mittleff5 (const num_t alpha,
+           const num_t beta,
+           const num_t z,
+           const num_t acc);
+
+/**
+ * Compute ML function in region G_6
+ */
+num_t
+mittleff6 (const num_t alpha,
+           const num_t beta,
+           const num_t z,
+           const num_t acc);
+
 #endif /* __ALGORITHM_H__ */

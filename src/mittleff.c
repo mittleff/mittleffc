@@ -66,8 +66,7 @@ mittleff (const num_t alpha,
         // apply recursive relation (2.2)
         log_info("[%s] applying recursive relation", __func__);
         const int m = (int) (ceil((_alpha - 1)/2.0) + 1);
-        num_t m_num = new(num, (double)m, 0.0);
-
+        const num_t m_num = new(num, (double)m, 0.0);
         num_t sum = zero;
         for (int h = -m; h <= m; h++)
         {
@@ -75,33 +74,13 @@ mittleff (const num_t alpha,
                                  num_exp(num_div(new(num, 0.0, 2.0 * M_PI * h), num_add(num_mul(two, m_num), one))));
             num_t ml = mittleff(new(num, (double)_alpha/(2*m + 1), 0.0), beta, znew, acc);
             sum = num_add(sum, ml);
-            log_debug("[%s] %g %g", __func__, num_real_d(sum), num_imag_d(sum));
         }
+        res = num_mul(num_div(one, num_add(num_mul(two, m_num), one)), sum);
         delete(m_num);
-        log_info("[%s] %g %g", __func__, num_real_d(sum), num_imag_d(sum));
-
-        return num_mul(num_div(one, num_add(num_mul(two, m_num), one)), sum);
-
-
-        
-        /* m_num = Numeric(m, 0.0) */
-        /* s = zero */
-        /* for h in range(-m, m+1):                        */
-        /*     znew = num_to_complex(num_mul(num_pow(z, num_div(one, num_add(num_mul(two, m_num), one))), */
-        /*             num_exp(num_div(Numeric(0.0, 2.0 * M_PI * h), num_add(num_mul(two, m_num), one))))) */
-        /*     ml = _wrap_mittleff(_alpha/(2*m + 1), _beta, znew, _tol) */
-        /*     s = num_add(s, ml)  */
-        /* return num_mul(num_div(one, num_add(num_mul(two, m_num), one)), s) */
-        /* return new(num, 1.0, 0.0); */
     }
     else /* alpha <= 1 */
     {
         log_info("[%s] applying main algorithm", __func__);
-
-        /* compute parameters */
-
-         /* double C0 = pow(1.3, 1 - num_to_double(p.alpha))/(M_PI * sin(M_PI * num_to_double(p.alpha))); /\* Equation (5.3) *\/ */
-        /* p.r1 = new(num, pow(-2.0 * log(num_to_double(tol)/C0), num_to_double(p.alpha)), 0.0); /\* Equation (4.21) *\/ */
 
         if (in_region_G1(z, alpha, acc))
         {
@@ -136,14 +115,14 @@ mittleff (const num_t alpha,
             log_info("[%s] z=(%+.5e, %+.5e) in region G5",
                      __func__, num_real_d(z), num_imag_d(z));
 
-            return new(num, 5.0, 0.0);
+            res = mittleff5(alpha, beta, z, acc);
         }
         else if (in_region_G6(z, alpha, acc))
         {
             log_info("[%s] z=(%+.5e, %+.5e) in region G6",
                      __func__, num_real_d(z), num_imag_d(z));
 
-            return new(num, 6.0, 0.0);
+            res = mittleff6(alpha, beta, z, acc);
         }
         else
         {
@@ -154,6 +133,8 @@ mittleff (const num_t alpha,
         }
         
     }
+
+    log_info("[%s] res = %+g%+gj", __func__, num_real_d(res), num_imag_d(res));
 
     delete(zero); delete(one);
 
@@ -174,9 +155,14 @@ mittleff_cmplx (double* res,
     num_t _beta  = new(num, beta,  0.0);
     num_t _z     = new(num, re_z, im_z);
     num_t _acc   = new(num, acc, 0.0);
-    num_t ml = mittleff(_alpha, _beta, _z, _acc);    
+    
+    num_t ml = mittleff(_alpha, _beta, _z, _acc);
+    
     res[0] = num_real_d(ml); res[1] = num_imag_d(ml);
+    
     delete(_alpha); delete(_beta); delete(_z); delete(_acc);
+
+    
     
     return EXIT_SUCCESS;
 }
