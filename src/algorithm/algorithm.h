@@ -34,6 +34,51 @@ mittleff0 (const num_t alpha,
            const num_t acc);
 
 /**
+ * Compute ML function in region G_0
+ */
+num_t
+mittleff0 (const num_t alpha,
+           const num_t beta,
+           const num_t z,
+           const num_t acc);
+
+/**
+ * Compute ML function in region G_1
+ */
+num_t
+mittleff1 (const num_t alpha,
+           const num_t beta,
+           const num_t z,
+           const num_t acc);
+
+/**
+ * Compute ML function in region G_2
+ */
+num_t
+mittleff2 (const num_t alpha,
+           const num_t beta,
+           const num_t z,
+           const num_t acc);
+
+/**
+ * Compute ML function in region G_3
+ */
+num_t
+mittleff3 (const num_t alpha,
+           const num_t beta,
+           const num_t z,
+           const num_t acc);
+
+/**
+ * Compute ML function in region G_4
+ */
+num_t
+mittleff4 (const num_t alpha,
+           const num_t beta,
+           const num_t z,
+           const num_t acc);
+
+/**
  * Compute ML function in region G_5
  */
 num_t

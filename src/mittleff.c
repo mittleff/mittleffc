@@ -87,28 +87,28 @@ mittleff (const num_t alpha,
             log_info("[%s] z=(%+.5e, %+.5e) in region G1",
                      __func__, num_real_d(z), num_imag_d(z));
 
-            return new(num, 1.0, 0.0);
+            res = mittleff1(alpha, beta, z, acc);
         }
         else if (in_region_G2(z, alpha, acc))
         {
             log_info("[%s] z=(%+.5e, %+.5e) in region G2",
                      __func__, num_real_d(z), num_imag_d(z));
 
-            return new(num, 2.0, 0.0);
+            res = mittleff2(alpha, beta, z, acc);
         }
         else if (in_region_G3(z, alpha, acc))
         {
             log_info("[%s] z=(%+.5e, %+.5e) in region G3",
                      __func__, num_real_d(z), num_imag_d(z));
 
-            return new(num, 3.0, 0.0);
+            res = mittleff3(alpha, beta, z, acc);
         }
         else if (in_region_G4(z, alpha, acc))
         {
             log_info("[%s] z=(%+.5e, %+.5e) in region G4",
                      __func__, num_real_d(z), num_imag_d(z));
 
-            return new(num, 4.0, 0.0);
+            res = mittleff4(alpha, beta, z, acc);
         }
         else if (in_region_G5(z, alpha, acc))
         {

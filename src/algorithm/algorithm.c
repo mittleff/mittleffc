@@ -40,6 +40,42 @@ mittleff0 (const num_t alpha,
 }
 
 num_t
+mittleff1 (const num_t alpha,
+           const num_t beta,
+           const num_t z,
+           const num_t acc)
+{
+    return new(num, 0.0, 0.0);
+}
+
+num_t
+mittleff2 (const num_t alpha,
+           const num_t beta,
+           const num_t z,
+           const num_t acc)
+{
+    return new(num, 0.0, 0.0);
+}
+
+num_t
+mittleff3 (const num_t alpha,
+           const num_t beta,
+           const num_t z,
+           const num_t acc)
+{
+    return new(num, 0.0, 0.0);
+}
+
+num_t
+mittleff4 (const num_t alpha,
+           const num_t beta,
+           const num_t z,
+           const num_t acc)
+{
+    return new(num, 0.0, 0.0);
+}
+
+num_t
 mittleff5 (const num_t alpha,
            const num_t beta,
            const num_t z,
