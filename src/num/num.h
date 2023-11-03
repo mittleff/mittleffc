@@ -121,11 +121,11 @@ num_to_double (const num_t _self);
 num_t
 num_abs (const num_t _self);
 
-/* /\** */
-/*  * Returns the negative of \p _self (\f$x\f$), \f$-x\f$. */
-/*  *\/ */
-/* num_t */
-/* num_negative (const num_t _self); */
+/**
+ * Returns the negative of \p _self (\f$x\f$), \f$-x\f$.
+ */
+num_t
+num_negative (const num_t _self);
 
 /* /\** */
 /*  * Returns the complex conjugate of \p _self (\f$x\f$), \f$x^\ast\f$. */
@@ -201,11 +201,11 @@ num_mul (const num_t _self, const num_t _other);
 num_t
 num_div (const num_t _self, const num_t _other);
 
-/* /\** */
-/*  *  Returns the remainder of the division of \p _self (\f$x\f$) and \p _other (\f$y\f$), \f$x/y\f$. */
-/*  *\/ */
-/* num_t */
-/* num_fmod (const num_t _self, const num_t _other); */
+/**
+ *  Returns the remainder of the division of \p _self (\f$x\f$) and \p _other (\f$y\f$), \f$x/y\f$.
+ */
+num_t
+num_fmod (const num_t _self, const num_t _other);
 
 /**
  * returns the exponentiation of \p _self (\f$x\f$) to \p _other (\f$y\f$), \f$x^y\f$.

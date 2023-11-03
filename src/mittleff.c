@@ -94,9 +94,65 @@ mittleff (const num_t alpha,
         /* return num_mul(num_div(one, num_add(num_mul(two, m_num), one)), s) */
         /* return new(num, 1.0, 0.0); */
     }
-    else
+    else /* alpha <= 1 */
     {
-        return new(num, 0.0, 0.0);
+        log_info("[%s] applying main algorithm", __func__);
+
+        /* compute parameters */
+
+         /* double C0 = pow(1.3, 1 - num_to_double(p.alpha))/(M_PI * sin(M_PI * num_to_double(p.alpha))); /\* Equation (5.3) *\/ */
+        /* p.r1 = new(num, pow(-2.0 * log(num_to_double(tol)/C0), num_to_double(p.alpha)), 0.0); /\* Equation (4.21) *\/ */
+
+        if (in_region_G1(z, alpha, acc))
+        {
+            log_info("[%s] z=(%+.5e, %+.5e) in region G1",
+                     __func__, num_real_d(z), num_imag_d(z));
+
+            return new(num, 1.0, 0.0);
+        }
+        else if (in_region_G2(z, alpha, acc))
+        {
+            log_info("[%s] z=(%+.5e, %+.5e) in region G2",
+                     __func__, num_real_d(z), num_imag_d(z));
+
+            return new(num, 2.0, 0.0);
+        }
+        else if (in_region_G3(z, alpha, acc))
+        {
+            log_info("[%s] z=(%+.5e, %+.5e) in region G3",
+                     __func__, num_real_d(z), num_imag_d(z));
+
+            return new(num, 3.0, 0.0);
+        }
+        else if (in_region_G4(z, alpha, acc))
+        {
+            log_info("[%s] z=(%+.5e, %+.5e) in region G4",
+                     __func__, num_real_d(z), num_imag_d(z));
+
+            return new(num, 4.0, 0.0);
+        }
+        else if (in_region_G5(z, alpha, acc))
+        {
+            log_info("[%s] z=(%+.5e, %+.5e) in region G5",
+                     __func__, num_real_d(z), num_imag_d(z));
+
+            return new(num, 5.0, 0.0);
+        }
+        else if (in_region_G6(z, alpha, acc))
+        {
+            log_info("[%s] z=(%+.5e, %+.5e) in region G6",
+                     __func__, num_real_d(z), num_imag_d(z));
+
+            return new(num, 6.0, 0.0);
+        }
+        else
+        {
+            log_info("[%s] z=(%+.5e, %+.5e) in no region [G0, G6]",
+                     __func__, num_real_d(z), num_imag_d(z));
+
+            return new(num, -1.0, 0.0);
+        }
+        
     }
 
     delete(zero); delete(one);

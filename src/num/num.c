@@ -216,13 +216,13 @@ num_abs (const num_t _self)
     return res;
 }
 
-/* num_t */
-/* num_negative (const num_t _self) */
-/* { */
-/*     const struct num* self = _self; */
+num_t
+num_negative (const num_t _self)
+{
+    const struct num* self = _self;
     
-/* 	return new(num, -1 * self->dat[0], -1 * self->dat[1]); */
-/* } */
+	return new(num, -1 * self->dat[0], -1 * self->dat[1]);
+}
 
 /* num_t */
 /* num_conjugate (const num_t _self) */
@@ -403,12 +403,12 @@ num_div (const num_t _self, const num_t _other)
     return res;
 }
 
-/* num_t */
-/* num_fmod (const num_t _self, const num_t _other) */
-/* { */
-/*     assert(num_is_real(_self) && num_is_real(_other)); */
-/*     return new(num, fmod(num_to_double(_self), num_to_double(_other)), 0.0); */
-/* } */
+num_t
+num_fmod (const num_t _self, const num_t _other)
+{
+    assert(num_is_real(_self) && num_is_real(_other));
+    return new(num, fmod(num_to_double(_self), num_to_double(_other)), 0.0);
+}
 
 num_t
 num_pow (const num_t _self, const num_t _other)
