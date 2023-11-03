@@ -30,9 +30,11 @@
 #include <arb.h>
 #include <arb_hypgeom.h>
 
+#include "arb2num.h"
+
 #include "abc.h"
 #include "new.h"
-#include "num.h"
+// #include "num.h"
 //include "log.h"
 
 /* #ifndef _TOLERANCE */
@@ -140,6 +142,15 @@ num_is_real (const num_t _self)
 
 /* Type casting */
 
+/* static double */
+/* arbtod (const arb_t x); */
+
+/* static num_t */
+/* num_from_acb (const acb_t x); */
+
+/* static num_t */
+/* num_from_arb (const arb_t x); */
+
 double
 num_to_double (const num_t _self)
 {
@@ -155,29 +166,6 @@ num_to_complex (const num_t _self)
     return self->dat[0] + self->dat[1] * I;
 }
 
-// Converts an arb_t number to double.
-static double
-arbtod (const arb_t x)
-{
-    return arf_get_d(arb_midref(x), ARF_RND_NEAR);
-}
-
-static num_t
-num_from_acb (const acb_t x)
-{
-    arb_t re, im;
-    
-    arb_init(re); arb_init(im);
-    acb_get_real(re, x);
-    acb_get_imag(im, x);
-    return new(num, arbtod(re), arbtod(im));
-}
-
-static num_t
-num_from_arb (const arb_t x)
-{
-    return new(num, arbtod(x), 0.0);
-}
 
 /* void */
 /* num_to_pair (double* res, const num_t _self) */

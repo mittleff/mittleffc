@@ -18,6 +18,8 @@ test:
 	$(CC) $(DEV_CFLAGS) $(DEV_INCDIR) -DM_PI=3.14159265359 -c ./src/partition.c -o .obj/partition.o
 	$(CC) $(DEV_CFLAGS) $(DEV_INCDIR) -DM_PI=3.14159265359 -c ./src/integrate.c -o .obj/integrate.o
 	$(CC) $(DEV_CFLAGS) $(DEV_INCDIR) -DM_PI=3.14159265359 -c ./src/algorithm.c -o .obj/algorithm.o
+	$(CC) $(DEV_CFLAGS) $(DEV_INCDIR) -DM_PI=3.14159265359 -c ./src/sf.c -o .obj/sf.o
+	$(CC) $(DEV_CFLAGS) $(DEV_INCDIR) -DM_PI=3.14159265359 -c ./src/arb2num.c -o .obj/arb2num.o
 	$(CC) $(DEV_CFLAGS) $(DEV_INCDIR) -DM_PI=3.14159265359 -c ./src/mittleff.c -o .obj/mittleff.o
 	$(CC) $(DEV_CFLAGS) $(DEV_INCDIR) -I./modules/unity/src -I./modules/log/src  -DLOGLEVEL=1 -DUNITY_INCLUDE_DOUBLE -c ./test/test.c -o .obj/test.o
 	$(CC) $$(ls .obj/*.o) -o test.out -lm -larb -lflint

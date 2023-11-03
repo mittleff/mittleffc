@@ -3,7 +3,8 @@
 #include "unity.h"
 #include "log.h"
 #include "mittleff.h"
-//#include "sf/sf.h"
+#include "sf.h"
+#include "new.h"
 
 #include <complex.h>
 
@@ -138,7 +139,8 @@ test_erf_small_z (void) /* Uses G5 and G6 */
 
     log_info("[%s] Testing whether E(1/2, 1, x) == exp(x**2)*(1 + erf(x))", __func__);
 
-    const double complex expected = cexp(x*x)*(1.0 + num_to_double(num_erf(new())));
+    const double complex expected = cexp(x*x)*(1.0 + num_to_double(num_erf(new(num, x, 0.0))));
+
     const double complex computed = mittleff(0.5, 1.0, x);
     TEST_VALUE(expected, computed);
 }
@@ -156,6 +158,7 @@ main (void)
     RUN_TEST(test_cosh_small_z);
     RUN_TEST(test_sin_recurrence);
     RUN_TEST(test_cos_recurrence);
+    RUN_TEST(test_erf_small_z);
 
     return UNITY_END();
 }
