@@ -120,7 +120,48 @@ mittleff4 (const num_t alpha,
            const num_t z,
            const num_t acc)
 {
-    return new(num, 0.0, 0.0);
+      /* numeric_t a = PARAMS_GET_ALPHA(p); */
+    /* numeric_t b = PARAMS_GET_BETA(p); */
+
+    /* th = mp.arg(z**(1/alpha)) - np.pi */
+    const double th = num_to_double(
+        num_sub(
+            num_arg(
+                num_pow(
+                    z,
+                    num_inverse(alpha))),
+            new(num, M_PI, 0.0)));
+		
+    /* c = th + 1j*th**2/6 - th**3/36 */
+    const num_t c = new(num, -th + th*th*th/36.0, -th*th/6.0);
+		
+    /* fac = (1/(2*alpha))*z**((1 - beta)/alpha)*mp.exp(z**(1/alpha))*mp.erfc(c*mp.sqrt(0.5*mp.fabs(z)**(1/alpha))) */
+    num_t fac;
+    fac = num_inverse(num_mul(new(num, 2.0, 0.0), alpha));
+    fac = num_mul(
+        fac,
+        num_pow(
+            z,
+            num_div(
+                num_sub(new(num, 1.0, 0.0), beta),
+                alpha)));
+    fac = num_mul(
+        fac,
+        num_exp(
+            num_pow(
+                z,
+                num_inverse(alpha))));
+    fac = num_mul(
+        fac,
+        num_erfc(num_mul(
+                     c,
+                     num_sqrt(
+                         num_mul(
+                             new(num, 0.5, 0.0),
+                             num_pow(
+                                 num_abs(z), num_inverse(alpha)))))));
+		
+    return num_add(fac, asymptotic_series(z, alpha, beta));	
 }
 
 num_t
