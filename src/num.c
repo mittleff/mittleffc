@@ -256,14 +256,23 @@ num_arg (const num_t _self)
     return res;
 }
 
-/* num_t */
-/* num_sqrt (const num_t _self) */
-/* { */
-/*     const double sqrt_r = sqrt(num_to_double(num_abs(_self))); */
-/*     const double half_arg_z = 0.5 * num_to_double(num_arg(_self)); */
+num_t
+num_sqrt (const num_t _self)
+{
+    num_t res;
+    acb_t _res, self;
 
-/*     return new(num, sqrt_r * cos(half_arg_z), sqrt_r * sin(half_arg_z));      */
-/* } */
+    acb_init(self);
+    acb_set_d_d(self, num_real_d(_self), num_imag_d(_self));
+    
+    acb_sqrt(_res, self, prec);
+    
+    res = num_from_acb(_res);
+    
+    acb_clear(self);
+
+    return res;
+}
 
 num_t
 num_exp (const num_t _self)

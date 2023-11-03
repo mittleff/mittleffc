@@ -25,7 +25,10 @@
 #include "num.h"
 
 num_t
-num_erf (const num_t x);
+num_erf (const num_t _self);
+
+num_t
+num_erfc (const num_t _self);
 
 
 #endif /* __SF_H__ */

@@ -24,3 +24,20 @@ num_erf (const num_t _self)
 
     return res;
 }
+
+num_t
+num_erfc (const num_t _self)
+{
+    assert(num_is_real(_self));
+
+    num_t res;
+    arb_t _res, self;
+
+    arb_init(self); arb_init(_res);
+    arb_set_d(self, num_to_double(_self));
+    arb_hypgeom_erfc(_res, self, 53);
+    res = new(num, arbtod(_res), 0.0);
+    arb_clear(self); arb_clear(_res);
+
+    return res;
+}
