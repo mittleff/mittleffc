@@ -145,6 +145,19 @@ test_erf_small_z (void) /* Uses G5 and G6 */
     TEST_VALUE(expected, computed);
 }
 
+void
+test_erf_not_small_z (void) /* Uses G5 and G6 */
+{
+    const double complex x = 1.01;
+
+    log_info("[%s] Testing whether E(1/2, 1, x) == exp(x**2)*(1 + erf(x))", __func__);
+
+    const double complex expected = cexp(x*x)*(1.0 + num_to_double(num_erf(new(num, x, 0.0))));
+
+    const double complex computed = mittleff(0.5, 1.0, x);
+    TEST_VALUE(expected, computed);
+}
+
 
 int
 main (void)
@@ -159,6 +172,7 @@ main (void)
     RUN_TEST(test_sin_recurrence);
     RUN_TEST(test_cos_recurrence);
     RUN_TEST(test_erf_small_z);
+    RUN_TEST(test_erf_not_small_z);
 
     return UNITY_END();
 }
