@@ -5,6 +5,8 @@
 #include "log.h"
 #include "new.h"
 
+static num_t asymptotic_series (const num_t z, const num_t alpha, const num_t beta);
+
 num_t
 mittleff0 (const num_t alpha,
            const num_t beta,
@@ -45,7 +47,17 @@ mittleff1 (const num_t alpha,
            const num_t z,
            const num_t acc)
 {
-    return new(num, 0.0, 0.0);
+    log_debug("[%s] called", __func__);
+    num_t fac1, fac2;
+
+    fac1 = num_mul(
+        num_mul(
+            new(num, 1.0/num_to_double(alpha), 0.0),
+            num_pow(z, num_div(num_sub(new(num, 1.0, 0.0), beta), alpha))),
+        num_exp(num_pow(z, num_inverse(alpha))));	   
+    fac2 = asymptotic_series(z, alpha, beta);
+		
+    return num_add(fac1, fac2);
 }
 
 num_t
@@ -217,3 +229,34 @@ mittleff6 (const num_t alpha,
 }
 
 
+/* Return the rhs of equation (2.3) */
+num_t
+asymptotic_series (const num_t z, const num_t alpha, const num_t beta)
+{
+    log_trace("[%s] called", __func__);
+    /*kmax = int(mp.ceil((1/alpha)*mp.fabs(z)**(1/alpha)) + 1)*/
+    const int kmax = (int) num_to_double(
+        num_add(
+            num_ceil(num_mul(num_inverse(alpha),
+                             num_pow(num_abs(z),
+                                     num_inverse(alpha)))),
+            new(num, 1.0, 0.0)));
+    log_trace("[%s] summing %d terms", __func__, kmax);
+
+    /* -sum([z**(-k) * mp.rgamma(beta - alpha*k) for k in range(1, kmax + 1)]) */
+    num_t sum = new(num, 0.0, 0.0);
+    for (int k = 1; k <= kmax; k++)
+    {
+        sum = num_add(sum,
+                      num_mul(
+                          /* z**(-k) */ 
+                          num_pow(z, new(num, (double) -k, 0.0)),
+                          /* mp.rgamma(beta - alpha*k) */
+                          num_rgamma(
+                              num_sub(beta,
+                                      num_mul(alpha,
+                                              new(num, (double) k, 0.0))))));
+    }
+    log_trace("[%s] Finished", __func__);
+    return num_mul(sum, new(num, -1.0, 0.0));
+}
