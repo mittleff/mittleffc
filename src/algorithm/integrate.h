@@ -4,6 +4,24 @@
 #include "num.h"
 
 num_t
-integrate_B (void);
+A (const num_t z,
+   const num_t alpha,
+   const num_t beta,
+   const num_t x);
+
+num_t
+B (const num_t r,
+   const num_t alpha,
+   const num_t beta,
+   const num_t z,
+   const num_t phi);
+
+num_t
+integrate_B (const num_t alpha,
+             const num_t beta,
+             const num_t z,
+             const num_t phi,
+             const num_t from,
+             const num_t to);
 
 #endif  /* __INTEGRATE_H__ */

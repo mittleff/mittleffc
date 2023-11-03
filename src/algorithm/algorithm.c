@@ -5,8 +5,6 @@
 #include "log.h"
 #include "new.h"
 
-static num_t A (const num_t z, const num_t alpha, const num_t beta, const num_t x);
-
 num_t
 mittleff0 (const num_t alpha,
            const num_t beta,
@@ -68,6 +66,7 @@ mittleff5 (const num_t alpha,
     const double eps = 0.5;
 
     const num_t zero = new(num, 0.0, 0.0);
+    const num_t pi = new(num, M_PI, 0.0);
     const num_t one = new(num, 1.0, 0.0);
     const num_t two = new(num, 2.0, 0.0);
     const num_t half = new(num, 0.5, 0.0);
@@ -94,7 +93,8 @@ mittleff5 (const num_t alpha,
                 alpha));
 
     num_t a_value = A(z, alpha, beta, zero);
-    num_t integ_b = integrate_B();
+    num_t phi = num_mul(pi, alpha);
+    num_t integ_b = integrate_B(alpha, beta, z, phi, zero, one);
     num_t integ_c = zero;
     
     if (num_le(beta, one)) /* Equation (4.25) */
@@ -121,17 +121,4 @@ mittleff6 (const num_t alpha,
     return new(num, 0.5, 0.0);
 }
 
-/****************************************************************/
 
-static num_t
-A (const num_t z, const num_t alpha, const num_t beta, const num_t x)
-{
-    const double _alpha = num_to_double(alpha);
-    const double _beta = num_to_double(beta);
-    
-    return num_mul(
-        num_inverse(alpha),
-        num_mul(
-            num_pow(z, new(num, (1 - _beta)/_alpha, 0.0)),
-            num_exp(num_mul(num_pow(z, num_inverse(alpha)), num_cos(num_div(x, alpha))))));
-}
