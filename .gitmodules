@@ -4,3 +4,6 @@
 [submodule "modules/log"]
 	path = modules/log
 	url = git@github.com:rxi/log.c.git
+[submodule "modules/num.c"]
+	path = modules/num.c
+	url = git@github.com:padawanphysicist/num.c.git
