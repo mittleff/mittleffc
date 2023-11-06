@@ -2,7 +2,6 @@
 
 #include "algorithm.h"
 #include "integrate.h"
-#include "sf.h"
 #include "log.h"
 #include "new.h"
 
@@ -14,15 +13,15 @@ mittleff0 (const num_t alpha,
            const num_t z,
            const num_t acc)
 {
-    const double _alpha = num_to_double(alpha);
-    const double _beta = num_to_double(beta);
-    const double _acc = num_to_double(acc);
+    const double _alpha = num_to_d(alpha);
+    const double _beta = num_to_d(beta);
+    const double _acc = num_to_d(acc);
     
      num_t zero = new(num, 0.0, 0.0);
      num_t one = new(num, 1.0, 0.0);
      num_t two = new(num, 2.0, 0.0);
 
-     const double abs_z = num_to_double(num_abs(z));
+     const double abs_z = num_to_d(num_abs(z));
      const int k1 = (int) (ceil((2 - _beta)/_alpha) + 1);
      const int k2 = (int) (ceil(log(_acc*(1-abs_z))/log(abs_z)) + 1);
      const int kmax = (k1 > k2) ? k1 : k2;
@@ -53,9 +52,9 @@ mittleff1 (const num_t alpha,
 
     fac1 = num_mul(
         num_mul(
-            new(num, 1.0/num_to_double(alpha), 0.0),
+            new(num, 1.0/num_to_d(alpha), 0.0),
             num_pow(z, num_div(num_sub(new(num, 1.0, 0.0), beta), alpha))),
-        num_exp(num_pow(z, num_inverse(alpha))));	   
+        num_exp(num_pow(z, num_inv(alpha))));	   
     fac2 = asymptotic_series(z, alpha, beta);
 		
     return num_add(fac1, fac2);
@@ -80,9 +79,9 @@ mittleff3 (const num_t alpha,
     /* num_t b = PARAMS_GET_BETA(p); */
 
     /* th = mp.arg(z**(1/alpha)) - np.pi */
-    const double th = num_to_double(
+    const double th = num_to_d(
         num_sub(
-            num_arg(num_pow(z, num_inverse(alpha))),
+            num_arg(num_pow(z, num_inv(alpha))),
             new(num, M_PI, 0.0)));
 		
     /* c = th + 1j*th**2/6 - th**3/36 */
@@ -90,7 +89,7 @@ mittleff3 (const num_t alpha,
 		
     /* fac = (1/(2*alpha))*z**((1 - beta)/alpha)*mp.exp(z**(1/alpha))*mp.erfc(c*mp.sqrt(0.5*mp.fabs(z)**(1/alpha))) */
     num_t fac;
-    fac = num_inverse(num_mul(new(num, 2.0, 0.0), alpha));
+    fac = num_inv(num_mul(new(num, 2.0, 0.0), alpha));
     fac = num_mul(fac,
                   num_pow(
                       z,
@@ -99,7 +98,7 @@ mittleff3 (const num_t alpha,
                   num_exp(
                       num_pow(
                           z,
-                          num_inverse(alpha))));
+                          num_inv(alpha))));
     fac = num_mul(fac,
                   num_erfc(
                       num_mul(
@@ -109,7 +108,7 @@ mittleff3 (const num_t alpha,
                                   new(num, 0.5, 0.0),
                                   num_pow(
                                       num_abs(z),
-                                      num_inverse(alpha)))))));
+                                      num_inv(alpha)))))));
 		
     return num_add(fac, asymptotic_series(z, alpha, beta));
 }
@@ -124,12 +123,12 @@ mittleff4 (const num_t alpha,
     /* numeric_t b = PARAMS_GET_BETA(p); */
 
     /* th = mp.arg(z**(1/alpha)) - np.pi */
-    const double th = num_to_double(
+    const double th = num_to_d(
         num_sub(
             num_arg(
                 num_pow(
                     z,
-                    num_inverse(alpha))),
+                    num_inv(alpha))),
             new(num, M_PI, 0.0)));
 		
     /* c = th + 1j*th**2/6 - th**3/36 */
@@ -137,7 +136,7 @@ mittleff4 (const num_t alpha,
 		
     /* fac = (1/(2*alpha))*z**((1 - beta)/alpha)*mp.exp(z**(1/alpha))*mp.erfc(c*mp.sqrt(0.5*mp.fabs(z)**(1/alpha))) */
     num_t fac;
-    fac = num_inverse(num_mul(new(num, 2.0, 0.0), alpha));
+    fac = num_inv(num_mul(new(num, 2.0, 0.0), alpha));
     fac = num_mul(
         fac,
         num_pow(
@@ -150,7 +149,7 @@ mittleff4 (const num_t alpha,
         num_exp(
             num_pow(
                 z,
-                num_inverse(alpha))));
+                num_inv(alpha))));
     fac = num_mul(
         fac,
         num_erfc(num_mul(
@@ -159,7 +158,7 @@ mittleff4 (const num_t alpha,
                          num_mul(
                              new(num, 0.5, 0.0),
                              num_pow(
-                                 num_abs(z), num_inverse(alpha)))))));
+                                 num_abs(z), num_inv(alpha)))))));
 		
     return num_add(fac, asymptotic_series(z, alpha, beta));	
 }
@@ -170,17 +169,17 @@ mittleff5 (const num_t alpha,
            const num_t z,
            const num_t acc)
 {
-    log_trace("[%s] (alpha=%g, beta=%g, z=(%+.5e, %+.5e), tol=%g)",
-              __func__,              
-              num_to_double(alpha),
-              num_to_double(beta),
-              num_real_d(z),
-              num_imag_d(z),
-              num_to_double(acc));
+    /* log_trace("[%s] (alpha=%g, beta=%g, z=(%+.5e, %+.5e), tol=%g)", */
+    /*           __func__,               */
+    /*           num_to_d(alpha), */
+    /*           num_to_d(beta), */
+    /*           num_real_d(z), */
+    /*           num_imag_d(z), */
+    /*           num_to_d(acc)); */
 
-    const double _alpha = num_to_double(alpha);
-    const double _beta = num_to_double(beta);
-    const double _acc = num_to_double(acc);
+    const double _alpha = num_to_d(alpha);
+    const double _beta = num_to_d(beta);
+    const double _acc = num_to_d(acc);
     const double eps = 0.5;
 
     const num_t zero = new(num, 0.0, 0.0);
@@ -198,20 +197,22 @@ mittleff5 (const num_t alpha,
     if (num_ge(beta, zero))
     {
         rmax = num_max(
-            num_max(one,
-                    num_mul(two, num_abs(z))),
-            num_pow(num_negative(num_log(new(num, M_PI*eps/6.0, 0.0))), alpha));
+            3,
+            one,
+            num_mul(two, num_abs(z)),
+            num_pow(num_neg(num_log(new(num, M_PI*eps/6.0, 0.0))), alpha));
     }
     else
         rmax = num_max(
-            num_max(num_pow(num_add(num_abs(beta), one), alpha),
-                    num_mul(two, num_abs(z))),
+            3,
+            num_pow(num_add(num_abs(beta), one), alpha),
+            num_mul(two, num_abs(z)),
             num_pow(
-                num_negative(
+                num_neg(
                     num_mul(two,
                             num_log(new(num, M_PI*eps/(6.0*(fabs(_beta)+2.0)*pow(2*fabs(_beta), _beta)), 0.0)))),
                 alpha));
-    log_trace("After compute rmax: %g %g", num_real_d(rmax), num_imag_d(rmax));
+    //log_trace("After compute rmax: %g %g", num_real_d(rmax), num_imag_d(rmax));
     num_t a_value = A(z, alpha, beta, zero);
     num_t pi_alpha = num_mul(pi, alpha);
     num_t integ_b = zero;
@@ -226,7 +227,7 @@ mittleff5 (const num_t alpha,
     else /* Equation (4.26) */
     {
         integ_b = integrate_B(alpha, beta, z, pi_alpha, half, rmax);
-        integ_c = integrate_C(alpha, beta, z, half, num_negative(pi_alpha), pi_alpha);
+        integ_c = integrate_C(alpha, beta, z, half, num_neg(pi_alpha), pi_alpha);
         res = num_add(a_value, num_add(integ_b, integ_c));         
     }
     log_trace("After compute integrals");
@@ -248,8 +249,8 @@ mittleff6 (const num_t alpha,
            const num_t acc)
 {
     const double eps = 0.5;
-    const double _beta = num_to_double(beta);
-    const double _alpha = num_to_double(alpha);
+    const double _beta = num_to_d(beta);
+    const double _alpha = num_to_d(alpha);
 
     const num_t zero = new(num, 0.0, 0.0);
     const num_t pi = new(num, M_PI, 0.0);
@@ -262,24 +263,25 @@ mittleff6 (const num_t alpha,
     if (num_ge(beta, zero))
     {
         rmax = num_max(
-            num_max(num_pow(two, alpha),
-                    num_mul(two, num_abs(z))),
-            num_pow(num_negative(num_log(new(num, M_PI*eps*pow(2.0, _beta)/12.0, 0.0))), alpha));
+            3,
+            num_pow(two, alpha),
+            num_mul(two, num_abs(z)),
+            num_pow(num_neg(num_log(new(num, M_PI*eps*pow(2.0, _beta)/12.0, 0.0))), alpha));
     }
     else // TODO Check with Hansjoerg whether the brackets mean "ceil" here
         rmax = num_max(
-            num_max(
-                num_pow(num_ceil(num_mul(two, num_add(num_abs(beta), one))), alpha),
-                num_mul(two, num_abs(z))),
+            3,
+            num_pow(num_ceil(num_mul(two, num_add(num_abs(beta), one))), alpha),
+            num_mul(two, num_abs(z)),
             num_pow(
                 num_ceil(
-                    num_negative(
+                    num_neg(
                         new(num, log((M_PI*pow(2.0,_beta)*eps)/(12*(fabs(_beta)+2)*pow(4*fabs(_beta), fabs(_beta)))), 0.0))), alpha));
 
-    num_t res = clone(zero);
+    num_t res = num_from_d(0.0);
 
-    num_t integ_b = clone(zero);
-    num_t integ_c = clone(zero);
+    num_t integ_b = num_from_d(0.0);
+    num_t integ_c = num_from_d(0.0);
     num_t v = new(num, 2.0 * M_PI * _alpha/3.0, 0.0);
         
     if (num_le(beta, one)) /* Equation (4.31) */
@@ -289,7 +291,7 @@ mittleff6 (const num_t alpha,
     else /* Equation (4.32) */
     {
         integ_b = integrate_B(alpha, beta, z, v, half, rmax);
-        integ_c = integrate_C(alpha, beta, z, half, num_negative(v), v);
+        integ_c = integrate_C(alpha, beta, z, half, num_neg(v), v);
         res = num_add(integ_b, integ_c);         
     }
 
@@ -312,11 +314,11 @@ asymptotic_series (const num_t z, const num_t alpha, const num_t beta)
 {
     log_trace("[%s] called", __func__);
     /*kmax = int(mp.ceil((1/alpha)*mp.fabs(z)**(1/alpha)) + 1)*/
-    const int kmax = (int) num_to_double(
+    const int kmax = (int) num_to_d(
         num_add(
-            num_ceil(num_mul(num_inverse(alpha),
+            num_ceil(num_mul(num_inv(alpha),
                              num_pow(num_abs(z),
-                                     num_inverse(alpha)))),
+                                     num_inv(alpha)))),
             new(num, 1.0, 0.0)));
     log_trace("[%s] summing %d terms", __func__, kmax);
 

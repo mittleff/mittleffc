@@ -27,8 +27,8 @@
 #include "log.h"
 
 #include "mittleff.h"
-#include "new.h"
 #include "num.h"
+#include "new.h"
 #include "partition.h"
 #include "algorithm.h"
 
@@ -38,27 +38,27 @@ mittleff (const num_t alpha,
           const num_t z,
           const num_t acc)
 {
-    const double _alpha = num_to_double(alpha);
-    const double _beta = num_to_double(beta);
-    const double _acc = num_to_double(acc);
+    const double _alpha = num_to_d(alpha);
+    const double _beta = num_to_d(beta);
+    const double _acc = num_to_d(acc);
          
-    log_trace("[%s] (alpha, beta, z, acc) = (%g, %g, %g%+gj, %g)",
-              __func__,
-              _alpha,
-              _beta,
-              num_real_d(z),
-              num_imag_d(z),
-              _acc);
+    /* log_trace("[%s] (alpha, beta, z, acc) = (%g, %g, %g%+gj, %g)", */
+    /*           __func__, */
+    /*           _alpha, */
+    /*           _beta, */
+    /*           num_real_d(z), */
+    /*           num_imag_d(z), */
+    /*           _acc); */
 
-    num_t zero = new(num, 0.0, 0.0);
-    num_t one = new(num, 1.0, 0.0);
-    num_t two = new(num, 2.0, 0.0);
-    num_t res = zero;
+    num_t zero = num_from_d(0.0);
+    num_t one = num_from_d(1.0);
+    num_t two = num_from_d(2.0);
+    num_t res = num_from_d(0.0);
     
     if (in_region_G0(z))
     {
-        log_info("[%s] z=(%+.5e, %+.5e) in region G0. Applying Taylor series",
-                 __func__, num_real_d(z), num_imag_d(z));
+        /* log_info("[%s] z=(%+.5e, %+.5e) in region G0. Applying Taylor series", */
+        /*          __func__, num_real_d(z), num_imag_d(z)); */
         res = mittleff0(alpha, beta, z, acc);
     }
     else if (num_gt(alpha, one))
@@ -84,57 +84,57 @@ mittleff (const num_t alpha,
 
         if (in_region_G1(z, alpha, acc))
         {
-            log_info("[%s] z=(%+.5e, %+.5e) in region G1",
-                     __func__, num_real_d(z), num_imag_d(z));
+            /* log_info("[%s] z=(%+.5e, %+.5e) in region G1", */
+            /*          __func__, num_real_d(z), num_imag_d(z)); */
 
             res = mittleff1(alpha, beta, z, acc);
         }
         else if (in_region_G2(z, alpha, acc))
         {
-            log_info("[%s] z=(%+.5e, %+.5e) in region G2",
-                     __func__, num_real_d(z), num_imag_d(z));
+            /* log_info("[%s] z=(%+.5e, %+.5e) in region G2", */
+            /*          __func__, num_real_d(z), num_imag_d(z)); */
 
             res = mittleff2(alpha, beta, z, acc);
         }
         else if (in_region_G3(z, alpha, acc))
         {
-            log_info("[%s] z=(%+.5e, %+.5e) in region G3",
-                     __func__, num_real_d(z), num_imag_d(z));
+            /* log_info("[%s] z=(%+.5e, %+.5e) in region G3", */
+            /*          __func__, num_real_d(z), num_imag_d(z)); */
 
             res = mittleff3(alpha, beta, z, acc);
         }
         else if (in_region_G4(z, alpha, acc))
         {
-            log_info("[%s] z=(%+.5e, %+.5e) in region G4",
-                     __func__, num_real_d(z), num_imag_d(z));
+            /* log_info("[%s] z=(%+.5e, %+.5e) in region G4", */
+            /*          __func__, num_real_d(z), num_imag_d(z)); */
 
             res = mittleff4(alpha, beta, z, acc);
         }
         else if (in_region_G5(z, alpha, acc))
         {
-            log_info("[%s] z=(%+.5e, %+.5e) in region G5",
-                     __func__, num_real_d(z), num_imag_d(z));
+            /* log_info("[%s] z=(%+.5e, %+.5e) in region G5", */
+            /*          __func__, num_real_d(z), num_imag_d(z)); */
 
             res = mittleff5(alpha, beta, z, acc);
         }
         else if (in_region_G6(z, alpha, acc))
         {
-            log_info("[%s] z=(%+.5e, %+.5e) in region G6",
-                     __func__, num_real_d(z), num_imag_d(z));
+            /* log_info("[%s] z=(%+.5e, %+.5e) in region G6", */
+            /*          __func__, num_real_d(z), num_imag_d(z)); */
 
             res = mittleff6(alpha, beta, z, acc);
         }
         else
         {
-            log_info("[%s] z=(%+.5e, %+.5e) in no region [G0, G6]",
-                     __func__, num_real_d(z), num_imag_d(z));
+            /* log_info("[%s] z=(%+.5e, %+.5e) in no region [G0, G6]", */
+            /*          __func__, num_real_d(z), num_imag_d(z)); */
 
-            return new(num, -1.0, 0.0);
+            res = num_from_d(-1.0);
         }
         
     }
 
-    delete(zero); delete(one);
+    delete(zero); delete(one); delete(two);
 
     return res;
 }
@@ -149,16 +149,20 @@ mittleff_cmplx (double* res,
 {
     assert(alpha > 0);
     
-    num_t _alpha = new(num, alpha, 0.0);
-    num_t _beta  = new(num, beta,  0.0);
-    num_t _z     = new(num, re_z, im_z);
-    num_t _acc   = new(num, acc, 0.0);
+    num_t _alpha = num_from_d(alpha);
+    num_t _beta  = num_from_d(beta);
+    num_t _z     = num_from_d_d(re_z, im_z);
+    num_t _acc   = num_from_d(acc);
     
     num_t ml = mittleff(_alpha, _beta, _z, _acc);
+    double complex z = num_to_complex(ml);
     
-    res[0] = num_real_d(ml); res[1] = num_imag_d(ml);
+    res[0] = creal(z);
+    res[1] = cimag(z);
     
-    delete(_alpha); delete(_beta); delete(_z); delete(_acc);
+    delete(_alpha); delete(_beta);
+    delete(_z); delete(_acc);
+    delete(ml);
 
     return EXIT_SUCCESS;
 }

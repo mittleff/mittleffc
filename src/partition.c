@@ -30,15 +30,15 @@ in_region_G0 (const num_t z)
 bool
 in_region_G1 (const num_t z, const num_t alpha, const num_t acc)
 {
-    const double _alpha = num_to_double(alpha);
+    const double _alpha = num_to_d(alpha);
     const num_t pi = new(num, M_PI, 0.0);
     const num_t delta = new(num, M_PI * _alpha/8.0, 0.0);
     const num_t phi1 = num_sub(delta, num_mul(pi, alpha));
     const num_t phi2 = num_sub(num_mul (pi, alpha), delta);
 
     /* Compute r1 */
-    const double C0 = pow(1.3, 1 - num_to_double(alpha))/(M_PI * sin(M_PI * num_to_double(alpha))); /* Equation (5.3) */
-    const num_t r1 = new(num, pow(-2.0 * log(num_to_double(acc)/C0), num_to_double(alpha)), 0.0); /* Equation (4.21) */
+    const double C0 = pow(1.3, 1 - num_to_d(alpha))/(M_PI * sin(M_PI * num_to_d(alpha))); /* Equation (5.3) */
+    const num_t r1 = new(num, pow(-2.0 * log(num_to_d(acc)/C0), num_to_d(alpha)), 0.0); /* Equation (4.21) */
     
     const bool ret = (!diskp(z, r1)) && wedgep(z, phi1, phi2);
 
@@ -49,15 +49,15 @@ in_region_G1 (const num_t z, const num_t alpha, const num_t acc)
 bool
 in_region_G2 (const num_t z, const num_t alpha, const num_t acc)
 {
-    const double _alpha = num_to_double(alpha);
+    const double _alpha = num_to_d(alpha);
     const num_t pi = new(num, M_PI, 0.0);
     const num_t deltat = new(num, MIN(M_PI*_alpha/8.0, M_PI*(_alpha + 1)/2),   0.0);
     const num_t phi1 = num_add(deltat, num_mul(pi, alpha));
-    const num_t phi2 = num_negative(num_add(num_mul(pi, alpha), deltat));
+    const num_t phi2 = num_neg(num_add(num_mul(pi, alpha), deltat));
 
     /* Compute r1 */
-    const double C0 = pow(1.3, 1 - num_to_double(alpha))/(M_PI * sin(M_PI * num_to_double(alpha))); /* Equation (5.3) */
-    const num_t r1 = new(num, pow(-2.0 * log(num_to_double(acc)/C0), num_to_double(alpha)), 0.0); /* Equation (4.21) */
+    const double C0 = pow(1.3, 1 - num_to_d(alpha))/(M_PI * sin(M_PI * num_to_d(alpha))); /* Equation (5.3) */
+    const num_t r1 = new(num, pow(-2.0 * log(num_to_d(acc)/C0), num_to_d(alpha)), 0.0); /* Equation (4.21) */
     
     const bool ret = (!diskp(z, r1)) && wedgep(z, phi1, phi2);
     
@@ -69,7 +69,7 @@ in_region_G2 (const num_t z, const num_t alpha, const num_t acc)
 bool
 in_region_G3 (const num_t z, const num_t alpha, const num_t acc)
 {
-    const double _alpha = num_to_double(alpha);
+    const double _alpha = num_to_d(alpha);
     const num_t pi = new(num, M_PI, 0.0);
     const num_t delta = new(num, M_PI * _alpha/8.0, 0.0);
     const num_t deltat = new(num, MIN(M_PI*_alpha/8.0, M_PI*(_alpha + 1)/2),   0.0);
@@ -77,8 +77,8 @@ in_region_G3 (const num_t z, const num_t alpha, const num_t acc)
     const num_t phi2 = num_add(num_mul(pi, alpha), deltat);
 
     /* Compute r1 */
-    const double C0 = pow(1.3, 1 - num_to_double(alpha))/(M_PI * sin(M_PI * num_to_double(alpha))); /* Equation (5.3) */
-    const num_t r1 = new(num, pow(-2.0 * log(num_to_double(acc)/C0), num_to_double(alpha)), 0.0); /* Equation (4.21) */
+    const double C0 = pow(1.3, 1 - num_to_d(alpha))/(M_PI * sin(M_PI * num_to_d(alpha))); /* Equation (5.3) */
+    const num_t r1 = new(num, pow(-2.0 * log(num_to_d(acc)/C0), num_to_d(alpha)), 0.0); /* Equation (4.21) */
 
     const bool ret = (!diskp(z, r1)) && closure_wedgep(z, phi1, phi2);
 
@@ -90,16 +90,16 @@ in_region_G3 (const num_t z, const num_t alpha, const num_t acc)
 bool
 in_region_G4 (const num_t z, const num_t alpha, const num_t acc)
 {
-    const double _alpha = num_to_double(alpha);
+    const double _alpha = num_to_d(alpha);
     const num_t pi = new(num, M_PI, 0.0);
     const num_t delta = new(num, M_PI * _alpha/8.0, 0.0);
     const num_t deltat = new(num, MIN(M_PI*_alpha/8.0, M_PI*(_alpha + 1)/2),   0.0);
-    const num_t phi1 = num_negative(num_add(num_mul (pi, alpha), deltat));
+    const num_t phi1 = num_neg(num_add(num_mul (pi, alpha), deltat));
     const num_t phi2 = num_sub(delta, num_mul(pi, alpha));
 
      /* Compute r1 */
-    const double C0 = pow(1.3, 1 - num_to_double(alpha))/(M_PI * sin(M_PI * num_to_double(alpha))); /* Equation (5.3) */
-    const num_t r1 = new(num, pow(-2.0 * log(num_to_double(acc)/C0), num_to_double(alpha)), 0.0); /* Equation (4.21) */
+    const double C0 = pow(1.3, 1 - num_to_d(alpha))/(M_PI * sin(M_PI * num_to_d(alpha))); /* Equation (5.3) */
+    const num_t r1 = new(num, pow(-2.0 * log(num_to_d(acc)/C0), num_to_d(alpha)), 0.0); /* Equation (4.21) */
     
     const bool ret = (!diskp(z, r1)) && closure_wedgep(z, phi1, phi2);
 
@@ -111,12 +111,12 @@ in_region_G4 (const num_t z, const num_t alpha, const num_t acc)
 bool
 in_region_G5 (const num_t z, const num_t alpha, const num_t acc)
 {
-    const num_t phi1 = new(num, -5.0 * M_PI * num_to_double(alpha)/6.0, 0.0);
-    const num_t phi2 = new(num,  5.0 * M_PI * num_to_double(alpha)/6.0, 0.0);
+    const num_t phi1 = new(num, -5.0 * M_PI * num_to_d(alpha)/6.0, 0.0);
+    const num_t phi2 = new(num,  5.0 * M_PI * num_to_d(alpha)/6.0, 0.0);
 
     /* Compute r1 */
-    const double C0 = pow(1.3, 1 - num_to_double(alpha))/(M_PI * sin(M_PI * num_to_double(alpha))); /* Equation (5.3) */
-    const num_t r1 = new(num, pow(-2.0 * log(num_to_double(acc)/C0), num_to_double(alpha)), 0.0); /* Equation (4.21) */
+    const double C0 = pow(1.3, 1 - num_to_d(alpha))/(M_PI * sin(M_PI * num_to_d(alpha))); /* Equation (5.3) */
+    const num_t r1 = new(num, pow(-2.0 * log(num_to_d(acc)/C0), num_to_d(alpha)), 0.0); /* Equation (4.21) */
     
     const bool ret = diskp(z, r1) && (closure_wedgep(z, phi1, phi2) && !diskp(z, new(num, R0, 0.0)));
     delete(phi1); delete(phi2);
@@ -127,11 +127,11 @@ in_region_G5 (const num_t z, const num_t alpha, const num_t acc)
 bool
 in_region_G6 (const num_t z, const num_t alpha, const num_t acc)
 {
-    const num_t phi1 = new (num,  5.0 * M_PI * num_to_double(alpha)/6.0, 0.0);
-    const num_t phi2 = new (num, -5.0 * M_PI * num_to_double(alpha)/6.0, 0.0);
+    const num_t phi1 = new (num,  5.0 * M_PI * num_to_d(alpha)/6.0, 0.0);
+    const num_t phi2 = new (num, -5.0 * M_PI * num_to_d(alpha)/6.0, 0.0);
     /* Compute r1 */
-    const double C0 = pow(1.3, 1 - num_to_double(alpha))/(M_PI * sin(M_PI * num_to_double(alpha))); /* Equation (5.3) */
-    const num_t r1 = new(num, pow(-2.0 * log(num_to_double(acc)/C0), num_to_double(alpha)), 0.0); /* Equation (4.21) */
+    const double C0 = pow(1.3, 1 - num_to_d(alpha))/(M_PI * sin(M_PI * num_to_d(alpha))); /* Equation (5.3) */
+    const num_t r1 = new(num, pow(-2.0 * log(num_to_d(acc)/C0), num_to_d(alpha)), 0.0); /* Equation (4.21) */
     const bool ret = diskp(z, r1) && (closure_wedgep(z, phi1, phi2) && !diskp(z, new(num, R0, 0.0)));
     delete(phi1); delete(phi2);
     return ret;
