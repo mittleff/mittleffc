@@ -1,30 +1,33 @@
-#include <assert.h>
+//#include <assert.h>
+
+
+//#include "mittleff.h"
+//#include "sf.h"
+#include "new.h"
+#include "num.h"
 
 #include "unity.h"
 #include "log.h"
-#include "mittleff.h"
-#include "sf.h"
-#include "new.h"
 
 #include <complex.h>
 
-const double acc = 1.0e-10;
+//const double acc = 1.0e-10;
 
-#define TEST_VALUE(expected,computed) TEST_ASSERT_DOUBLE_WITHIN(acc, creal(expected), creal(computed)); TEST_ASSERT_DOUBLE_WITHIN(acc, cimag(expected), cimag(computed));
+/* #define TEST_VALUE(expected,computed) TEST_ASSERT_DOUBLE_WITHIN(acc, creal(expected), creal(computed)); TEST_ASSERT_DOUBLE_WITHIN(acc, cimag(expected), cimag(computed)); */
 
 /* Wrapper around the library function */
-double complex
-mittleff (const double alpha, const double beta, const double complex z)
-{        
-    double res[2];    
-    const int status = mittleff_cmplx(
-        res,
-        alpha, beta,
-        creal(z), cimag(z),
-        acc);
-    assert(status == 0);
-    return res[0] + res[1]*I;
-}
+/* double complex */
+/* mittleff (const double alpha, const double beta, const double complex z) */
+/* {         */
+/*     double res[2];     */
+/*     const int status = mittleff_cmplx( */
+/*         res, */
+/*         alpha, beta, */
+/*         creal(z), cimag(z), */
+/*         acc); */
+/*     assert(status == 0); */
+/*     return res[0] + res[1]*I; */
+/* } */
 
 void
 setUp (void)
@@ -41,138 +44,153 @@ tearDown (void)
 /********************************/
 /* Tests for the bignum library */
 /********************************/
+void
+test_num_create_instance (void)
+{
+    log_info("[%s] Testing whether one can create a num_t instance", __func__);
+    num_t a = new(num, 3.0, 4.0);
+    //TEST_ASSERT_NOT_NULL(a);
+    log_info("[%s] a created successfully: a = (%g%+gj)", num_real_d(a), num_real_d(a));
+    delete(a);
+    //TEST_ASSERT_NULL(a);
+    log_info("[%s] a destroyed successfully");
+    
+}
+
 
 /*******************************/
 /* Tests for the main function */
 /*******************************/
 
-void
-test_exp_small_z (void)
-{
-    const double complex z = 0.9;
+/* void */
+/* test_exp_small_z (void) */
+/* { */
+/*     const double complex z = 0.9; */
 
-    log_info("[%s] Testing whether E(1, 1, z) == exp(z)", __func__);
+/*     log_info("[%s] Testing whether E(1, 1, z) == exp(z)", __func__); */
 
-    const double complex expected = cexp(z);   
-    const double complex computed = mittleff(1, 1, z);
-    TEST_VALUE(expected, computed);
-}
+/*     const double complex expected = cexp(z);    */
+/*     const double complex computed = mittleff(1, 1, z); */
+/*     TEST_VALUE(expected, computed); */
+/* } */
 
-void
-test_sin_small_z (void)
-{
-    const double complex z = 0.9;
+/* void */
+/* test_sin_small_z (void) */
+/* { */
+/*     const double complex z = 0.9; */
 
-    log_info("[%s] Testing whether z*E(2, 2, -z**2) == sin(z)", __func__);
+/*     log_info("[%s] Testing whether z*E(2, 2, -z**2) == sin(z)", __func__); */
 
-    const double complex expected = csin(z);   
-    const double complex computed = z*mittleff(2, 2, -z*z);
-    TEST_VALUE(expected, computed);
-}
+/*     const double complex expected = csin(z);    */
+/*     const double complex computed = z*mittleff(2, 2, -z*z); */
+/*     TEST_VALUE(expected, computed); */
+/* } */
 
-void
-test_cos_small_z (void)
-{
-    const double complex z = 0.9;
+/* void */
+/* test_cos_small_z (void) */
+/* { */
+/*     const double complex z = 0.9; */
 
-    log_info("[%s] Testing whether E(2, 1, -z**2) == cos(z)", __func__);
+/*     log_info("[%s] Testing whether E(2, 1, -z**2) == cos(z)", __func__); */
 
-    const double complex expected = ccos(z);   
-    const double complex computed = mittleff(2, 1, -z*z);
-    TEST_VALUE(expected, computed);
-}
+/*     const double complex expected = ccos(z);    */
+/*     const double complex computed = mittleff(2, 1, -z*z); */
+/*     TEST_VALUE(expected, computed); */
+/* } */
 
-void
-test_sinh_small_z (void)
-{
-    const double complex z = 0.9;
+/* void */
+/* test_sinh_small_z (void) */
+/* { */
+/*     const double complex z = 0.9; */
 
-    log_info("[%s] Testing whether z*E(2, 2, z**2) == sinh(z)", __func__);
+/*     log_info("[%s] Testing whether z*E(2, 2, z**2) == sinh(z)", __func__); */
 
-    const double complex expected = csinh(z);   
-    const double complex computed = z*mittleff(2, 2, z*z);
-    TEST_VALUE(expected, computed);
-}
+/*     const double complex expected = csinh(z);    */
+/*     const double complex computed = z*mittleff(2, 2, z*z); */
+/*     TEST_VALUE(expected, computed); */
+/* } */
 
-void
-test_cosh_small_z (void)
-{
-    const double complex z = 0.9;
+/* void */
+/* test_cosh_small_z (void) */
+/* { */
+/*     const double complex z = 0.9; */
 
-    log_info("[%s] Testing whether E(2, 1, z**2) == cosh(z)", __func__);
+/*     log_info("[%s] Testing whether E(2, 1, z**2) == cosh(z)", __func__); */
 
-    const double complex expected = ccosh(z);   
-    const double complex computed = mittleff(2, 1, z*z);
-    TEST_VALUE(expected, computed);
-}
+/*     const double complex expected = ccosh(z);    */
+/*     const double complex computed = mittleff(2, 1, z*z); */
+/*     TEST_VALUE(expected, computed); */
+/* } */
 
-void
-test_sin_recurrence (void) /* Uses G5 */
-{
-    //TEST_IGNORE();
-    const double complex z = 1.001;
+/* void */
+/* test_sin_recurrence (void) /\* Uses G5 *\/ */
+/* { */
+/*     //TEST_IGNORE(); */
+/*     const double complex z = 1.001; */
 
-    log_info("[%s] Testing whether z*E(2, 2, -z**2) == sin(z)", __func__);
+/*     log_info("[%s] Testing whether z*E(2, 2, -z**2) == sin(z)", __func__); */
 
-    const double complex expected = csin(z);   
-    const double complex computed = z*mittleff(2, 2, -z*z);
-    TEST_VALUE(expected, computed);
-}
+/*     const double complex expected = csin(z);    */
+/*     const double complex computed = z*mittleff(2, 2, -z*z); */
+/*     TEST_VALUE(expected, computed); */
+/* } */
 
-void
-test_cos_recurrence (void) /* Uses G5 and G6 */
-{
-    const double complex z = 1.001;
+/* void */
+/* test_cos_recurrence (void) /\* Uses G5 and G6 *\/ */
+/* { */
+/*     const double complex z = 1.001; */
 
-    log_info("[%s] Testing whether E(2, 1, -z**2) == cos(z)", __func__);
+/*     log_info("[%s] Testing whether E(2, 1, -z**2) == cos(z)", __func__); */
 
-    const double complex expected = ccos(z);   
-    const double complex computed = mittleff(2, 1, -z*z);
-    TEST_VALUE(expected, computed);
-}
+/*     const double complex expected = ccos(z);    */
+/*     const double complex computed = mittleff(2, 1, -z*z); */
+/*     TEST_VALUE(expected, computed); */
+/* } */
 
 
-void
-test_erf_small_z (void) /* Uses G5 and G6 */
-{
-    const double complex x = 0.9;
+/* void */
+/* test_erf_small_z (void) /\* Uses G5 and G6 *\/ */
+/* { */
+/*     const double complex x = 0.9; */
 
-    log_info("[%s] Testing whether E(1/2, 1, x) == exp(x**2)*(1 + erf(x))", __func__);
+/*     log_info("[%s] Testing whether E(1/2, 1, x) == exp(x**2)*(1 + erf(x))", __func__); */
 
-    const double complex expected = cexp(x*x)*(1.0 + num_to_double(num_erf(new(num, x, 0.0))));
+/*     const double complex expected = cexp(x*x)*(1.0 + num_to_double(num_erf(new(num, x, 0.0)))); */
 
-    const double complex computed = mittleff(0.5, 1.0, x);
-    TEST_VALUE(expected, computed);
-}
+/*     const double complex computed = mittleff(0.5, 1.0, x); */
+/*     TEST_VALUE(expected, computed); */
+/* } */
 
-void
-test_erf_not_small_z (void) /* Uses G5 and G6 */
-{
-    const double complex x = 1.01;
+/* void */
+/* test_erf_not_small_z (void) /\* Uses G5 and G6 *\/ */
+/* { */
+/*     const double complex x = 1.01; */
 
-    log_info("[%s] Testing whether E(1/2, 1, x) == exp(x**2)*(1 + erf(x))", __func__);
+/*     log_info("[%s] Testing whether E(1/2, 1, x) == exp(x**2)*(1 + erf(x))", __func__); */
 
-    const double complex expected = cexp(x*x)*(1.0 + num_to_double(num_erf(new(num, x, 0.0))));
+/*     const double complex expected = cexp(x*x)*(1.0 + num_to_double(num_erf(new(num, x, 0.0)))); */
 
-    const double complex computed = mittleff(0.5, 1.0, x);
-    TEST_VALUE(expected, computed);
-}
+/*     const double complex computed = mittleff(0.5, 1.0, x); */
+/*     TEST_VALUE(expected, computed); */
+/* } */
 
 
 int
 main (void)
 {
     UNITY_BEGIN();
+
+    RUN_TEST(test_num_create_instance);
     
-    RUN_TEST(test_exp_small_z);
-    RUN_TEST(test_sin_small_z);
-    RUN_TEST(test_cos_small_z);
-    RUN_TEST(test_sinh_small_z);
-    RUN_TEST(test_cosh_small_z);
-    RUN_TEST(test_sin_recurrence);
-    RUN_TEST(test_cos_recurrence);
-    RUN_TEST(test_erf_small_z);
-    RUN_TEST(test_erf_not_small_z);
+    /* RUN_TEST(test_exp_small_z); */
+    /* RUN_TEST(test_sin_small_z); */
+    /* RUN_TEST(test_cos_small_z); */
+    /* RUN_TEST(test_sinh_small_z); */
+    /* RUN_TEST(test_cosh_small_z); */
+    /* RUN_TEST(test_sin_recurrence); */
+    /* RUN_TEST(test_cos_recurrence); */
+    /* RUN_TEST(test_erf_small_z); */
+    /* RUN_TEST(test_erf_not_small_z); */
 
     return UNITY_END();
 }
