@@ -1,6 +1,5 @@
 #include <assert.h>
 
-
 #include "mittleff.h"
 #include "new.h"
 #include "num.h"
@@ -9,6 +8,10 @@
 #include "log.h"
 
 #include <complex.h>
+
+#ifndef LOGLEVEL
+#define LOGLEVEL 1
+#endif
 
 const double acc = 1.0e-10;
 
@@ -161,6 +164,8 @@ test_erf_not_small_z (void) /* Uses G5 and G6 */
 int
 main (void)
 {
+    log_set_level(LOGLEVEL);
+
     UNITY_BEGIN();
 
     RUN_TEST(test_exp_small_z);
