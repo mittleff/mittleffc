@@ -16,28 +16,38 @@ mittleff0 (const num_t alpha,
     const double _alpha = num_to_d(alpha);
     const double _beta = num_to_d(beta);
     const double _acc = num_to_d(acc);
-    
-     num_t zero = new(num, 0.0, 0.0);
-     num_t one = new(num, 1.0, 0.0);
-     num_t two = new(num, 2.0, 0.0);
 
-     const double abs_z = num_to_d(num_abs(z));
-     const int k1 = (int) (ceil((2 - _beta)/_alpha) + 1);
-     const int k2 = (int) (ceil(log(_acc*(1-abs_z))/log(abs_z)) + 1);
-     const int kmax = (k1 > k2) ? k1 : k2;
+    num_t abs_z = num_abs(z);
+    const double _abs_z = num_to_d(abs_z);
+    const int k1 = (int) (ceil((2 - _beta)/_alpha) + 1);
+    const int k2 = (int) (ceil(log(_acc * (1 - _abs_z))/log(_abs_z)) + 1);
+    const int kmax = (k1 > k2) ? k1 : k2;
 
-     num_t sum = zero;
-     for (int k = 0; k <= kmax; k++)
-     {
-         num_t k_num = new(num, (double)k, 0.0);
-         sum = num_add(
-             sum,
-             num_mul(num_pow(z, k_num),
-                     num_rgamma(num_add(num_mul(alpha, k_num), beta))));
-     }
+    num_t k_num = num_from_d(0.0);
+    num_t sum = num_from_d(0.0);
+    for (int k = 0; k <= kmax; k++)
+    {
+        num_cpy(&k_num, num_from_d((double) k));
+        num_t z_pow_k = num_pow(z, k_num); /* z**k */
+        num_t alpha_k = num_mul(alpha, k_num);
+        num_t alpha_k_beta = num_add(alpha_k, beta);
+        num_t gamma_k = num_rgamma(alpha_k_beta);
+        num_t sum_k = num_add(sum, num_mul(z_pow_k, gamma_k));
+        //sum = num_add(
+        //    sum,
+        //    num_mul(num_pow(z, k_num),
+        //            num_rgamma(num_add(num_mul(alpha, k_num), beta))));
+        num_cpy(&sum, sum_k);
+        delete(z_pow_k);
+        delete(alpha_k);
+        delete(alpha_k_beta);
+        delete(gamma_k);
+        delete(sum_k);
+    }
 
-     delete(zero); delete(one); delete(two);
-     
+    delete(k_num);
+    delete(abs_z);
+
     return sum;
 }
 

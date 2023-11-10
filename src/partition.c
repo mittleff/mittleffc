@@ -30,7 +30,13 @@ in_region_G0 (const num_t z)
 bool
 in_region_G1 (const num_t z, const num_t alpha, const num_t acc)
 {
-    const double _alpha = num_to_d(alpha);
+    double a;
+    bool res;
+    num_t pi, delta, phi1, phi2;
+    
+    a = num_to_d(alpha);
+    pi = new(num), delta = new(num), phi1 = new(num), phi2 = new(num);
+    
     const num_t pi = new(num, M_PI, 0.0);
     const num_t delta = new(num, M_PI * _alpha/8.0, 0.0);
     const num_t phi1 = num_sub(delta, num_mul(pi, alpha));
@@ -40,10 +46,11 @@ in_region_G1 (const num_t z, const num_t alpha, const num_t acc)
     const double C0 = pow(1.3, 1 - num_to_d(alpha))/(M_PI * sin(M_PI * num_to_d(alpha))); /* Equation (5.3) */
     const num_t r1 = new(num, pow(-2.0 * log(num_to_d(acc)/C0), num_to_d(alpha)), 0.0); /* Equation (4.21) */
     
-    const bool ret = (!diskp(z, r1)) && wedgep(z, phi1, phi2);
+    res = (!diskp(z, r1)) && wedgep(z, phi1, phi2);
 
-    delete(pi); delete(phi1); delete(phi2);
-    return ret;
+    delete(pi), delete(delta), delete(phi1), delete(phi2);
+
+    return res;
 }
 
 bool

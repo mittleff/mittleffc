@@ -46,17 +46,18 @@
  * Generalized Mittag-Leffler Function*. SIAM Journal on Numerical Analysis,
  * 47(1), 69–88 (2008)
  *
- * @param[in,out] res Holds the final result of the computation
+ * @param[in,out] result Holds the final result of the computation
  * @param[in] alpha   Real positive escalar parameter.
  * @param[in] beta    Real scalar parameter.
  * @param[in] re_z    Real part of the complex number argument.
  * @param[in] im_z    Imaginary part of the complex number argument.
- * @param[in] tol     Accuracy for the computation.
+ * @param[in] accuracy     Accuracy for the computation.
  */
 int
-mittleff_cmplx (double* res,
-                const double alpha, const double beta,
+mittleff_cmplx (double* result,
+                const double alpha,
+                const double beta,
                 const double re_z, const double im_z,
-                const double tol);
+                const double accuracy);
 
 #endif /* __ML_MITTLEFF_H__ */
