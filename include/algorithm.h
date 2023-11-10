@@ -27,20 +27,11 @@
 /**
  * Compute ML function in region G_0
  */
-num_t
-mittleff0 (const num_t alpha,
-           const num_t beta,
-           const num_t z,
-           const num_t acc);
-
-/**
- * Compute ML function in region G_0
- */
-num_t
-mittleff0 (const num_t alpha,
-           const num_t beta,
-           const num_t z,
-           const num_t acc);
+void
+mittleff0 (double* res,
+           const double a, const double b,
+           const double x, const double y,
+           const double acc);
 
 /**
  * Compute ML function in region G_1
