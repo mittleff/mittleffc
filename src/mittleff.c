@@ -99,7 +99,7 @@ mittleff (double* res,
         }
         else if (in_region_G2(x, y, alpha, acc))
         {
-            log_trace("region 2\n");
+            log_trace("[%s] z = (%+.5e%+.5ej) in G_2", __func__, x, y);
             /* res = mittleff2(alpha, beta, z, acc); */
         }
         else if (in_region_G3(x, y, alpha, acc))
