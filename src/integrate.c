@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "integrate.h"
 
 #include "log.h"
@@ -13,18 +15,20 @@
 
 /* Parameters for integrating B */
 typedef struct {
-    num_t alpha;
-    num_t beta;
-    num_t z;
-    num_t phi;
+    double alpha;
+    double beta;
+    double x;
+    double y;
+    double phi;
 } parameters_B;
 
 /* Parameters for integrating C */
 typedef struct {
-    num_t alpha;
-    num_t beta;
-    num_t z;
-    num_t rho;
+    double alpha;
+    double beta;
+    double x;
+    double y;
+    double rho;
 } parameters_C;
 
 // Converts an arb_t number to double.
@@ -34,15 +38,15 @@ arbtod (const arb_t x)
     return arf_get_d(arb_midref(x), ARF_RND_NEAR);
 }
 
-static num_t
-num_from_acb (const acb_t x)
+void
+num_set_acb (num_t res, const acb_t x)
 {
-    arb_t re, im;
-    
+    arb_t re, im;    
     arb_init(re); arb_init(im);
     acb_get_real(re, x);
     acb_get_imag(im, x);
-    return new(num, arbtod(re), arbtod(im));
+    num_set_d_d(res, arbtod(re), arbtod(im));
+    arb_clear(re), arb_clear(im);
 }
 
 static int
@@ -51,90 +55,169 @@ f_wrap_B(acb_ptr res, const acb_t z, void * param, slong order, slong prec);
 static int
 f_wrap_C(acb_ptr res, const acb_t z, void * params, slong order, slong prec);
 
-num_t
-A (const num_t z,
-   const num_t alpha,
-   const num_t beta,
-   const num_t x)
-{
-    const double _alpha = num_to_d(alpha);
-    const double _beta = num_to_d(beta);
+/* num_t */
+/* A (const num_t z, */
+/*    const num_t alpha, */
+/*    const num_t beta, */
+/*    const num_t x) */
+/* { */
+/*     const double _alpha = num_to_d(alpha); */
+/*     const double _beta = num_to_d(beta); */
     
-    return num_mul(
-        num_inv(alpha),
-        num_mul(
-            num_pow(z, new(num, (1 - _beta)/_alpha, 0.0)),
-            num_exp(num_mul(num_pow(z, num_inv(alpha)), num_cos(num_div(x, alpha))))));
+/*     return num_mul( */
+/*         num_inv(alpha), */
+/*         num_mul( */
+/*             num_pow(z, new(num, (1 - _beta)/_alpha, 0.0)), */
+/*             num_exp(num_mul(num_pow(z, num_inv(alpha)), num_cos(num_div(x, alpha)))))); */
+/* } */
+
+void
+A (num_t res,
+   const double rez,
+   const double imz,
+   const double alpha,
+   const double beta,
+   const double x)
+{
+    num_t zp, cosxa, expz;
+    zp = new(num), cosxa = new(num), expz = new(num);
+
+    /* compute z**((1-beta)/alpha) */
+    num_set_d_d(zp, rez, imz);
+    num_pow_d(zp, zp, (1.0 - beta)/alpha);
+    /* compute cos(x/alpha) */
+    num_set_d(cosxa, x/alpha);
+    num_cos(cosxa, cosxa);
+    /* compute exp(z**(1/alpha) * cos(x/alpha)) */
+    num_set_d_d(expz, rez, imz);
+    num_pow_d(expz, expz, 1.0/alpha);
+    num_mul(expz, expz, cosxa);
+    num_exp(expz, expz);
+
+    num_mul(res, zp, expz);
+    num_mul_d(res, res, 1.0/alpha);
+       
+    delete(zp), delete(cosxa), delete(expz);
 }
 
-num_t
-omega(const num_t x, const num_t y, const num_t alpha, const num_t beta)
+double
+omega(const double x, const double y, const double alpha, const double beta)
 {
-    num_t one = new(num, 1.0, 0.0);
-    num_t two = new(num, 2.0, 0.0);
-    return num_add(
-        num_mul(num_pow(x, num_inv(alpha)), num_sin(num_div(y, alpha))),
-        num_mul(y, num_add(one, num_div(num_sub(one, beta), alpha))));
+    return pow(x, 1/alpha)*sin(y/alpha) + y*(1 + (1 - beta)/alpha);
 }
 
-num_t
-B (const num_t r,
-   const num_t alpha,
-   const num_t beta,
-   const num_t z,
-   const num_t phi)
-{
-    num_t two = new(num, 2.0, 0.0);
-    num_t one_over_pi = new(num, 1.0/M_PI, 0.0);
-    num_t num, den;
+/* num_t */
+/* B (const num_t r, */
+/*    const num_t alpha, */
+/*    const num_t beta, */
+/*    const num_t z, */
+/*    const num_t phi) */
+/* { */
+/*     num_t two = new(num, 2.0, 0.0); */
+/*     num_t one_over_pi = new(num, 1.0/M_PI, 0.0); */
+/*     num_t num, den; */
 
-    num = num_sub(num_mul(r, num_sin(num_sub(omega(r, phi, alpha, beta), phi))), num_mul(z, num_sin(omega(r, phi, alpha, beta))));
-    den = num_sub(
-        num_add(num_pow(r, two), num_pow(z, two)),
-        num_mul(two, num_mul(r, num_mul(z, num_cos(phi)))));
+/*     num = num_sub(num_mul(r, num_sin(num_sub(omega(r, phi, alpha, beta), phi))), num_mul(z, num_sin(omega(r, phi, alpha, beta)))); */
+/*     den = num_sub( */
+/*         num_add(num_pow(r, two), num_pow(z, two)), */
+/*         num_mul(two, num_mul(r, num_mul(z, num_cos(phi))))); */
 
-    num_t res =  num_mul(
-        one_over_pi,
-        num_mul(A(r, alpha, beta, phi), num_div(num, den)));
+/*     num_t res =  num_mul( */
+/*         one_over_pi, */
+/*         num_mul(A(r, alpha, beta, phi), num_div(num, den))); */
 
-    delete(two); delete(num); delete(den); delete(one_over_pi);
+/*     delete(two); delete(num); delete(den); delete(one_over_pi); */
     
-    return res;
-}
+/*     return res; */
+/* } */
 
-num_t
-C (const num_t phi,
-   const num_t alpha,
-   const num_t beta,
-   const num_t z,
-   const num_t rho)
+void
+B (num_t res,
+   const double r,
+   const double alpha,
+   const double beta,
+   const double x,
+   const double y,
+   const double phi)
 {
-    num_t J = new(num, 0.0, 1.0);
-    num_t two = new(num, 2.0, 0.0);
-    num_t two_pi = new(num, 2.0*M_PI, 0.0);
+    num_t z, n, d, fac1, fac2;
 
-    num_t res = num_mul(
-        num_div(rho, two_pi),
-        num_mul(
-            A(rho, alpha, beta, phi),
-            num_div(
-                num_exp(num_mul(J, omega(rho, phi, alpha, beta))),
-                num_sub(num_mul(rho, num_exp(num_mul(J, phi))), z))));
+    z = new(num), n = new(num), d = new(num);
+    fac1 = new(num), fac2 = new(num);
 
-    delete(two);
-    delete(J);
-    delete(two_pi);
+    num_set_d_d(z, x, y);
 
-    return res;
+    /* numerator */
+    num_set_d(fac1, omega(r, phi, alpha, beta) - phi);
+    num_sin(fac1, fac1);
+    num_mul_d(fac1, fac1, r);
+    num_set_d(fac2, omega(r, phi, alpha, beta));
+    num_mul(fac2, fac2, z);
+    num_sub(n, fac1, fac2);
+
+    /* denominator */
+    num_set_d(d, r*r);
+    num_pow_d(fac1, z, 2.0);
+    num_set_d(fac2, -2.0*r*cos(phi));
+    num_mul(fac2, fac2, z);
+    num_add(d, d, fac1);
+    num_add(d, d, fac2);
+    
+    A(res, r, 0.0, alpha, beta, phi);
+    num_mul(res, res, n);
+    num_div(res, res, d);
+    num_mul_d(res, res, 1.0/M_PI);
+
+    delete(z), delete(n), delete(d), delete(fac1), delete(fac2);
 }
 
-num_t
-integrate_B (const num_t alpha,
-             const num_t beta,
-             const num_t z,
-             const num_t phi,
-             const num_t from,
-             const num_t to)
+void
+C (num_t res,
+   const double phi,
+   const double alpha,
+   const double beta,
+   const double x,
+   const double y,
+   const double rho)
+{
+    num_t z, n, d, fac1, fac2, J;
+
+    z = new(num), n = new(num), d = new(num), J = new(num);
+    fac1 = new(num), fac2 = new(num);
+
+    num_onei(J);
+    num_set_d_d(z, x, y);
+
+    /* numerator */
+    num_set_d(fac1, omega(rho, phi, alpha, beta));
+    num_sin(fac1, fac1);
+    num_mul(fac1, fac1, J);
+    num_set_d(fac2, cos(omega(rho, phi, alpha, beta)));
+    num_add(n, fac1, fac2);
+
+    /* denominator */
+    num_set_d_d(fac1, 0.0, phi);
+    num_exp(fac1, fac1);
+    num_mul_d(fac1, fac1, rho);
+    num_sub(d, fac1, z);
+        
+    A(res, rho, 0.0, alpha, beta, phi);
+    num_mul(res, res, n);
+    num_div(res, res, d);
+    num_mul_d(res, res, rho/(2.0*M_PI));
+
+    delete(z), delete(n), delete(d), delete(J), delete(fac1), delete(fac2);
+}
+
+void
+integrate_B (num_t res,
+             const double alpha,
+             const double beta,
+             const double x,
+             const double y,
+             const double phi,
+             const double from,
+             const double to)
 {
     acb_t _res, t, _from, _to;
     mag_t tol;
@@ -152,14 +235,12 @@ integrate_B (const num_t alpha,
     acb_init(t);
     mag_init(tol);
 
-    parameters_B p = { .alpha = alpha, .beta = beta, .z = z, .phi = phi };
+    parameters_B p = { .alpha = alpha, .beta = beta, .x = x, .y = y, .phi = phi };
 
-    acb_set_d(_from, num_to_d(from));
-    acb_set_d(  _to, num_to_d(to));
+    acb_set_d(_from, from);
+    acb_set_d(  _to, to);
     int status = acb_calc_integrate(_res, f_wrap_B, &p, _from, _to, goal, tol, options, prec);
-
-    num_t res = num_from_acb(_res);
-
+    num_set_acb(res, _res);
     acb_clear(_res);
     acb_clear(t);
     acb_clear(_from);
@@ -167,17 +248,17 @@ integrate_B (const num_t alpha,
     mag_clear(tol);
 
     flint_cleanup_master();
-                
-    return res;
 }
 
-num_t
-integrate_C (const num_t alpha,
-             const num_t beta,
-             const num_t z,
-             const num_t rho,
-             const num_t from,
-             const num_t to)
+void
+integrate_C (num_t res,
+             const double alpha,
+             const double beta,
+             const double x,
+             const double y,
+             const double rho,
+             const double from,
+             const double to)
 {
     acb_t _res, t, _from, _to;
     mag_t tol;
@@ -195,15 +276,13 @@ integrate_C (const num_t alpha,
     acb_init(t);
     mag_init(tol);
 
-    parameters_C p = { .alpha = alpha, .beta = beta, .z = z, .rho = rho };
+    parameters_C p = { .alpha = alpha, .beta = beta, .x = x, .y = y, .rho = rho };
 
-    acb_set_d(_from, num_to_d(from));
-    acb_set_d(  _to, num_to_d(to));
+    acb_set_d(_from, from);
+    acb_set_d(  _to, to);
     int status = acb_calc_integrate(_res, f_wrap_C, &p, _from, _to, goal, tol, options, prec);
 
-    num_t res = num_from_acb(_res);
-    //log_trace("===================>%d %g %g", status, num_real_d(res), num_imag_d(res));
-
+    num_set_acb(res, _res);
     acb_clear(_res);
     acb_clear(t);
     acb_clear(_from);
@@ -211,8 +290,6 @@ integrate_C (const num_t alpha,
     mag_clear(tol);
 
     flint_cleanup_master();
-                
-    return res;
 }
 
 static int
@@ -222,14 +299,21 @@ f_wrap_B(acb_ptr res, const acb_t z, void * params, slong order, slong prec)
         flint_abort();  /* Would be needed for Taylor method. */
 
     parameters_B* p = (parameters_B *) params;
-    num_t _z = num_from_acb(z);
-    num_t _res = B(_z, p->alpha, p->beta, p->z, p->phi);
+    
+    num_t _z = new(num);
+    num_set_acb(_z, z);
+    assert(num_is_real(_z));
+    const double r = num_to_d(_z);
+    delete(_z);
+    
+    num_t _res;
+    _res = new(num);
+    B(_res, r, p->alpha, p->beta, p->x, p->y, p->phi);
     const double complex __res = num_to_complex(_res);
+    delete(_res);
     
     acb_set_d_d(res, creal(__res), cimag(__res));
 
-    delete(_res);
-    
     return 0;
 }
 
@@ -240,13 +324,20 @@ f_wrap_C(acb_ptr res, const acb_t z, void * params, slong order, slong prec)
         flint_abort();  /* Would be needed for Taylor method. */
 
     parameters_C* p = (parameters_C *) params;
-    num_t _z = num_from_acb(z);
-    num_t _res = C(_z, p->alpha, p->beta, p->z, p->rho);
+
+    num_t _z = new(num);
+    num_set_acb(_z, z);
+    assert(num_is_real(_z));
+    const double r = num_to_d(_z);
+    delete(_z);
+
+    num_t _res;
+    _res = new(num);
+    C(_res, r, p->alpha, p->beta, p->x, p->y, p->rho);
     const double complex __res = num_to_complex(_res);
-    
-    acb_set_d_d(res, creal(__res), cimag(__res));
-    
     delete(_res);
     
+    acb_set_d_d(res, creal(__res), cimag(__res));
+        
     return 0;
 }

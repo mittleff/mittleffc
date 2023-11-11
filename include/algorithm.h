@@ -36,12 +36,11 @@ mittleff0 (double* res,
 /**
  * Compute ML function in region G_1
  */
-num_t
-mittleff1 (const num_t alpha,
-           const num_t beta,
-           const num_t z,
-           const num_t acc);
-
+void
+mittleff1 (double* res,
+           const double a, const double b,
+           const double x, const double y,
+           const double acc);
 /**
  * Compute ML function in region G_2
  */
@@ -72,19 +71,20 @@ mittleff4 (const num_t alpha,
 /**
  * Compute ML function in region G_5
  */
-num_t
-mittleff5 (const num_t alpha,
-           const num_t beta,
-           const num_t z,
-           const num_t acc);
+void
+mittleff5 (double* res,
+           const double a, const double b,
+           const double x, const double y,
+           const double acc);
 
 /**
  * Compute ML function in region G_6
  */
-num_t
-mittleff6 (const num_t alpha,
-           const num_t beta,
-           const num_t z,
-           const num_t acc);
+void
+mittleff6 (double* res,
+           const double alpha,
+           const double beta,
+           const double x, const double y,
+           const double acc);
 
 #endif /* __ALGORITHM_H__ */

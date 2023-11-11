@@ -3,33 +3,41 @@
 
 #include "num.h"
 
-num_t
-A (const num_t z,
-   const num_t alpha,
-   const num_t beta,
-   const num_t x);
+void
+A (num_t res,
+   const double rez,
+   const double imz,
+   const double alpha,
+   const double beta,
+   const double x);
 
-num_t
-B (const num_t r,
-   const num_t alpha,
-   const num_t beta,
-   const num_t z,
-   const num_t phi);
+void
+B (num_t res,
+   const double r,
+   const double alpha,
+   const double beta,
+   const double x,
+   const double y,
+   const double phi);
 
-num_t
-integrate_B (const num_t alpha,
-             const num_t beta,
-             const num_t z,
-             const num_t phi,
-             const num_t from,
-             const num_t to);
+void
+integrate_B (num_t res,
+             const double alpha,
+             const double beta,
+             const double x,
+             const double y,
+             const double phi,
+             const double from,
+             const double to);
 
-num_t
-integrate_C (const num_t alpha,
-             const num_t beta,
-             const num_t z,
-             const num_t rho,
-             const num_t from,
-             const num_t to);
+void
+integrate_C (num_t res,
+             const double alpha,
+             const double beta,
+             const double x,
+             const double y,
+             const double rho,
+             const double from,
+             const double to);
 
 #endif  /* __INTEGRATE_H__ */

@@ -2,3 +2,4 @@
 *.out
 .dir-locals.el
 valgrind-out.txt
+*.dsv
