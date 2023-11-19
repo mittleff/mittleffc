@@ -55,9 +55,9 @@
  */
 int
 mittleff_cmplx (double* result,
-                const double alpha,
-                const double beta,
-                const double re_z, const double im_z,
-                const double accuracy);
+          const double alpha,
+          const double beta,
+          const double re_z, const double im_z,
+          const double accuracy);
 
 #endif /* __ML_MITTLEFF_H__ */

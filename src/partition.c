@@ -113,14 +113,6 @@ in_region_G2 (const num_t z, const num_t alpha, const num_t acc)
     delete(r1), delete(deltat), delete(phi1), delete(phi2);
 
     return ret;
-
-    
-    /* const double deltat = MIN(M_PI * alpha/8.0, M_PI * (alpha + 1.0)/2.0); */
-    /* const double phi1 = M_PI * alpha + deltat; */
-    /* const double phi2 = -phi1; */
-    /* const double r1 = compute_r1(alpha, acc); */
-    /* const bool ret = (!diskp(z, r1)) && wedgep(z, phi1, phi2);     */
-    /* return ret; */
 }
 
 bool

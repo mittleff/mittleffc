@@ -28,43 +28,43 @@
  * Compute ML function in region G_0
  */
 void
-mittleff0 (double* res,
-           const double a, const double b,
-           const double x, const double y,
-           const double acc);
+mittleff0 (num_t res,
+           const num_t a, const num_t b,
+           const num_t z,
+           const num_t acc);
 
 /**
  * Compute ML function in region G_1
  */
 void
-mittleff1 (double* res,
-           const double a, const double b,
-           const double x, const double y,
-           const double acc);
+mittleff1 (num_t res,
+           const num_t a, const num_t b,
+           const num_t z,
+           const num_t acc);
 /**
  * Compute ML function in region G_2
  */
-num_t
-mittleff2 (const num_t alpha,
-           const num_t beta,
+void
+mittleff2 (num_t res,
+           const num_t a, const num_t b,
            const num_t z,
            const num_t acc);
 
 /**
  * Compute ML function in region G_3
  */
-num_t
-mittleff3 (const num_t alpha,
-           const num_t beta,
+void
+mittleff3 (num_t res,
+           const num_t a, const num_t b,
            const num_t z,
            const num_t acc);
 
 /**
  * Compute ML function in region G_4
  */
-num_t
-mittleff4 (const num_t alpha,
-           const num_t beta,
+void
+mittleff4 (num_t res,
+           const num_t a, const num_t b,
            const num_t z,
            const num_t acc);
 
@@ -72,19 +72,19 @@ mittleff4 (const num_t alpha,
  * Compute ML function in region G_5
  */
 void
-mittleff5 (double* res,
-           const double a, const double b,
-           const double x, const double y,
-           const double acc);
+mittleff5 (num_t res,
+           const num_t a, const num_t b,
+           const num_t z,
+           const num_t acc);
 
 /**
  * Compute ML function in region G_6
  */
 void
-mittleff6 (double* res,
-           const double alpha,
-           const double beta,
-           const double x, const double y,
-           const double acc);
+mittleff6 (num_t res,
+           const num_t alpha,
+           const num_t beta,
+           const num_t z,
+           const num_t acc);
 
 #endif /* __ALGORITHM_H__ */
