@@ -139,15 +139,6 @@ in_region_G3 (const num_t z, const num_t alpha, const num_t acc)
     delete(r1), delete(deltat), delete(phi1), delete(phi2);
 
     return ret;
-
-    
-    /* const double delta = M_PI * alpha/8.0 ; */
-    /* const double deltat = MIN(M_PI * alpha/8.0, M_PI * (alpha + 1)/2); */
-    /* const double phi1 = M_PI * alpha - delta; */
-    /* const double phi2 = M_PI * alpha + deltat; */
-    /* const double r1 = compute_r1(alpha, acc); */
-    /* const bool ret = (!diskp(z, r1)) && closure_wedgep(z, phi1, phi2); */
-    /* return ret; */
 }
 
 bool
@@ -174,14 +165,6 @@ in_region_G4 (const num_t z, const num_t alpha, const num_t acc)
     delete(r1), delete(delta), delete(deltat), delete(phi1), delete(phi2);
 
     return ret;
-    
-    /* const double delta = M_PI * alpha/8.0; */
-    /* const double deltat = MIN(M_PI*alpha/8.0, M_PI*(alpha + 1)/2); */
-    /* const double phi1 = -(M_PI * alpha +  deltat); */
-    /* const double phi2 = delta - M_PI * alpha; */
-    /* const double r1 = compute_r1(alpha, acc);     */
-    /* const bool ret = (!diskp(z, r1)) && closure_wedgep(z, phi1, phi2); */
-    /* return ret; */
 }
 
 bool
@@ -206,11 +189,6 @@ in_region_G5 (const num_t z, const num_t alpha, const num_t acc)
     delete(r0), delete(r1), delete(phi1), delete(phi2);
 
     return ret;    
-    /* const double phi1 = -5.0 * M_PI * alpha/6.0; */
-    /* const double phi2 = -phi1; */
-    /* const double r1 = compute_r1(alpha, acc); */
-    /* const bool ret = diskp(z, r1) && (closure_wedgep(z, phi1, phi2) && !diskp(z, R0)); */
-    /* return ret; */
 }
 
 bool
@@ -235,12 +213,6 @@ in_region_G6 (const num_t z, const num_t alpha, const num_t acc)
     delete(r0), delete(r1), delete(phi1), delete(phi2);
 
     return ret;
-    
-    /* const double phi1 = 5.0 * M_PI * alpha/6.0; */
-    /* const double phi2 = -5.0 * M_PI * alpha/6.0; */
-    /* const double r1 = compute_r1(alpha, acc); */
-    /* const bool ret = diskp(z, r1) && (closure_wedgep(z, phi1, phi2) && !diskp(z, R0)); */
-    /* return ret; */
 }
 
 
@@ -271,15 +243,6 @@ static bool
 closure_diskp (const num_t z, const num_t r)
 {
     return _diskp(z, r, true);
-    /* num_t absz; */
-    /* bool ret; */
-    
-    /* absz = new(num); */
-    /* num_abs(absz, z); */
-    /* ret = diskp(z, r) || num_eq(absz, r); */
-    /* delete(absz); */
-
-    /* return ret; */
 }
 
 static bool
@@ -299,29 +262,12 @@ static bool
 wedgep (const num_t z, const num_t phi1, const num_t phi2)
 {
     return _wedgep(z, phi1, phi2, false);
-    /* bool res; */
-    /* num_t argz; */
-
-    /* argz = new(num); */
-    /* num_set_d_d(z, x, y); */
-    /* num_arg(argz, z); */
-    /* res = is_between(num_to_d(argz), phi1, phi2, false); */
-    /* delete(argz); */
-    /* return res; */
 }
 
 static bool
 closure_wedgep (const num_t z, const num_t phi1, const num_t phi2)
 {
     return _wedgep(z, phi1, phi2, true);
-    /* bool res; */
-    /* num_t z = new(num); */
-    
-    /* num_set_d_d(z, x, y); */
-    /* num_arg(z, z); */
-    /* res = is_between(num_to_d(z), phi1, phi2, true); */
-    /* delete(z); */
-    /* return res; */
 }
 
 /* Checks if _c is between _a and _b */
@@ -330,12 +276,9 @@ is_between (const num_t c, const num_t a, const num_t b, const bool eq)
 {
     bool ret;
     num_t _a, _b, _c, n;
-    /* double n = 2.0 * M_PI; */
     
     _a = new(num), _b = new(num), _c = new(num), n = new(num);
     num_set_d(n, 2.0 * M_PI);
-
-    
 
     num_fmod(_a, a, n);
     num_fmod(_b, b, n);
@@ -358,52 +301,6 @@ is_between (const num_t c, const num_t a, const num_t b, const bool eq)
     }
 
     delete(_a), delete(_b), delete(_c), delete(n);
-
-    
-    /* num_set_d(a, fmod(_a, n)); */
-    /* num_set_d(b, fmod(_b, n)); */
-    /* num_set_d(c, fmod(_c, n)); */
-
-    /* if (num_lt (a, b)) */
-    /* { */
-    /*     if (eq) */
-    /*         ret = (num_le(a, c) && num_le(c, b)) ? true : false; */
-    /*     else */
-    /*         ret = (num_lt(a, c) && num_lt(c, b)) ? true : false; */
-    /* } */
-    /* else */
-    /* { /\* b < a *\/ */
-    /*     /\* if in [b, a] then not in [a, b] *\/ */
-    /*     if (eq) */
-    /*         ret = (num_le(b, c) && num_le(c, a)) ? false : true; */
-    /*     else */
-    /*         ret = (num_lt(b, c) && num_lt(c, a)) ? false : true; */
-    /* } */
-
-    /* delete(a), delete(b), delete(c); */
-
-    
-    
-    /* const double n = 2.0 * M_PI; */
-    /* const double a = fmod(_a, n); */
-    /* const double b = fmod(_b, n); */
-    /* const double c = fmod(_c, n); */
-    
-    /* if (d_lt (a, b)) */
-    /* { */
-    /*     if (eq) */
-    /*         ret = (d_le(a, c) && d_le(c, b)) ? true : false; */
-    /*     else */
-    /*         ret = (d_lt(a, c) && d_lt(c, b)) ? true : false; */
-    /* } */
-    /* else */
-    /* { /\* b < a *\/ */
-    /*     /\* if in [b, a] then not in [a, b] *\/ */
-    /*     if (eq) */
-    /*         ret = (d_le(b, c) && d_le(c, a)) ? false : true; */
-    /*     else */
-    /*         ret = (d_lt(b, c) && d_lt(c, a)) ? false : true; */
-    /* } */
 
     return ret;
 }
