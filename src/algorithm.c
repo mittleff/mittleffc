@@ -19,6 +19,9 @@ mittleff0 (num_t res,
            const num_t z,
            const num_t acc)
 {
+    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
+              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
+    
     int k, kmax;
     num_t absz, sum, tmp, fac1, fac2;
 
@@ -38,6 +41,7 @@ mittleff0 (num_t res,
     num_div(tmp, tmp, alpha);
     num_ceil(tmp, tmp);
     num_add(k1, tmp, k1);
+    
     tmp = new(num);
     num_one(k2);
     num_one(fac1);
@@ -53,6 +57,8 @@ mittleff0 (num_t res,
     //k2 = (int) (ceil(log(acc * (1 - abs_z))/log(abs_z)) + 1);
     kmax = num_gt(k1, k2) ? (int) num_to_d(k1) : (int) num_to_d(k2);
     delete(k1), delete(k2);
+
+    
 
     /* Sum Taylor series */
     sum = new(num), tmp = new(num);
@@ -72,10 +78,15 @@ mittleff0 (num_t res,
         
         num_add(sum, sum, tmp);
     }
-    num_to_d_d(res, sum);
+    num_set(res, sum);
     delete(sum), delete(z), delete(tmp), delete(fac1), delete(fac2);
+
+    //num_print(res, true);
+    log_trace("[%s] Done.", __func__);
+    
 }
 
+/* compute eq. (2.4) */
 void
 mittleff1 (num_t res,
            const num_t alpha,
@@ -83,7 +94,9 @@ mittleff1 (num_t res,
            const num_t z,
            const num_t acc)
 {
-    /* compute eq. (2.4) */
+    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
+          num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
+    
     num_t fac1, fac2, _res;
 
     fac1 = new(num), fac2 = new(num), _res = new(num);
@@ -99,7 +112,7 @@ mittleff1 (num_t res,
     num_mul(fac1, fac1, _res);
     asymptotic_series(fac2, z, alpha, beta);
     num_add(_res, fac1, fac2);
-    num_to_d_d(res, _res);
+    num_set(res, _res);
     delete(_res), delete(fac1), delete(fac2);
 }
 
@@ -322,41 +335,47 @@ mittleff6 (num_t res,
 void
 asymptotic_series (num_t res, const num_t z, const num_t alpha, const num_t beta)
 {
-    /* int k, kmax; */
-    /* double abs_z; */
-    /* num_t z, sum, tmp, fac1, fac2; */
+    int k, kmax;
+    double abs_z;
+    num_t absz, sum, tmp, fac1, fac2, one;
 
-    /* tmp = new(num); */
-    /* num_set_d_d(tmp, x, y); */
-    /* num_abs(tmp, tmp); */
-    /* abs_z = num_to_d(tmp); */
-    /* delete(tmp); */
-    
-    /* kmax = (int) (ceil((1.0/alpha) * pow(abs_z, 1.0/alpha)) + 1.0); */
-    /* //log_trace("[%s] |z|=%.5e, kmax=%d", __func__, abs_z, kmax); */
+    absz = new(num), one = new(num);
+    sum = new(num), tmp = new(num);
+    fac1 = new(num), fac2 = new(num);
 
-    /* /\* -sum([z**(-k) * mp.rgamma(beta - alpha*k) for k in range(1, kmax + 1)]) *\/ */
-    /* z = new(num), sum = new(num); */
-    /* //tmp = new(num); */
-    /* fac1 = new(num), fac2 = new(num); */
-    /* num_set_d_d(z, x, y), num_set_d(sum, 0.0); */
-    /* for (k = 1; k <= kmax; k++) */
-    /* { */
-    /*     //log_trace("[%s] k=%d", __func__, k); */
-    /*     /\* fac1 <- z**(-k) *\/ */
-    /*     num_pow_d(fac1, z, (double) (-k));  */
+    num_one(one);
+    num_abs(absz, z);
 
-    /*     /\* fac2 <- rgamma(beta - alpha * k) *\/ */
-    /*     num_mul_d(fac2, alpha, (double) k); */
-    /*     num_sub(fac2, beta, fac2); */
-    /*     num_rgamma(fac2, fac2); */
+    /* compute kmax */
+    num_inv(tmp, alpha);
+    num_pow(fac1, absz, tmp);
+    num_mul(fac1, tmp, fac1);
+    num_ceil(fac1, fac1);
+    num_add(fac1, fac1, one);    
+    kmax = (int) num_to_d(fac1); //(ceil((1.0/alpha) * pow(abs_z, 1.0/alpha)) + 1.0);
+    //log_trace("[%s] |z|=%.5e, kmax=%d", __func__, num_to_d(absz), kmax);
 
-    /*     /\* partial sum = fac1 * fac2 *\/ */
-    /*     num_mul(tmp, fac1, fac2); */
+    /* -sum([z**(-k) * mp.rgamma(beta - alpha*k) for k in range(1, kmax + 1)]) */
+    for (k = 1; k <= kmax; k++)
+    {
+        //log_trace("[%s] k=%d", __func__, k);
+        /* fac1 <- z**(-k) */
+        num_pow_d(fac1, z, (double) (-k));
+
+        /* fac2 <- rgamma(beta - alpha * k) */
+        num_mul_d(fac2, alpha, (double) k);
+        num_sub(fac2, beta, fac2);
+        num_rgamma(fac2, fac2);
+
+        /* partial sum = fac1 * fac2 */
+        num_mul(tmp, fac1, fac2);
         
-    /*     num_add(sum, sum, tmp);         */
-    /* } */
-    /* num_set(res, sum); */
-    /* num_mul_d(res, res, -1.0); */
-    /* delete(sum), delete(z), delete(tmp), delete(fac1), delete(fac2); */
+        num_add(sum, sum, tmp);
+    }
+    num_set(res, sum);
+    num_mul_d(res, res, -1.0);
+    
+    delete(absz), delete(one);
+    delete(sum), delete(tmp);
+    delete(fac1), delete(fac2);
 }

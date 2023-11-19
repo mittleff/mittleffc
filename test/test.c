@@ -16,39 +16,39 @@ num_t acc;
 #define TEST_VALUE(expected,computed) TEST_ASSERT_TRUE(test_value(expected, computed))
 
 /* Wrapper around the library function */
-/* double complex */
-/* mittleff (const double alpha, const double beta, const double complex z) */
-/* { */
-/*     double res[2]; */
-/*     const int status = mittleff_cmplx( */
-/*         res, */
-/*         alpha, beta, */
-/*         creal(z), cimag(z), */
-/*         acc); */
-/*     assert(status == 0); */
-/*     return res[0] + res[1]*I; */
-/* } */
+double complex
+mittleff (const double alpha, const double beta, const double complex z)
+{
+    double res[2];
+    const int status = mittleff_cmplx(
+        res,
+        alpha, beta,
+        creal(z), cimag(z),
+        num_to_d(acc));
+    assert(status == 0);
+    return res[0] + res[1]*I;
+}
 
-/* bool */
-/* test_value(const double complex expected, const double complex computed) */
-/* { */
-/*     bool res; */
-/*     double tol, abs_err; */
+bool
+test_value(const double complex expected, const double complex computed)
+{
+    bool res;
+    double tol, abs_err;
 
-/*     tol = 1e-14; */
-/*     abs_err = fabs(expected - computed)/fabs(expected); */
+    tol = 1e-14;
+    abs_err = fabs(expected - computed)/fabs(expected);
     
-/*     printf("expected = %+.8e%+.8ej, computed = %+.8e%+.8ej, abs_err = %.8e\n", */
-/*            creal(expected), cimag(expected), */
-/*            creal(computed), cimag(computed), */
-/*            abs_err); */
+    printf("expected = %+.8e%+.8ej, computed = %+.8e%+.8ej, abs_err = %.8e\n",
+           creal(expected), cimag(expected),
+           creal(computed), cimag(computed),
+           abs_err);
 
-/*     res = (abs_err < tol) ? true : false; */
+    res = (abs_err < tol) ? true : false;
     
-/*     return res; */
-/*     //TEST_ASSERT_DOUBLE_WITHIN(1e-10, creal(expected), creal(computed)); */
-/*     //TEST_ASSERT_DOUBLE_WITHIN(1e-10, cimag(expected), cimag(computed)); */
-/* } */
+    return res;
+    //TEST_ASSERT_DOUBLE_WITHIN(1e-10, creal(expected), creal(computed));
+    //TEST_ASSERT_DOUBLE_WITHIN(1e-10, cimag(expected), cimag(computed));
+}
 
 void
 setUp (void)
@@ -224,35 +224,31 @@ test_in_region_G6 (void)
     delete(z), delete(alpha);
 }
 
-/*******************************/
-/* Tests for the main function */
-/*******************************/
+/********************************************************************/
+/* sage: z = -7.33057219e-02-5.11934762e-01*I; exp(z**2) * erfc(-z) */
+/* 0.725165453880409 - 0.432914368208589*I                          */
+/********************************************************************/
+void
+test_mittleff0 (void)
+{
+    const double complex x = -7.33057219e-02-5.11934762e-01*I;
+    const double complex expected = 0.725165453880409-0.432914368208589*I;
+    const double complex computed = mittleff(0.5, 1.0, x);
+    TEST_VALUE(expected, computed);
+}
 
-/************************************************************************/
-/* sage: z = -7.33057219e-02-5.11934762e-01*I; exp(z**2) * (1 + erf(z)) */
-/* # => 0.725165453880409 - 0.432914368208589*I                         */
-/************************************************************************/
-/* void */
-/* test_mittleff0 (void)  */
-/* { */
-/*     const double complex x = -7.33057219e-02-5.11934762e-01*I; */
-/*     const double complex expected = ref_value(x); */
-/*     const double complex computed = mittleff(0.5, 1.0, x); */
-/*     TEST_VALUE(expected, computed); */
-/* } */
-
-/* /\************************************************************************\/ */
-/* /\* sage: z = +1.00809273e+01+2.22251668e+00*I; exp(z**2) * (1 + erf(z)) *\/ */
-/* /\* # => 1.32220943230009e42 + 1.43926327412783e42*I                     *\/ */
-/* /\************************************************************************\/ */
-/* void */
-/* test_mittleff1 (void) */
-/* { */
-/*     const double complex x = +1.00809273e+01+2.22251668e+00*I; */
-/*     const double complex expected = ref_value(x); */
-/*     const double complex computed = mittleff(0.5, 1.0, x); */
-/*     TEST_VALUE(expected, computed); */
-/* } */
+/*******************************************************************/
+/* sage: z =+1.00809273e+01+2.22251668e+00*I; exp(z**2) * erfc(-z) */
+/* 1.32220943230009e42 + 1.43926327412783e42*I                     */
+/*******************************************************************/
+void
+test_mittleff1 (void)
+{
+    const double complex x = +1.00809273e+01+2.22251668e+00*I;
+    const double complex expected = 1.32220943230009e42 + 1.43926327412783e42*I;
+    const double complex computed = mittleff(0.5, 1.0, x);
+    TEST_VALUE(expected, computed);
+}
 
 /* /\************************************************************************\/ */
 /* /\* sage: z = -8.81638303e+00+4.53794350e+00*I; exp(z**2) * (1 + erf(z)) *\/ */
@@ -457,7 +453,9 @@ main (void)
     RUN_TEST(test_in_region_G4);
     RUN_TEST(test_in_region_G5);
     RUN_TEST(test_in_region_G6);
-    
+
+    RUN_TEST(test_mittleff0);
+    RUN_TEST(test_mittleff1);
 
     /* RUN_TEST(test_mittleff0); */
     /* RUN_TEST(test_mittleff1); */
