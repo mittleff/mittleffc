@@ -134,11 +134,12 @@ mittleff2 (num_t res,
 
 /* Apply eq. (2.6) */
 void
-mittleff3 (num_t res,
-           const num_t alpha,
-           const num_t beta,
-           const num_t z,
-           const num_t acc)
+mittleff3_4 (num_t res,
+             const num_t alpha,
+             const num_t beta,
+             const num_t z,
+             const num_t acc,
+             const int flag)
 {
     num_t c, one, J, pi, aux, th, fac, fac1, fac2, fac3, fac4;
 
@@ -162,6 +163,9 @@ mittleff3 (num_t res,
     num_add(c, c, one);
     num_mul_d(c, c, 2.0);
     num_sqrt(c, c);
+
+    if (flag == 4)
+        num_neg(c, c);
 
     num_sub(aux, one, beta);
     num_div(aux, aux, alpha);
@@ -196,13 +200,23 @@ mittleff3 (num_t res,
 }
 
 void
+mittleff3 (num_t res,
+           const num_t alpha,
+           const num_t beta,
+           const num_t z,
+           const num_t acc)
+{
+    mittleff3_4(res, alpha, beta, z, acc, 3);
+}
+
+void
 mittleff4 (num_t res,
            const num_t alpha,
            const num_t beta,
            const num_t z,
            const num_t acc)
 {
-    num_zero(res);
+    mittleff3_4(res, alpha, beta, z, acc, 4);
 }
 
 /* num_t */
