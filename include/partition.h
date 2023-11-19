@@ -22,48 +22,49 @@
 #ifndef __PARTITION_H__
 #define __PARTITION_H__
 
+#include "num.h"
 #include <stdbool.h>
 
 /**
  * Size in bytes of the object
  */
 bool
-in_region_G0 (const double x, const double y);
+in_region_G0 (const num_t z);
 
 /**
  * Size in bytes of the object
  */
 bool
-in_region_G1 (const double x, const double y, const double alpha, const double acc);
+in_region_G1 (const num_t z, const num_t alpha, const num_t acc);
 
 /**
  * Size in bytes of the object
  */
 bool
-in_region_G2 (const double x, const double y, const double alpha, const double acc);
+in_region_G2 (const num_t z, const num_t alpha, const num_t acc);
 
 /**
  * Size in bytes of the object
  */
 bool
-in_region_G3 (const double x, const double y, const double alpha, const double acc);
+in_region_G3 (const num_t z, const num_t alpha, const num_t acc);
 
 /**
  * Size in bytes of the object
  */
 bool
-in_region_G4 (const double x, const double y, const double alpha, const double acc);
+in_region_G4 (const num_t z, const num_t alpha, const num_t acc);
 
 /**
  * Size in bytes of the object
  */
 bool
-in_region_G5 (const double x, const double y, const double alpha, const double acc);
+in_region_G5 (const num_t z, const num_t alpha, const num_t acc);
 
 /**
  * Size in bytes of the object
  */
 bool
-in_region_G6 (const double x, const double y, const double alpha, const double acc);
+in_region_G6 (const num_t z, const num_t alpha, const num_t acc);
 
 #endif /* __PARTITION_H__ */
