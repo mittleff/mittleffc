@@ -257,26 +257,24 @@ test_mittleff1 (void)
 void
 test_mittleff2 (void)
 {
-    //TEST_IGNORE_MESSAGE("not working yet");
     const double complex x = -8.81638303e+00+4.53794350e+00*I;
     const double complex expected = 0.0505454404812237 + 0.0257564201381804*I;
     const double complex computed = mittleff(0.5, 1.0, x);
     TEST_VALUE(expected, computed);
 }
 
-/* /\************************************************************************\/ */
-/* /\* sage: z = -3.22342758e-01+8.45119872e+00*I; exp(z**2) * (1 + erf(z)) *\/ */
-/* /\* #=> 0.00259774904698259 + 0.0671347813921331*I                       *\/ */
-/* /\************************************************************************\/ */
-/* void */
-/* test_mittleff3 (void) */
-/* { */
-/*     //TEST_IGNORE_MESSAGE("not working yet"); */
-/*     const double complex x = -3.22342758e-01+8.45119872e+00*I; */
-/*     const double complex expected = ref_value(x); */
-/*     const double complex computed = mittleff(0.5, 1.0, x); */
-/*     TEST_VALUE(expected, computed); */
-/* } */
+/********************************************************************/
+/* sage: z = -3.22342758e-01+8.45119872e+00*I; exp(z**2) * erfc(-z) */
+/* 0.00259774904698259 + 0.0671347813921331*I                       */
+/********************************************************************/
+void
+test_mittleff3 (void)
+{
+    const double complex x = -3.22342758e-01+8.45119872e+00*I;
+    const double complex expected = 0.00259774904698259 + 0.0671347813921331*I;
+    const double complex computed = mittleff(0.5, 1.0, x);
+    TEST_VALUE(expected, computed);
+}
 
 /* /\************************************************************************\/ */
 /* /\* sage: z = -3.75588680e-01-9.83203507e+00*I; exp(z**2) * (1 + erf(z)) *\/ */
@@ -457,6 +455,7 @@ main (void)
     RUN_TEST(test_mittleff0);
     RUN_TEST(test_mittleff1);
     RUN_TEST(test_mittleff2);
+    RUN_TEST(test_mittleff3);
 
     /* RUN_TEST(test_mittleff0); */
     /* RUN_TEST(test_mittleff1); */

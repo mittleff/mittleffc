@@ -132,58 +132,67 @@ mittleff2 (num_t res,
     delete(_res);
 }
 
-
-
-
-
+/* Apply eq. (2.6) */
 void
 mittleff3 (num_t res,
-           const num_t a, const num_t b,
+           const num_t alpha,
+           const num_t beta,
            const num_t z,
            const num_t acc)
 {
-    num_zero(res);
-    /* num_t fac1, fac2,; */
-    /* double th; */
-    
+    num_t c, one, J, pi, aux, th, fac, fac1, fac2, fac3, fac4;
 
-    /* /\* compute z**(1/alpha) *\/ */
-    /* fac1 = new(num); */
-    /* num_set_d_d(fac1, x, y); */
-    /* num_pow_d(fac1, fac1, 1.0/alpha); */
-    /* num_arg(fac1, fac1); */
-    /* th = num_to_d(fac1) - M_PI; */
-    
-    /* /\* c = th + 1j*th**2/6 - th**3/36 *\/ */
-    /* num_t c; */
-    /* c = new(num); */
-    /* num_set_d_d(c, th - th*th*th/36.0, th*th/6.0); */
-		
-    /* /\* fac = (1/(2*alpha))*z**((1 - beta)/alpha)*mp.exp(z**(1/alpha))*mp.erfc(c*mp.sqrt(0.5*mp.fabs(z)**(1/alpha))) *\/ */
+    c = new(num), one = new(num);
+    pi = new(num), J = new(num), aux = new(num);
+    fac = new(num), fac3 = new(num), fac4 = new(num);
+    th = new(num), fac1 = new(num), fac2 = new(num);
 
-    /* num_set_d(fac1, 1.0/(2.0 * alpha)); */
-    /* num_ */
-    /* fac = num_mul(fac, */
-    /*               num_pow( */
-    /*                   z, */
-    /*                   num_div(num_sub(new(num, 1.0, 0.0), beta), alpha))); */
-    /* fac = num_mul(fac, */
-    /*               num_exp( */
-    /*                   num_pow( */
-    /*                       z, */
-    /*                       num_inv(alpha)))); */
-    /* fac = num_mul(fac, */
-    /*               num_erfc( */
-    /*                   num_mul( */
-    /*                       c, */
-    /*                       num_sqrt( */
-    /*                           num_mul( */
-    /*                               new(num, 0.5, 0.0), */
-    /*                               num_pow( */
-    /*                                   num_abs(z), */
-    /*                                   num_inv(alpha))))))); */
-		
-    /* return num_add(fac, asymptotic_series(z, alpha, beta)); */
+    num_one(one);
+    num_set_d(pi, M_PI);
+    num_set_d_d(J, 0.0, 1.0);
+
+    /* compute c(theta) */
+    num_inv(th, alpha);
+    num_pow(th, z, th);
+    num_arg(th, th);
+    num_sub(th, th, pi);
+    num_mul(aux, J, th);
+    num_exp(c, aux);
+    num_sub(c, aux, c);
+    num_add(c, c, one);
+    num_mul_d(c, c, 2.0);
+    num_sqrt(c, c);
+
+    num_sub(aux, one, beta);
+    num_div(aux, aux, alpha);
+    num_pow(fac1, z, aux);
+
+    num_inv(aux, alpha);
+    num_pow(aux, z, aux);
+    num_exp(fac2, aux);
+
+    num_inv(aux, alpha);
+    num_abs(fac4, z);
+    num_pow(aux, fac4, aux);
+    num_mul_d(fac4, aux, 0.5);
+
+    num_sqrt(aux, fac4);
+    num_mul(aux, c, aux);
+    num_erfc(fac3, aux);
+
+    num_mul(fac, fac1, fac2);
+    num_mul(fac, fac, fac3);
+    num_div(fac, fac, alpha);
+    num_mul_d(fac, fac, 0.5);
+
+    asymptotic_series(aux, z, alpha, beta);
+
+    num_add(res, fac, aux);
+
+    delete(c), delete(one);
+    delete(pi), delete(J), delete(aux);
+    delete(fac), delete(fac3), delete(fac4);
+    delete(th), delete(fac1), delete(fac2);
 }
 
 void
