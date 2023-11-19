@@ -19,22 +19,22 @@ mittleff0 (num_t res,
            const num_t z,
            const num_t acc)
 {
-    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
-              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
+    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
+    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
     
     int k, kmax;
-    num_t absz, sum, tmp, fac1, fac2;
+    num_t absz, sum, tmp, fac1, fac2, k1, k2;
 
-    /* Compute the maximum number of terms kmax to be taken into account for the
-     * Taylor series, eq. (4.5) */
     absz = new(num);
-    num_abs(absz, z);
-
-    /* Compute kmax */
-    num_t k1, k2;
     k1 = new(num), k2 = new(num);
     fac1 = new(num), fac2 = new(num);
     tmp = new(num);
+    sum = new(num);
+
+    /* Compute the maximum number of terms kmax to be taken into account for the
+     * Taylor series, eq. (4.5) */
+    num_abs(absz, z);
+    
     num_one(k1);
     num_set_d(tmp, 2.0);
     num_sub(tmp, tmp, beta);
@@ -42,7 +42,6 @@ mittleff0 (num_t res,
     num_ceil(tmp, tmp);
     num_add(k1, tmp, k1);
     
-    tmp = new(num);
     num_one(k2);
     num_one(fac1);
     num_sub(fac1, fac1, absz);
@@ -58,10 +57,7 @@ mittleff0 (num_t res,
     kmax = num_gt(k1, k2) ? (int) num_to_d(k1) : (int) num_to_d(k2);
     delete(k1), delete(k2);
 
-    
-
     /* Sum Taylor series */
-    sum = new(num), tmp = new(num);
     for (k = 0; k <= kmax; k++)
     {
         /* fac1 <- z**k */
@@ -82,7 +78,7 @@ mittleff0 (num_t res,
     delete(sum), delete(z), delete(tmp), delete(fac1), delete(fac2);
 
     //num_print(res, true);
-    log_trace("[%s] Done.", __func__);
+    //log_trace("[%s] Done.", __func__);
     
 }
 
@@ -219,56 +215,7 @@ mittleff4 (num_t res,
     mittleff3_4(res, alpha, beta, z, acc, 4);
 }
 
-/* num_t */
-/* mittleff4 (const num_t alpha, */
-/*            const num_t beta, */
-/*            const num_t z, */
-/*            const num_t acc) */
-/* { */
-/*       /\* numeric_t a = PARAMS_GET_ALPHA(p); *\/ */
-/*     /\* numeric_t b = PARAMS_GET_BETA(p); *\/ */
-
-/*     /\* th = mp.arg(z**(1/alpha)) - np.pi *\/ */
-/*     const double th = num_to_d( */
-/*         num_sub( */
-/*             num_arg( */
-/*                 num_pow( */
-/*                     z, */
-/*                     num_inv(alpha))), */
-/*             new(num, M_PI, 0.0))); */
-		
-/*     /\* c = th + 1j*th**2/6 - th**3/36 *\/ */
-/*     const num_t c = new(num, -th + th*th*th/36.0, -th*th/6.0); */
-		
-/*     /\* fac = (1/(2*alpha))*z**((1 - beta)/alpha)*mp.exp(z**(1/alpha))*mp.erfc(c*mp.sqrt(0.5*mp.fabs(z)**(1/alpha))) *\/ */
-/*     num_t fac; */
-/*     fac = num_inv(num_mul(new(num, 2.0, 0.0), alpha)); */
-/*     fac = num_mul( */
-/*         fac, */
-/*         num_pow( */
-/*             z, */
-/*             num_div( */
-/*                 num_sub(new(num, 1.0, 0.0), beta), */
-/*                 alpha))); */
-/*     fac = num_mul( */
-/*         fac, */
-/*         num_exp( */
-/*             num_pow( */
-/*                 z, */
-/*                 num_inv(alpha)))); */
-/*     fac = num_mul( */
-/*         fac, */
-/*         num_erfc(num_mul( */
-/*                      c, */
-/*                      num_sqrt( */
-/*                          num_mul( */
-/*                              new(num, 0.5, 0.0), */
-/*                              num_pow( */
-/*                                  num_abs(z), num_inv(alpha))))))); */
-		
-/*     return num_add(fac, asymptotic_series(z, alpha, beta));	 */
-/* } */
-
+/* apply eqs. (4.25) and (4.26) */
 void
 mittleff5 (num_t res,
            const num_t alpha,
@@ -276,12 +223,78 @@ mittleff5 (num_t res,
            const num_t z,
            const num_t acc)
 {
-    /* const double eps = 0.5; */
+    num_t rmax, aux, fac1, fac2, fac3, two, one, d;
+
+    one = new(num), two = new(num);
+    rmax = new(num), aux = new(num);
+    fac1 = new(num), fac2 = new(num), fac3 = new(num);
+    d = new(num);
+    
+    num_set_d(two, 2.0);
+    num_one(one);
+    
+    if (num_ge_d(beta, 1.0))
+    {
+        num_zero(rmax);
+        if (num_ge_d(beta, 0.0))
+        {
+            num_abs(fac1, z);
+            num_mul(fac1, fac1, two);
+            
+            num_pow(fac2, two, alpha);
+
+            num_pow(aux, two, beta);
+            num_mul(aux, aux, acc);
+            num_mul_d(aux, aux, M_PI/12.0);
+            num_log(aux, aux);
+            num_mul_d(aux, aux, -2.0);
+            num_pow(fac3, aux, alpha);
+
+            num_max3(rmax, fac1, fac2, fac3);
+        }
+        else
+        {
+            num_abs(fac1, beta);
+            num_add(fac1, fac1, one);
+            num_mul(fac1, fac1, two);
+            num_pow(fac1, fac1, alpha);
+
+            num_abs(fac2, z);
+            num_mul(fac2, fac2, two);
+
+            num_pow(aux, two, beta);
+            num_mul(aux, aux, acc);
+
+            num_abs(aux, beta);
+            num_mul_d(d, aux, 4.0);
+            num_pow(d, d, aux);
+            num_add(aux, aux, two);
+            num_mul(d, d, aux);
+            num_mul_d(d, d, 12.0);
+            
+            num_div(aux, aux, d);
+            num_log(aux, aux);
+            num_mul_d(aux, aux, -2.0);
+            num_pow(fac3, aux, alpha);
+
+            num_max3(rmax, fac1, fac2, fac3);
+        }
+        num_one(res);
+    }
+    delete(aux);
+    delete(one), delete(two), delete(d);
+    delete(rmax);
+    delete(fac1), delete(fac2), delete(fac3);
+    /* const double x = num_real_d(_z); */
+    /* const double y = num_imag_d(_z); */
+    /* const double alpha = num_to_d(_alpha); */
+    /* const double beta = num_to_d(_beta); */
+    /* const double eps = num_to_d(_acc); */
 
     /* /\* Compute r_max, equation (4.53) *\/ */
     /* double rmax = 0.0; */
     /* double abs_z = sqrt(x*x + y*y); */
-    /* if (ge(beta, 0.0)) */
+    /* if (beta >= 0.0) */
     /*     rmax = MAX3(1.0, */
     /*                 pow(2.0, abs_z), */
     /*                 pow(-log(M_PI * eps/6.0), alpha)); */
@@ -290,9 +303,9 @@ mittleff5 (num_t res,
     /*                 2.0*abs_z, */
     /*                 pow(-2.0 * log(M_PI*eps/(6.0*(fabs(beta)+2.0)*pow(2.0*fabs(beta), beta))), alpha)); */
 
-    /* num_t _res = new(num), a = new(num);     */
+    /* num_t _res = new(num), a = new(num); */
     /* A(a, x, y, alpha, beta, 0.0); */
-    /* if (le(beta, 1.0)) /\* Equation (4.25) *\/ */
+    /* if (beta <= 1.0) /\* Equation (4.25) *\/ */
     /* { */
     /*     num_t integ_b = new(num); */
     /*     integrate_B(integ_b, alpha, beta, x, y, M_PI * alpha, 0.0, rmax); */
@@ -308,7 +321,7 @@ mittleff5 (num_t res,
     /*     num_add(_res, _res, a); */
     /*     delete(integ_b), delete(integ_c); */
     /* } */
-    /* num_to_d_d(res, _res); */
+    /* num_set(res, _res); */
     /* delete(_res), delete(a); */
 }
 
