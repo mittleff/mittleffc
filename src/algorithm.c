@@ -122,11 +122,13 @@ mittleff2 (num_t res,
            const num_t z,
            const num_t acc)
 {
+    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
+              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
     num_t _res;
     _res = new(num);
     num_set_d(_res, 0.0);
     asymptotic_series(_res, z, alpha, beta);
-    num_to_d_d(res, _res);
+    num_set(res, _res);
     delete(_res);
 }
 
