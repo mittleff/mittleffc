@@ -455,7 +455,7 @@ main (void)
     RUN_TEST(test_mittleff2);
     RUN_TEST(test_mittleff3);
     RUN_TEST(test_mittleff4);
-    //RUN_TEST(test_mittleff5);
+    RUN_TEST(test_mittleff5);
 
     /* RUN_TEST(test_mittleff0); */
     /* RUN_TEST(test_mittleff1); */

@@ -223,18 +223,22 @@ mittleff5 (num_t res,
            const num_t z,
            const num_t acc)
 {
-    num_t rmax, aux, fac1, fac2, fac3, two, one, d;
+    num_t zero, rmax, aux, fac1, fac2, fac3, two, one, d, phi;
 
     one = new(num), two = new(num);
     rmax = new(num), aux = new(num);
     fac1 = new(num), fac2 = new(num), fac3 = new(num);
     d = new(num);
+    zero = new(num);
+    num_zero(zero);
+    phi = new(num);
     
     num_set_d(two, 2.0);
     num_one(one);
     
-    if (num_ge_d(beta, 1.0))
+    if (num_le_d(beta, 1.0))
     {
+        /* Compute rmax */
         num_zero(rmax);
         if (num_ge_d(beta, 0.0))
         {
@@ -279,12 +283,43 @@ mittleff5 (num_t res,
 
             num_max3(rmax, fac1, fac2, fac3);
         }
-        num_one(res);
+
+        num_t from, to;
+        from = new(num), to = new(num);
+        num_set_d(from, 0.0);
+        num_set(to, rmax);
+        A(fac1, z, alpha, beta, zero);
+        num_mul_d(phi, alpha, M_PI);
+        integrate_B(fac2, alpha, beta, z, phi, from, to);
+        num_add(res, fac1, fac2);
+        delete(from), delete(to);
     }
+    else
+    {
+        if (num_ge_d(beta, 0.0))
+        {
+        }
+        else
+        {
+        }
+
+        num_t from, to;
+        from = new(num), to = new(num);
+        num_set_d(from, 0.5);
+        num_set_d(to, 2.0 * num_to_d(rmax));
+        A(fac1, z, alpha, beta, zero);
+        num_mul_d(phi, alpha, M_PI);
+        integrate_B(fac2, alpha, beta, z, phi, from, to);
+        num_add(res, fac1, fac2);
+        delete(from), delete(to);
+        
+    }
+    delete(zero);
     delete(aux);
     delete(one), delete(two), delete(d);
     delete(rmax);
     delete(fac1), delete(fac2), delete(fac3);
+    delete(phi);
     /* const double x = num_real_d(_z); */
     /* const double y = num_imag_d(_z); */
     /* const double alpha = num_to_d(_alpha); */
