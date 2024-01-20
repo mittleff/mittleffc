@@ -181,10 +181,22 @@ void
 num_sin (num_t res, const num_t self);
 
 /**
+ * Returns the hyperbolic sine of the number
+ */
+void
+num_sinh (num_t res, const num_t self);
+
+/**
  * Returns the cosine of the number
  */
 void
 num_cos (num_t res, const num_t self);
+
+/**
+ * Returns the hyperbolic cosine of the number
+ */
+void
+num_cosh (num_t res, const num_t self);
 
 /*********************/
 /* Binary operations */

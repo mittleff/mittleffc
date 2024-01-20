@@ -251,26 +251,121 @@ test_z_zero_2 (void)
 void
 test_exp_0 (void)
 {
+    const double complex z = 0.8;
     const double complex expected = +2.22554092849247e+00+0.00000000000000e+00*I;
-    const double complex computed = mittleff(1.0, 1.0, 0.8);
+    const double complex computed = mittleff(1.0, 1.0, z);
     TEST_VALUE(expected, computed);
 }
 
 void
 test_exp_1 (void)
 {
+    const double complex z = 2.0;
     const double complex expected = +7.38905609893065e+00+0.00000000000000e+00*I;
-    const double complex computed = mittleff(1.0, 1.0, 2.0);
+    const double complex computed = mittleff(1.0, 1.0, z);
     TEST_VALUE(expected, computed);
 }
 
 void
 test_exp_2 (void)
 {
+    const double complex z = 3.0+4.0*I;
     const double complex expected = -1.31287830814622e+01-1.52007844630680e+01*I;
-    const double complex computed = mittleff(1.0, 1.0, 3.0+4.0*I);
+    const double complex computed = mittleff(1.0, 1.0, z);
     TEST_VALUE(expected, computed);
 }
+
+void
+test_cos_0 (void)
+{
+    const double complex z = -1.42469226000000e+00-1.93094380000000e-01*I;
+    const double complex expected = +1.48307362593645e-01-1.92226474311045e-01*I;
+    const double complex computed = mittleff(2.0, 1.0, -z*z);
+    TEST_VALUE(expected, computed);
+}
+
+void
+test_cos_1 (void)
+{
+    const double complex z = +6.64679980000000e-01+1.46133978000000e+00*I;
+    const double complex expected = +1.78818881219233e+00-1.25822734251227e+00*I;
+    const double complex computed = mittleff(2.0, 1.0, -z*z);
+    TEST_VALUE(expected, computed);
+}
+
+void
+test_cos_2 (void)
+{
+    const double complex z = +8.94857660000000e-01+1.89827224000000e+00*I;
+    const double complex expected = +2.13470542364750e+00-2.54495655003334e+00*I;
+    const double complex computed = mittleff(2.0, 1.0, -z*z);
+    TEST_VALUE(expected, computed);
+}
+
+void
+test_cos_3 (void)
+{
+    const double complex z = -1.32190510000000e-01+2.22985315000000e+00*I;
+    const double complex expected = +4.66199107535284e+00+6.05710930000310e-01*I;
+    const double complex computed = mittleff(2.0, 1.0, -z*z);
+    TEST_VALUE(expected, computed);
+}
+
+void
+test_cos_4 (void)
+{
+    const double complex z = -1.60041154000000e+00+3.95133590000000e-01*I;
+    const double complex expected = -3.19526988999422e-02+4.05318417916536e-01*I;
+    const double complex computed = mittleff(2.0, 1.0, -z*z);
+    TEST_VALUE(expected, computed);
+}
+
+void
+test_cosh_0 (void)
+{
+    const double complex z = -1.42469226000000e+00-1.93094380000000e-01*I;
+    const double complex expected = +2.15772016942189e+00+3.75733317193863e-01*I;
+    const double complex computed = mittleff(2.0, 1.0, z*z);
+    TEST_VALUE(expected, computed);
+}
+
+void
+test_cosh_1 (void)
+{
+    const double complex z = +6.64679980000000e-01+1.46133978000000e+00*I;
+    const double complex expected = 1.34270384074874e-01+7.10437973043830e-01*I;
+    const double complex computed = mittleff(2.0, 1.0, z*z);
+    TEST_VALUE(expected, computed);
+}
+
+void
+test_cosh_2 (void)
+{
+    const double complex z = +8.94857660000000e-01+1.89827224000000e+00*I;
+    const double complex expected = -4.59266292056142e-01+9.64999829685609e-01*I;
+    const double complex computed = mittleff(2.0, 1.0, z*z);
+    TEST_VALUE(expected, computed);
+}
+
+void
+test_cosh_3 (void)
+{
+    const double complex z = -1.32190510000000e-01+2.22985315000000e+00*I;
+    const double complex expected = -6.17729663704252e-01-1.04810500062338e-01*I;
+    const double complex computed = mittleff(2.0, 1.0, z*z);
+    TEST_VALUE(expected, computed);
+}
+
+void
+test_cosh_4 (void)
+{
+    const double complex z = -1.60041154000000e+00+3.95133590000000e-01*I;
+    const double complex expected = +2.37976084266865e+00-9.14839293944298e-01*I;
+    const double complex computed = mittleff(2.0, 1.0, z*z);
+    TEST_VALUE(expected, computed);
+}
+
+
 
 /********************************************************************/
 /* sage: z = -7.33057219e-02-5.11934762e-01*I; exp(z**2) * erfc(-z) */
@@ -505,6 +600,18 @@ main (void)
     RUN_TEST(test_exp_0);
     RUN_TEST(test_exp_1);
     RUN_TEST(test_exp_2);
+
+    RUN_TEST(test_cos_0);
+    RUN_TEST(test_cos_1);
+    RUN_TEST(test_cos_2);
+    RUN_TEST(test_cos_3);
+    RUN_TEST(test_cos_4);
+
+    RUN_TEST(test_cosh_0);
+    RUN_TEST(test_cosh_1);
+    RUN_TEST(test_cosh_2);
+    RUN_TEST(test_cosh_3);
+    RUN_TEST(test_cosh_4);
         
     //RUN_TEST(test_mittleff0);
     //RUN_TEST(test_mittleff1);

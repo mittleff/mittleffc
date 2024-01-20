@@ -55,6 +55,22 @@ _mittleff (num_t res,
     {
         num_exp(res, z);
     }
+    else if (num_eq_d(alpha, 2.0) && num_eq_d(beta, 1.0)) /* cosh(sqrt(z)) */
+    {
+        num_sqrt(res, z);
+        num_cosh(res, res);
+    }
+    else if (num_eq_d(alpha, 2.0) && num_eq_d(beta, 2.0)) /* sinh(sqrt(z))/sqrt(z) */
+    {
+        num_t n, d;
+        n = new(num);
+        d = new(num);
+        num_sqrt(n, z);
+        num_sqrt(d, z);
+        num_sinh(n, n);
+        num_div(res, n, d);
+        delete(n), delete(d);
+    }
     else if (in_region_G0(z))
         mittleff0(res, alpha, beta, z, acc);
     else if (num_gt_d(alpha, 1.0)) /* apply recursive relation (2.2) */
