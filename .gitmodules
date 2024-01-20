@@ -7,3 +7,6 @@
 [submodule "modules/num.c"]
 	path = modules/num.c
 	url = git@github.com:padawanphysicist/num.c.git
+[submodule "modules/sf.c"]
+	path = modules/sf.c
+	url = https://github.com/padawanphysicist/sf.c
