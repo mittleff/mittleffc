@@ -482,6 +482,20 @@ num_eq (const num_t self, const num_t other)
 }
 
 bool
+num_eq_d (const num_t self, const double other)
+{
+    num_t _other;
+    bool ret;
+
+    _other = new(num);
+    num_set_d(_other, other);
+    ret = num_eq(self, _other);
+    delete(_other);
+
+    return ret;
+}
+
+bool
 num_lt (const num_t self, const num_t other)
 {
     assert(num_is_real(self) && num_is_real(other));

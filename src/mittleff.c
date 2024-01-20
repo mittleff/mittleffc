@@ -46,9 +46,14 @@ _mittleff (num_t res,
 {
     /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
     /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
-    if (num_is_zero(z))
+    /* Test special cases */
+    if (num_is_zero(z)) /* z = 0 */
     {
         num_rgamma(res, beta);
+    }
+    else if (num_eq_d(alpha, 1.0) && num_eq_d(beta, 1.0)) /* exp(z) */
+    {
+        num_exp(res, z);
     }
     else if (in_region_G0(z))
         mittleff0(res, alpha, beta, z, acc);

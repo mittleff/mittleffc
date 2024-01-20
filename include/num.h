@@ -246,6 +246,8 @@ num_pow_d (num_t res, const num_t self, const double other);
  */
 bool
 num_eq (const num_t _self, const num_t _other);
+bool
+num_eq_d (const num_t _self, const double _other);
 
 bool
 num_gt (const num_t _self, const num_t _other);

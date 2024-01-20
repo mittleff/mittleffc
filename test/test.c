@@ -248,6 +248,30 @@ test_z_zero_2 (void)
     TEST_VALUE(expected, computed);
 }
 
+void
+test_exp_0 (void)
+{
+    const double complex expected = +2.22554092849247e+00+0.00000000000000e+00*I;
+    const double complex computed = mittleff(1.0, 1.0, 0.8);
+    TEST_VALUE(expected, computed);
+}
+
+void
+test_exp_1 (void)
+{
+    const double complex expected = +7.38905609893065e+00+0.00000000000000e+00*I;
+    const double complex computed = mittleff(1.0, 1.0, 2.0);
+    TEST_VALUE(expected, computed);
+}
+
+void
+test_exp_2 (void)
+{
+    const double complex expected = -1.31287830814622e+01-1.52007844630680e+01*I;
+    const double complex computed = mittleff(1.0, 1.0, 3.0+4.0*I);
+    TEST_VALUE(expected, computed);
+}
+
 /********************************************************************/
 /* sage: z = -7.33057219e-02-5.11934762e-01*I; exp(z**2) * erfc(-z) */
 /* 0.725165453880409 - 0.432914368208589*I                          */
@@ -477,6 +501,10 @@ main (void)
     RUN_TEST(test_z_zero_0);
     RUN_TEST(test_z_zero_1);
     RUN_TEST(test_z_zero_2);
+
+    RUN_TEST(test_exp_0);
+    RUN_TEST(test_exp_1);
+    RUN_TEST(test_exp_2);
         
     //RUN_TEST(test_mittleff0);
     //RUN_TEST(test_mittleff1);
