@@ -46,7 +46,11 @@ _mittleff (num_t res,
 {
     /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
     /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
-    if (in_region_G0(z))
+    if (num_is_zero(z))
+    {
+        num_rgamma(res, beta);
+    }
+    else if (in_region_G0(z))
         mittleff0(res, alpha, beta, z, acc);
     else if (num_gt_d(alpha, 1.0)) /* apply recursive relation (2.2) */
     {
