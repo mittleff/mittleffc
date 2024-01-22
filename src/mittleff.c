@@ -60,6 +60,17 @@ _mittleff (num_t res,
         num_sqrt(res, z);
         num_cosh(res, res);
     }
+    else if (num_eq_d(alpha, 0.5) && num_eq_d(beta, 1.0)) /* exp(z^2)*erfc(-z) */
+    {
+        num_t exp_z2, erfc_z;
+        exp_z2 = new(num), erfc_z = new(num);
+        num_pow_d(exp_z2, z, 2.0);
+        num_exp(exp_z2, exp_z2);
+        num_neg(erfc_z, z);
+        num_erfc(erfc_z, erfc_z);
+        num_mul(res, exp_z2, erfc_z);
+        delete(exp_z2), delete(erfc_z);
+    }
     else if (num_eq_d(alpha, 2.0) && num_eq_d(beta, 2.0)) /* sinh(sqrt(z))/sqrt(z) */
     {
         num_t n, d;

@@ -19,8 +19,8 @@ mittleff0 (num_t res,
            const num_t z,
            const num_t acc)
 {
-    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
-    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
+    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
+              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
     
     int k, kmax;
     num_t absz, sum, tmp, fac1, fac2, k1, k2;
@@ -137,6 +137,8 @@ mittleff3_4 (num_t res,
              const num_t acc,
              const int flag)
 {
+    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
+              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
     num_t c, one, J, pi, aux, th, fac, fac1, fac2, fac3, fac4;
 
     c = new(num), one = new(num);
@@ -202,6 +204,8 @@ mittleff3 (num_t res,
            const num_t z,
            const num_t acc)
 {
+    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
+              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
     mittleff3_4(res, alpha, beta, z, acc, 3);
 }
 
@@ -212,6 +216,8 @@ mittleff4 (num_t res,
            const num_t z,
            const num_t acc)
 {
+    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
+              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
     mittleff3_4(res, alpha, beta, z, acc, 4);
 }
 
@@ -223,6 +229,8 @@ mittleff5 (num_t res,
            const num_t z,
            const num_t acc)
 {
+    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
+              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
     num_t zero, rmax, aux, fac1, fac2, fac3, two, one, d, phi;
 
     one = new(num), two = new(num);
@@ -367,6 +375,8 @@ mittleff6 (num_t res,
            const num_t z,
            const num_t acc)
 {
+    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
+              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
     /* const double eps = 0.5; */
     /* /\* Compute r_max, equation (4.54) *\/ */
     /* double rmax = 0.0; */
