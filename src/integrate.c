@@ -242,8 +242,15 @@ integrate_B (num_t res,
              const num_t z,
              const num_t phi,
              const num_t from,
-             const num_t to)
+             const num_t to,
+             const num_t acc)
 {
+    log_trace("[%s] alpha=%g, beta=%g, z=%g+%g acc=%g",
+              __func__,
+              num_to_d(alpha),
+              num_to_d(beta),
+              num_to_complex(z),
+              num_to_d(acc));
     acb_t _res, t, _from, _to;
     mag_t tol;
     slong prec, goal;
@@ -260,12 +267,12 @@ integrate_B (num_t res,
     acb_init(t);
     mag_init(tol);
 
-    mag_set_d(tol, 1e-16);
+    mag_set_d(tol, num_to_d(acc));//1e-15);
     parameters_B p = { .alpha = alpha, .beta = beta, .z = z, .phi = phi };
 
     acb_set_d(_from, num_to_d(from));
     acb_set_d(  _to, num_to_d(to));
-    int status = acb_calc_integrate(_res, f_wrap_B, &p, _from, _to, goal, tol, options, prec);
+    int status = acb_calc_integrate(_res, &f_wrap_B, &p, _from, _to, goal, tol, options, prec);
     num_set_acb(res, _res);
     acb_clear(_res);
     acb_clear(t);
@@ -321,6 +328,7 @@ integrate_C (num_t res,
 static int
 f_wrap_B(acb_ptr res, const acb_t z, void * params, slong order, slong prec)
 {
+    
     if (order > 1)
         flint_abort();  /* Would be needed for Taylor method. */
 
@@ -336,6 +344,7 @@ f_wrap_B(acb_ptr res, const acb_t z, void * params, slong order, slong prec)
     _res = new(num);
     B(_res, _z, p->alpha, p->beta, p->z, p->phi);
     const double complex __res = num_to_complex(_res);
+    printf("%g+%g\n", __res);
     delete(_res);
     delete(_z);
     

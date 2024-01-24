@@ -4,3 +4,4 @@
 valgrind-out.txt
 *.dsv
 notebook/
+tmp/

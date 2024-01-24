@@ -25,7 +25,8 @@ integrate_B (num_t res,
              const num_t z,
              const num_t phi,
              const num_t from,
-             const num_t to);
+             const num_t to,
+             const num_t acc);
 
 void
 integrate_C (num_t res,

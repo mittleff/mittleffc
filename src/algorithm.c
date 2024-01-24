@@ -120,12 +120,7 @@ mittleff2 (num_t res,
 {
     log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
               num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
-    num_t _res;
-    _res = new(num);
-    num_set_d(_res, 0.0);
-    asymptotic_series(_res, z, alpha, beta);
-    num_set(res, _res);
-    delete(_res);
+    asymptotic_series(res, z, alpha, beta);
 }
 
 /* Apply eq. (2.6) */
@@ -221,13 +216,14 @@ mittleff4 (num_t res,
     mittleff3_4(res, alpha, beta, z, acc, 4);
 }
 
-/* apply eqs. (4.25) and (4.26) */
 void
-mittleff5 (num_t res,
-           const num_t alpha,
-           const num_t beta,
-           const num_t z,
-           const num_t acc)
+mittleff5_6 (num_t res,
+             const num_t alpha,
+             const num_t beta,
+             const num_t z,
+             const num_t acc,
+             const double c1,
+             const double c2)
 {
     log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
               num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
@@ -291,14 +287,35 @@ mittleff5 (num_t res,
 
             num_max3(rmax, fac1, fac2, fac3);
         }
+        log_trace("[%s] rmax=%+.15e", __func__,
+              num_to_d(rmax));
+
+        /* int1 = numerical_integral(lambda r: B(r, alpha, beta, z, c1), 0.0, rmax, acc) */
+        /* num_t int1, from, to; */
+        /* int1 = new(num), from = new(num), to = new(num); */
+        /* num_zero(int1); */
+        /* num_set_d(phi, c1); */
+        /* num_set_d(from, 0.0); */
+        /* num_set(to, rmax); */
+        /* integrate_B(int1, alpha, beta, z, phi, from, to); */
+
+        /* log_trace("[%s] int1=%+.15e", __func__, */
+        /*       num_to_d(int1)); */
+
+        /* delete(int1), delete(from), delete(to); */
+
+        /* num_set_d(res, 0.0); */
 
         num_t from, to;
         from = new(num), to = new(num);
         num_set_d(from, 0.0);
         num_set(to, rmax);
         A(fac1, z, alpha, beta, zero);
-        num_mul_d(phi, alpha, M_PI);
-        integrate_B(fac2, alpha, beta, z, phi, from, to);
+        num_mul_d(fac1, fac1, c2);
+        num_set_d(phi, c1);
+        integrate_B(fac2, alpha, beta, z, phi, from, to, acc);
+        log_trace("[%s] int1=%+.15e", __func__,
+              num_to_d(fac2));
         num_add(res, fac1, fac2);
         delete(from), delete(to);
     }
@@ -306,21 +323,74 @@ mittleff5 (num_t res,
     {
         if (num_ge_d(beta, 0.0))
         {
+            /* fac1 = 2.0 * abs(z) */
+            num_abs(fac1, z);
+            num_mul(fac1, fac1, two);
+
+            /* fac2 = (-log(pi * eps/6.0))**alpha */
+            num_mul_d(fac2, acc, M_PI/6.0);
+            num_log(fac2, fac2);
+            num_neg(fac2, fac2);
+            num_pow(fac2, fac2, alpha);
+
+            num_max3(rmax, one, fac1, fac2);
         }
         else
         {
+            /* fac1 = (abs(beta) + 1.0)**alpha */
+            num_abs(fac1, beta);
+            num_add(fac1, fac1, one);
+            num_pow(fac1, fac1, alpha);
+
+            /* fac2 = 2.0 * abs(z) */
+            num_abs(fac2, z);
+            num_mul(fac2, fac2, two);
+
+            /* d = (6.0 * (abs(beta) + 2.0) * (2.0 * abs(beta))**abs(beta)) */
+            num_abs(aux, beta);
+            num_add(aux, aux, two);
+            num_abs(d, beta);
+            num_mul(d, d, aux);
+            num_mul_d(d, d, 12.0);
+            num_abs(aux, beta);
+            num_pow(d, d, aux);
+
+            /* fac3 = (-2.0 * log(pi * eps/d))**alpha */
+            num_div(fac3, acc, d);
+            num_mul_d(fac3, fac3, M_PI);
+            num_log(fac3, fac3);
+            num_mul_d(fac3, fac3, -2.0);
+            num_pow(fac3, fac3, alpha);
+
+            num_max3(rmax, fac1, fac2, fac3);
         }
+
+        num_t int1, int2;
+        int1 = new(num), int2 = new(num);
+        num_zero(int1), num_zero(int2);
 
         num_t from, to;
         from = new(num), to = new(num);
-        num_set_d(from, 0.5);
-        num_set_d(to, 2.0 * num_to_d(rmax));
-        A(fac1, z, alpha, beta, zero);
-        num_mul_d(phi, alpha, M_PI);
-        integrate_B(fac2, alpha, beta, z, phi, from, to);
-        num_add(res, fac1, fac2);
-        delete(from), delete(to);
         
+        num_set_d(from, 0.5);
+        num_set_d(to, (1+c2) * num_to_d(rmax));
+        num_mul_d(phi, alpha, M_PI);
+        integrate_B(int1, alpha, beta, z, phi, from, to, acc);
+
+
+        num_set_d(from, -c1);
+        num_set_d(to, c1);
+        num_set_d(phi, 0.5);
+        integrate_C(int2, alpha, beta, z, phi, from, to);
+
+        A(aux, z, alpha, beta, zero);
+        num_mul_d(aux, aux, c2);
+        
+        num_add(res, int1, int2);
+        num_add(res, res, aux);
+        
+        delete(from), delete(to);
+        delete(int1), delete(int2);        
     }
     delete(zero);
     delete(aux);
@@ -328,45 +398,19 @@ mittleff5 (num_t res,
     delete(rmax);
     delete(fac1), delete(fac2), delete(fac3);
     delete(phi);
-    /* const double x = num_real_d(_z); */
-    /* const double y = num_imag_d(_z); */
-    /* const double alpha = num_to_d(_alpha); */
-    /* const double beta = num_to_d(_beta); */
-    /* const double eps = num_to_d(_acc); */
-
-    /* /\* Compute r_max, equation (4.53) *\/ */
-    /* double rmax = 0.0; */
-    /* double abs_z = sqrt(x*x + y*y); */
-    /* if (beta >= 0.0) */
-    /*     rmax = MAX3(1.0, */
-    /*                 pow(2.0, abs_z), */
-    /*                 pow(-log(M_PI * eps/6.0), alpha)); */
-    /* else */
-    /*     rmax = MAX3(pow(fabs(beta) + 1.0, alpha), */
-    /*                 2.0*abs_z, */
-    /*                 pow(-2.0 * log(M_PI*eps/(6.0*(fabs(beta)+2.0)*pow(2.0*fabs(beta), beta))), alpha)); */
-
-    /* num_t _res = new(num), a = new(num); */
-    /* A(a, x, y, alpha, beta, 0.0); */
-    /* if (beta <= 1.0) /\* Equation (4.25) *\/ */
-    /* { */
-    /*     num_t integ_b = new(num); */
-    /*     integrate_B(integ_b, alpha, beta, x, y, M_PI * alpha, 0.0, rmax); */
-    /*     num_add(_res, a, integ_b); */
-    /*     delete(integ_b); */
-    /* } */
-    /* else /\* Equation (4.26) *\/ */
-    /* { */
-    /*     num_t integ_b = new(num), integ_c = new(num); */
-    /*     integrate_B(integ_b, alpha, beta, x, y, M_PI * alpha, 0.5, rmax); */
-    /*     integrate_C(integ_c, alpha, beta, x, y, 0.5, -M_PI * alpha, M_PI * alpha); */
-    /*     num_add(_res, integ_b, integ_c); */
-    /*     num_add(_res, _res, a); */
-    /*     delete(integ_b), delete(integ_c); */
-    /* } */
-    /* num_set(res, _res); */
-    /* delete(_res), delete(a); */
 }
+
+/* apply eqs. (4.25) and (4.26) */
+void
+mittleff5 (num_t res,
+           const num_t alpha,
+           const num_t beta,
+           const num_t z,
+           const num_t acc)
+{
+    mittleff5_6(res, alpha, beta, z, acc, M_PI*num_to_d(alpha), 1.0);
+}
+
 
 void
 mittleff6 (num_t res,
@@ -377,40 +421,7 @@ mittleff6 (num_t res,
 {
     log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
               num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
-    /* const double eps = 0.5; */
-    /* /\* Compute r_max, equation (4.54) *\/ */
-    /* double rmax = 0.0; */
-    /* double abs_z = sqrt(x*x + y*y); */
-    /* if (ge(beta, 0.0)) */
-    /* { */
-    /*     rmax = MAX3(pow(2.0, alpha), */
-    /*                 2.0 * abs_z, */
-    /*                 pow(-log(M_PI*eps*pow(2.0, beta)/12.0), alpha)); */
-    /* } */
-    /* else // TODO Check with Hansjoerg whether the brackets mean "ceil" here */
-    /*     rmax = MAX3( */
-    /*         pow(ceil(2.0 * (fabs(beta) + 1.0)), alpha), // HERE */
-    /*         2.0 * abs_z, */
-    /*         pow(ceil(-log((M_PI * pow(2.0, beta)*eps)/(12*(fabs(beta) + 2)*pow(4 * fabs(beta), fabs(beta))))), alpha)); */
-
-    /* num_t _res = new(num); */
-    /* if (le(beta, 1.0)) /\* Equation (4.31) *\/ */
-    /* { */
-    /*     num_t integ_b = new(num); */
-    /*     integrate_B(integ_b, alpha, beta, x, y, 2.0 * M_PI * alpha/3.0, 0.0, rmax); */
-    /*     num_set(_res, integ_b); */
-    /*     delete(integ_b); */
-    /* } */
-    /* else /\* Equation (4.32) *\/ */
-    /* { */
-    /*     num_t integ_b = new(num), integ_c = new(num); */
-    /*     integrate_B(integ_b, alpha, beta, x, y, 2.0 * M_PI * alpha/3.0, 0.5, rmax); */
-    /*     integrate_C(integ_c, alpha, beta, x, y, 0.5, -2.0 * M_PI * alpha/3.0, 2.0 * M_PI * alpha/3.0); */
-    /*     num_add(_res, integ_b, integ_c); */
-    /*     delete(integ_b), delete(integ_c); */
-    /* } */
-    /* num_to_d_d(res, _res); */
-    /* delete(_res); */
+    mittleff5_6(res, alpha, beta, z, acc, 2.0*M_PI*num_to_d(alpha)/3.0, 0.0);
 }
 
 
@@ -436,6 +447,7 @@ asymptotic_series (num_t res, const num_t z, const num_t alpha, const num_t beta
     num_ceil(fac1, fac1);
     num_add(fac1, fac1, one);    
     kmax = (int) num_to_d(fac1); //(ceil((1.0/alpha) * pow(abs_z, 1.0/alpha)) + 1.0);
+    //kmax += 10;
     //log_trace("[%s] |z|=%.5e, kmax=%d", __func__, num_to_d(absz), kmax);
 
     /* -sum([z**(-k) * mp.rgamma(beta - alpha*k) for k in range(1, kmax + 1)]) */
