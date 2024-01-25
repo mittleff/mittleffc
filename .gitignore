@@ -1,7 +1,8 @@
 *.o
 *.out
 .dir-locals.el
-valgrind-out.txt
+valgrind-*.txt
 *.dsv
 notebook/
 tmp/
+build/

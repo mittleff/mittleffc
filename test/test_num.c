@@ -63,12 +63,175 @@ tearDown (void)
 }
 
 void
-test_init (void)
+test_Memory_Management (void)
 {
-    printf("Ola\n");
-    num_t x = num_alloc();
-    num_free(x);
+    num_t x;
+
+    x = num_init ();
+    TEST_ASSERT_NOT_NULL(x);
+
+    num_clear (x);
 }
+
+void
+test_Initialization_and_Accessors (void)
+{
+    num_t x, y;
+
+    x = num_init ();
+    TEST_ASSERT_NOT_NULL(x);
+
+    num_set_d (x, +2.0);
+    TEST_ASSERT_EQUAL_DOUBLE( +2.0, num_real_d (x) );
+    TEST_ASSERT_EQUAL_DOUBLE(  0.0, num_imag_d (x) );
+
+    num_set_d_d (x, +3.0, -4.0);
+    TEST_ASSERT_EQUAL_DOUBLE( +3.0, num_real_d (x) );
+    TEST_ASSERT_EQUAL_DOUBLE( -4.0, num_imag_d (x) );
+
+    y = num_init ();
+    num_set_num (y, x);
+    TEST_ASSERT_EQUAL_DOUBLE( +3.0, num_real_d (y) );
+    TEST_ASSERT_EQUAL_DOUBLE( -4.0, num_imag_d (y) );
+
+    num_clear (x), num_clear (y);
+}
+
+void
+test_Precision_and_Comparisons (void)
+{
+    num_t x, y;
+
+    x = num_init (), y = num_init ();
+    TEST_ASSERT_NOT_NULL(x);
+    TEST_ASSERT_NOT_NULL(y);
+    TEST_ASSERT(num_is_zero(x));
+    TEST_ASSERT(num_is_zero(y));
+
+    /* x = 3.0, y = 3.0, z = x */
+    num_set_d (x, 3.0), num_set_d (y, 3.0);
+    TEST_ASSERT(num_eq (x, y));
+
+    num_set_d_d (x, 2.0, -10.0);
+    TEST_ASSERT_FALSE(num_eq (x, y));
+    TEST_ASSERT(num_ne (x, y));
+
+    num_set_d (x, 0.0), num_set_d (y, 0.0);
+    TEST_ASSERT(num_eq (x, y));
+
+    num_set_d (x, 2.0);
+    TEST_ASSERT( num_is_real (x) );
+
+    num_set_d_d (x, 2.0, -10.0);
+    TEST_ASSERT_FALSE( num_is_real (x) );
+
+    num_set_d (x, 2.0), num_set_d (y, -3.0);
+    TEST_ASSERT_TRUE( num_gt (x, y) );
+    TEST_ASSERT_TRUE( num_lt (y, x) );
+    TEST_ASSERT_TRUE( num_ge (x, y) );
+    TEST_ASSERT_TRUE( num_le (y, x) );
+
+    num_set_d (x, 2.0), num_set_d (y, 2.0);
+    TEST_ASSERT_FALSE( num_gt (x, y) );
+    TEST_ASSERT_FALSE( num_lt (y, x) );
+    TEST_ASSERT_TRUE( num_ge (x, y) );
+    TEST_ASSERT_TRUE( num_le (y, x) );
+
+    /* Issue */
+    num_set_d_d (x, 4.94623e-05, +4.62743e-21);
+    TEST_ASSERT_TRUE( num_is_real (x) );
+
+    num_clear (x), num_clear(y);
+}
+
+void
+test_Arithmetic (void)
+{
+    num_t x, y, z;
+
+    x = num_init (), y = num_init ();
+    TEST_ASSERT_NOT_NULL(x);
+    TEST_ASSERT_NOT_NULL(y);
+
+    num_set_d_d (x, 3.0, -4.0);
+    TEST_ASSERT_EQUAL_DOUBLE( +3.0, num_real_d (x) );
+    TEST_ASSERT_EQUAL_DOUBLE( -4.0, num_imag_d (x) );
+    num_neg (x, x);
+    TEST_ASSERT_EQUAL_DOUBLE( -3.0, num_real_d (x) );
+    TEST_ASSERT_EQUAL_DOUBLE( +4.0, num_imag_d (x) );
+    num_conj (x, x);
+    TEST_ASSERT_EQUAL_DOUBLE( -3.0, num_real_d (x) );
+    TEST_ASSERT_EQUAL_DOUBLE( -4.0, num_imag_d (x) );
+
+    
+    z = num_init ();
+    num_set_d_d (x, +3.0, +4.0), num_set_d_d (y, +3.0, -4.0);
+
+    /* add */
+    num_add (z, x, y);
+    TEST_ASSERT_EQUAL_DOUBLE( +6.0, num_real_d (z) );
+    TEST_ASSERT_EQUAL_DOUBLE(  0.0, num_imag_d (z) );
+
+    /* sub */
+    num_sub (z, x, y);
+    TEST_ASSERT_EQUAL_DOUBLE(  0.0, num_real_d (z) );
+    TEST_ASSERT_EQUAL_DOUBLE( +8.0, num_imag_d (z) );
+
+    /* mul */
+    num_mul (z, x, y);
+    TEST_ASSERT_EQUAL_DOUBLE( +25.0, num_real_d (z) );
+    TEST_ASSERT_EQUAL_DOUBLE( 0.0, num_imag_d (z) );
+
+    // Issue when multiplying large and small values
+
+    /* div */
+    num_div (z, x, y);
+    TEST_ASSERT_EQUAL_DOUBLE( -0.28, num_real_d (z) );
+    TEST_ASSERT_EQUAL_DOUBLE( +0.96, num_imag_d (z) );
+
+    num_clear (x), num_clear (y), num_clear (z);
+}
+
+void
+test_Special_Functions (void)
+{
+    num_t x, y;
+
+    x = num_init (), y = num_init ();
+    TEST_ASSERT_NOT_NULL(x);
+    TEST_ASSERT_NOT_NULL(y);
+
+    num_set_d (x, +1.0), num_rgamma (y, x);
+    TEST_ASSERT_EQUAL_DOUBLE( +1.0, num_real_d (y) );
+    TEST_ASSERT_EQUAL_DOUBLE(  0.0, num_imag_d (y) );
+
+    num_set_d (x, +4.0), num_rgamma (y, x);
+    TEST_ASSERT_EQUAL_DOUBLE( 1.0/6.0, num_real_d (y) );
+    TEST_ASSERT_EQUAL_DOUBLE( 0.0, num_imag_d (y) );
+
+    num_clear (x), num_clear (y);
+}
+
+/* void */
+/* test_num_comparison (void) */
+/* { */
+/*     num_t x, y; */
+
+/*     x = num_init (), y = num_init (); */
+/*     TEST_ASSERT_NOT_NULL(x); */
+/*     TEST_ASSERT_NOT_NULL(y); */
+
+/*     /\* x = 3.0, y = 3.0, z = x *\/ */
+/*     num_set_d (x, 3.0), num_set_d (y, 3.0); */
+
+/*     num_clear (&x), num_clear (&y), num_clear (&z); */
+/*     /\* num_print(x); *\/ */
+/*     /\* num_print(y); *\/ */
+/*     /\* num_print(z); *\/ */
+/*     TEST_ASSERT_NULL(x); */
+/*     TEST_ASSERT_NULL(y); */
+/*     TEST_ASSERT_NULL(z); */
+/* } */
 
 /* #include "test_partition.h" */
 /* #include "test_z_zero.h" */
@@ -86,7 +249,12 @@ main (void)
 {
     UNITY_BEGIN();
 
-    RUN_TEST(test_init);
+    RUN_TEST(test_Memory_Management);
+    RUN_TEST(test_Initialization_and_Accessors);
+    RUN_TEST(test_Precision_and_Comparisons);
+    RUN_TEST(test_Arithmetic);
+    RUN_TEST(test_Special_Functions);
+    
     /* RUN_TEST(test_siam_4); */
     /* RUN_TEST(test_siam_5); */
     /* RUN_TEST(test_siam_6); */

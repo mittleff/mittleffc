@@ -2,6 +2,8 @@
 #define __INTEGRATE_H__
 
 #include "num.h"
+//#include "quad.h
+
 
 void
 A (num_t res,
