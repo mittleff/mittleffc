@@ -1,17 +1,13 @@
 #include <assert.h>
 
 #include "integrate.h"
+#include "integration.h"
 
 #include "log.h"
 #include "new.h"
 #include "num.h"
+#include <math.h>
 
-#include "flint/profiler.h"
-#include "arb_hypgeom.h"
-#include "acb_hypgeom.h"
-#include "acb_dirichlet.h"
-#include "acb_modular.h"
-#include "acb_calc.h"
 
 /* Parameters for integrating B */
 typedef struct {
@@ -29,45 +25,15 @@ typedef struct {
     num_t rho;
 } parameters_C;
 
-// Converts an arb_t number to double.
-static double
-arbtod (const arb_t x)
-{
-    return arf_get_d(arb_midref(x), ARF_RND_NEAR);
-}
+void
+f_wrap_B(num_t res,
+         const num_t z,
+         const void * ctx);
 
 void
-num_set_acb (num_t res, const acb_t x)
-{
-    arb_t re, im;    
-    arb_init(re); arb_init(im);
-    acb_get_real(re, x);
-    acb_get_imag(im, x);
-    num_set_d_d(res, arbtod(re), arbtod(im));
-    arb_clear(re), arb_clear(im);
-}
-
-static int
-f_wrap_B(acb_ptr res, const acb_t z, void * param, slong order, slong prec);
-
-static int
-f_wrap_C(acb_ptr res, const acb_t z, void * params, slong order, slong prec);
-
-/* num_t */
-/* A (const num_t z, */
-/*    const num_t alpha, */
-/*    const num_t beta, */
-/*    const num_t x) */
-/* { */
-/*     const double _alpha = num_to_d(alpha); */
-/*     const double _beta = num_to_d(beta); */
-    
-/*     return num_mul( */
-/*         num_inv(alpha), */
-/*         num_mul( */
-/*             num_pow(z, new(num, (1 - _beta)/_alpha, 0.0)), */
-/*             num_exp(num_mul(num_pow(z, num_inv(alpha)), num_cos(num_div(x, alpha)))))); */
-/* } */
+f_wrap_C(num_t res,
+         const num_t z,
+         const void * ctx);
 
 void
 A (num_t res,
@@ -130,31 +96,6 @@ omega(num_t res,
     delete(one_over_alpha);
     delete(aux), delete(fac1), delete(fac2);
 }
-
-/* num_t */
-/* B (const num_t r, */
-/*    const num_t alpha, */
-/*    const num_t beta, */
-/*    const num_t z, */
-/*    const num_t phi) */
-/* { */
-/*     num_t two = new(num, 2.0, 0.0); */
-/*     num_t one_over_pi = new(num, 1.0/M_PI, 0.0); */
-/*     num_t num, den; */
-
-/*     num = num_sub(num_mul(r, num_sin(num_sub(omega(r, phi, alpha, beta), phi))), num_mul(z, num_sin(omega(r, phi, alpha, beta)))); */
-/*     den = num_sub( */
-/*         num_add(num_pow(r, two), num_pow(z, two)), */
-/*         num_mul(two, num_mul(r, num_mul(z, num_cos(phi))))); */
-
-/*     num_t res =  num_mul( */
-/*         one_over_pi, */
-/*         num_mul(A(r, alpha, beta, phi), num_div(num, den))); */
-
-/*     delete(two); delete(num); delete(den); delete(one_over_pi); */
-    
-/*     return res; */
-/* } */
 
 void
 B (num_t res,
@@ -251,36 +192,38 @@ integrate_B (num_t res,
               num_to_d(beta),
               num_to_complex(z),
               num_to_d(acc));
-    acb_t _res, t, _from, _to;
-    mag_t tol;
-    slong prec, goal;
-    acb_calc_integrate_opt_t options;
+    /* acb_t _res, t, _from, _to; */
+    /* mag_t tol; */
+    /* slong prec, goal; */
+    /* acb_calc_integrate_opt_t options; */
 
-    acb_calc_integrate_opt_init(options);
+    /* acb_calc_integrate_opt_init(options); */
 
-    prec = 63;
-    goal = prec;
+    /* prec = 63; */
+    /* goal = prec; */
     
-    acb_init(_from);
-    acb_init(_to);
-    acb_init(_res);
-    acb_init(t);
-    mag_init(tol);
+    /* acb_init(_from); */
+    /* acb_init(_to); */
+    /* acb_init(_res); */
+    /* acb_init(t); */
+    /* mag_init(tol); */
 
-    mag_set_d(tol, num_to_d(acc));//1e-15);
+    /* mag_set_d(tol, num_to_d(acc));//1e-15); */
     parameters_B p = { .alpha = alpha, .beta = beta, .z = z, .phi = phi };
 
-    acb_set_d(_from, num_to_d(from));
-    acb_set_d(  _to, num_to_d(to));
-    int status = acb_calc_integrate(_res, &f_wrap_B, &p, _from, _to, goal, tol, options, prec);
-    num_set_acb(res, _res);
-    acb_clear(_res);
-    acb_clear(t);
-    acb_clear(_from);
-    acb_clear(_to);
-    mag_clear(tol);
+    /* acb_set_d(_from, num_to_d(from)); */
+    /* acb_set_d(  _to, num_to_d(to)); */
+    /* int status = acb_calc_integrate(_res, &f_wrap_B, &p, _from, _to, goal, tol, options, prec); */
+    /* num_set_acb(res, _res); */
+    /* acb_clear(_res); */
+    /* acb_clear(t); */
+    /* acb_clear(_from); */
+    /* acb_clear(_to); */
+    /* mag_clear(tol); */
 
-    flint_cleanup_master();
+    /* flint_cleanup_master(); */
+
+    integrate(res, &f_wrap_B, &p, from, to, 0);
 }
 
 void
@@ -292,89 +235,72 @@ integrate_C (num_t res,
              const num_t from,
              const num_t to)
 {
-    acb_t _res, t, _from, _to;
-    mag_t tol;
-    slong prec, goal;
-    acb_calc_integrate_opt_t options;
+    /* acb_t _res, t, _from, _to; */
+    /* mag_t tol; */
+    /* slong prec, goal; */
+    /* acb_calc_integrate_opt_t options; */
 
-    acb_calc_integrate_opt_init(options);
+    /* acb_calc_integrate_opt_init(options); */
 
-    prec = 53;
-    goal = prec;
+    /* prec = 53; */
+    /* goal = prec; */
     
-    acb_init(_from);
-    acb_init(_to);
-    acb_init(_res);
-    acb_init(t);
-    mag_init(tol);
+    /* acb_init(_from); */
+    /* acb_init(_to); */
+    /* acb_init(_res); */
+    /* acb_init(t); */
+    /* mag_init(tol); */
 
-    mag_set_d(tol, 1e-16);
+    /* mag_set_d(tol, 1e-16); */
     parameters_C p = { .alpha = alpha, .beta = beta, .z = z, .rho = rho };
 
-    acb_set_d(_from, num_to_d(from));
-    acb_set_d(  _to, num_to_d(to));
-    int status = acb_calc_integrate(_res, f_wrap_C, &p, _from, _to, goal, tol, options, prec);
+    /* acb_set_d(_from, num_to_d(from)); */
+    /* acb_set_d(  _to, num_to_d(to)); */
+    /* int status = acb_calc_integrate(_res, f_wrap_C, &p, _from, _to, goal, tol, options, prec); */
 
-    num_set_acb(res, _res);
-    acb_clear(_res);
-    acb_clear(t);
-    acb_clear(_from);
-    acb_clear(_to);
-    mag_clear(tol);
+    /* num_set_acb(res, _res); */
+    /* acb_clear(_res); */
+    /* acb_clear(t); */
+    /* acb_clear(_from); */
+    /* acb_clear(_to); */
+    /* mag_clear(tol); */
 
-    flint_cleanup_master();
+    /* flint_cleanup_master(); */
+    integrate(res, &f_wrap_C, &p, from, to, 0);
 }
 
-static int
-f_wrap_B(acb_ptr res, const acb_t z, void * params, slong order, slong prec)
+/* static int */
+/* f_wrap_B(acb_ptr res, const acb_t z, void * params, slong order, slong prec) */
+void
+f_wrap_B(num_t res,
+         const num_t z,
+         const void * ctx)
 {
     
-    if (order > 1)
-        flint_abort();  /* Would be needed for Taylor method. */
-
-    parameters_B* p = (parameters_B *) params;
+    parameters_B* p = (parameters_B *) ctx;
     
-    num_t _z = new(num);
-    num_set_acb(_z, z);
-    assert(num_is_real(_z));
+   
+    //assert(num_is_real(z));
     //const double r = num_to_d(_z);
     
+    B(res, z, p->alpha, p->beta, p->z, p->phi);
     
-    num_t _res;
-    _res = new(num);
-    B(_res, _z, p->alpha, p->beta, p->z, p->phi);
-    const double complex __res = num_to_complex(_res);
-    printf("%g+%g\n", __res);
-    delete(_res);
-    delete(_z);
-    
-    acb_set_d_d(res, creal(__res), cimag(__res));
-
-    return 0;
 }
 
-static int
-f_wrap_C(acb_ptr res, const acb_t z, void * params, slong order, slong prec)
+/* static int */
+/* f_wrap_C(acb_ptr res, const acb_t z, void * params, slong order, slong prec) */
+void
+f_wrap_C(num_t res,
+         const num_t z,
+         const void * ctx)
 {
-    if (order > 1)
-        flint_abort();  /* Would be needed for Taylor method. */
+    parameters_C* p = (parameters_C *) ctx;
 
-    parameters_C* p = (parameters_C *) params;
-
-    num_t _z = new(num);
-    num_set_acb(_z, z);
-    assert(num_is_real(_z));
+    /* num_t _z = new(num); */
+    /* num_set_acb(_z, z); */
+    //assert(num_is_real(z));
     //const double r = num_to_d(_z);
-    
+   
+    C(res, z, p->alpha, p->beta, p->z, p->rho);
 
-    num_t _res;
-    _res = new(num);
-    C(_res, _z, p->alpha, p->beta, p->z, p->rho);
-    const double complex __res = num_to_complex(_res);
-    delete(_res);
-    delete(_z);
-    
-    acb_set_d_d(res, creal(__res), cimag(__res));
-        
-    return 0;
 }

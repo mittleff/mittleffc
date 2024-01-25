@@ -11,14 +11,11 @@
 	path = modules/sf.c
 	url = https://github.com/padawanphysicist/sf.c
 [submodule "module/Unity"]
-	path = module/Unity
+	path = modules/Unity
 	url = https://github.com/ThrowTheSwitch/Unity
 [submodule "module/log.c"]
-	path = module/log.c
+	path = modules/log.c
 	url = https://github.com/rxi/log.c
-[submodule "module/num.c"]
-	path = module/num.c
-	url = https://github.com/padawanphysicist/num.c
 [submodule "module/integration.c"]
-	path = module/integration.c
+	path = modules/integration.c
 	url = https://github.com/padawanphysicist/integration.c.git
