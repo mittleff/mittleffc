@@ -27,6 +27,11 @@
 #include <complex.h>
 #include <stdarg.h>
 
+#ifndef M_PI
+#define M_PI 3.141592653589793238462643383279502884197169399375105820974944
+#endif
+
+
 /**
  * This should be used in the initialization of the variable
  */

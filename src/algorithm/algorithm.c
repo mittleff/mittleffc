@@ -1,10 +1,11 @@
-#include <math.h>
-
 #include "algorithm.h"
-#include "integrate.h"
-#include "log.h"
-//#include "new.h"
 
+#include "integrate.h"
+#include "new.h"
+
+#include "utils.h"
+
+#include <math.h>
 #include <stdbool.h>
 
 #define MAX2(a,b) ((a>b)?(a):(b))
@@ -19,17 +20,17 @@ mittleff0 (num_t res,
            const num_t z,
            const num_t acc)
 {
-    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
-              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
+    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
+    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
     
     int k, kmax;
     num_t absz, sum, tmp, fac1, fac2, k1, k2;
 
-    absz = num_init();
-    k1 = num_init(), k2 = num_init();
-    fac1 = num_init(), fac2 = num_init();
-    tmp = num_init();
-    sum = num_init();
+    absz = new(num);
+    k1 = new(num), k2 = new(num);
+    fac1 = new(num), fac2 = new(num);
+    tmp = new(num);
+    sum = new(num);
 
     /* Compute the maximum number of terms kmax to be taken into account for the
      * Taylor series, eq. (4.5) */
@@ -55,7 +56,7 @@ mittleff0 (num_t res,
     //k1 = (int) (ceil((2 - b)/a) + 1);
     //k2 = (int) (ceil(log(acc * (1 - abs_z))/log(abs_z)) + 1);
     kmax = num_gt(k1, k2) ? (int) num_to_d(k1) : (int) num_to_d(k2);
-    num_clear(k1), num_clear(k2);
+    delete(k1), delete(k2);
 
     /* Sum Taylor series */
     for (k = 0; k <= kmax; k++)
@@ -75,7 +76,7 @@ mittleff0 (num_t res,
         num_add(sum, sum, tmp);
     }
     num_set_num(res, sum);
-    num_clear(sum), num_clear(z), num_clear(tmp), num_clear(fac1), num_clear(fac2);
+    delete(sum), delete(z), delete(tmp), delete(fac1), delete(fac2);
 
     //num_print(res, true);
     //log_trace("[%s] Done.", __func__);
@@ -90,12 +91,13 @@ mittleff1 (num_t res,
            const num_t z,
            const num_t acc)
 {
-    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
-          num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
+    UNUSED(acc);
+    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
+    /*       num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
     
     num_t fac1, fac2, _res;
 
-    fac1 = num_init(), fac2 = num_init(), _res = num_init();
+    fac1 = new(num), fac2 = new(num), _res = new(num);
     num_set_d(fac1, 1.0);
     num_sub(fac1, fac1, beta);
     num_div(fac1, fac1, alpha);
@@ -109,7 +111,7 @@ mittleff1 (num_t res,
     asymptotic_series(fac2, z, alpha, beta);
     num_add(_res, fac1, fac2);
     num_set_num(res, _res);
-    num_clear(_res), num_clear(fac1), num_clear(fac2);
+    delete(_res), delete(fac1), delete(fac2);
 }
 
 void
@@ -118,8 +120,9 @@ mittleff2 (num_t res,
            const num_t z,
            const num_t acc)
 {
-    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
-              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
+    UNUSED(acc);
+    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
+    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
     asymptotic_series(res, z, alpha, beta);
 }
 
@@ -132,14 +135,15 @@ mittleff3_4 (num_t res,
              const num_t acc,
              const int flag)
 {
-    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
-              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
+    UNUSED(acc);
+    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
+    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
     num_t c, one, J, pi, aux, th, fac, fac1, fac2, fac3, fac4;
 
-    c = num_init(), one = num_init();
-    pi = num_init(), J = num_init(), aux = num_init();
-    fac = num_init(), fac3 = num_init(), fac4 = num_init();
-    th = num_init(), fac1 = num_init(), fac2 = num_init();
+    c = new(num), one = new(num);
+    pi = new(num), J = new(num), aux = new(num);
+    fac = new(num), fac3 = new(num), fac4 = new(num);
+    th = new(num), fac1 = new(num), fac2 = new(num);
 
     num_set_d(one, 1.0);
     num_set_d(pi, M_PI);
@@ -186,10 +190,10 @@ mittleff3_4 (num_t res,
 
     num_add(res, fac, aux);
 
-    num_clear(c), num_clear(one);
-    num_clear(pi), num_clear(J), num_clear(aux);
-    num_clear(fac), num_clear(fac3), num_clear(fac4);
-    num_clear(th), num_clear(fac1), num_clear(fac2);
+    delete(c), delete(one);
+    delete(pi), delete(J), delete(aux);
+    delete(fac), delete(fac3), delete(fac4);
+    delete(th), delete(fac1), delete(fac2);
 }
 
 void
@@ -199,8 +203,8 @@ mittleff3 (num_t res,
            const num_t z,
            const num_t acc)
 {
-    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
-              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
+    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
+    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
     mittleff3_4(res, alpha, beta, z, acc, 3);
 }
 
@@ -211,8 +215,8 @@ mittleff4 (num_t res,
            const num_t z,
            const num_t acc)
 {
-    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
-              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
+    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
+    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
     mittleff3_4(res, alpha, beta, z, acc, 4);
 }
 
@@ -225,17 +229,17 @@ mittleff5_6 (num_t res,
              const double c1,
              const double c2)
 {
-    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
-              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
+    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
+    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
     num_t zero, rmax, aux, fac1, fac2, fac3, two, one, d, phi;
 
-    one = num_init(), two = num_init();
-    rmax = num_init(), aux = num_init();
-    fac1 = num_init(), fac2 = num_init(), fac3 = num_init();
-    d = num_init();
-    zero = num_init();
+    one = new(num), two = new(num);
+    rmax = new(num), aux = new(num);
+    fac1 = new(num), fac2 = new(num), fac3 = new(num);
+    d = new(num);
+    zero = new(num);
     num_set_d(zero, 0.0);
-    phi = num_init();
+    phi = new(num);
     
     num_set_d(two, 2.0);
     num_set_d(one, 1.0);
@@ -287,12 +291,12 @@ mittleff5_6 (num_t res,
 
             num_max3(rmax, fac1, fac2, fac3);
         }
-        log_trace("[%s] rmax=%+.15e", __func__,
-              num_to_d(rmax));
+        /* log_trace("[%s] rmax=%+.15e", __func__, */
+        /*       num_to_d(rmax)); */
 
         /* int1 = numerical_integral(lambda r: B(r, alpha, beta, z, c1), 0.0, rmax, acc) */
         /* num_t int1, from, to; */
-        /* int1 = num_init(), from = num_init(), to = num_init(); */
+        /* int1 = new(num), from = new(num), to = new(num); */
         /* num_set_d(int1, 0.0); */
         /* num_set_d(phi, c1); */
         /* num_set_d(from, 0.0); */
@@ -302,22 +306,22 @@ mittleff5_6 (num_t res,
         /* log_trace("[%s] int1=%+.15e", __func__, */
         /*       num_to_d(int1)); */
 
-        /* num_clear(int1), num_clear(from), num_clear(to); */
+        /* delete(int1), delete(from), delete(to); */
 
         /* num_set_d(res, 0.0); */
 
         num_t from, to;
-        from = num_init(), to = num_init();
+        from = new(num), to = new(num);
         num_set_d(from, 0.0);
         num_set_num(to, rmax);
         A(fac1, z, alpha, beta, zero);
         num_mul_d(fac1, fac1, c2);
         num_set_d(phi, c1);
         integrate_B(fac2, alpha, beta, z, phi, from, to, acc);
-        log_trace("[%s] int1=%+.15e", __func__,
-              num_to_d(fac2));
+        /* log_trace("[%s] int1=%+.15e", __func__, */
+        /*       num_to_d(fac2)); */
         num_add(res, fac1, fac2);
-        num_clear(from), num_clear(to);
+        delete(from), delete(to);
     }
     else
     {
@@ -366,11 +370,11 @@ mittleff5_6 (num_t res,
         }
 
         num_t int1, int2;
-        int1 = num_init(), int2 = num_init();
+        int1 = new(num), int2 = new(num);
         num_set_d(int1, 0.0), num_set_d(int2, 0.0);
 
         num_t from, to;
-        from = num_init(), to = num_init();
+        from = new(num), to = new(num);
         
         num_set_d(from, 0.5);
         num_set_d(to, (1+c2) * num_to_d(rmax));
@@ -389,15 +393,15 @@ mittleff5_6 (num_t res,
         num_add(res, int1, int2);
         num_add(res, res, aux);
         
-        num_clear(from), num_clear(to);
-        num_clear(int1), num_clear(int2);        
+        delete(from), delete(to);
+        delete(int1), delete(int2);        
     }
-    num_clear(zero);
-    num_clear(aux);
-    num_clear(one), num_clear(two), num_clear(d);
-    num_clear(rmax);
-    num_clear(fac1), num_clear(fac2), num_clear(fac3);
-    num_clear(phi);
+    delete(zero);
+    delete(aux);
+    delete(one), delete(two), delete(d);
+    delete(rmax);
+    delete(fac1), delete(fac2), delete(fac3);
+    delete(phi);
 }
 
 /* apply eqs. (4.25) and (4.26) */
@@ -419,8 +423,8 @@ mittleff6 (num_t res,
            const num_t z,
            const num_t acc)
 {
-    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__,
-              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc));
+    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
+    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
     mittleff5_6(res, alpha, beta, z, acc, 2.0*M_PI*num_to_d(alpha)/3.0, 0.0);
 }
 
@@ -429,15 +433,15 @@ mittleff6 (num_t res,
 void
 asymptotic_series (num_t res, const num_t z, const num_t alpha, const num_t beta)
 {
-    log_trace("[%s] alpha=%g, beta=%g, z=%g%+g", __func__,
-              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z));
+    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g", __func__, */
+    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z)); */
     int k, kmax;
-    double abs_z;
+    //double abs_z;
     num_t absz, sum, tmp, fac1, fac2, one;
 
-    absz = num_init(), one = num_init();
-    sum = num_init(), tmp = num_init();
-    fac1 = num_init(), fac2 = num_init();
+    absz = new(num), one = new(num);
+    sum = new(num), tmp = new(num);
+    fac1 = new(num), fac2 = new(num);
 
     num_set_d(one, 1.0);
     num_abs(absz, z);
@@ -450,7 +454,7 @@ asymptotic_series (num_t res, const num_t z, const num_t alpha, const num_t beta
     num_add(fac1, fac1, one);    
     kmax = (int) num_to_d(fac1); //(ceil((1.0/alpha) * pow(abs_z, 1.0/alpha)) + 1.0);
     //kmax += 10;
-    log_trace("[%s] |z|=%.5e, kmax=%d", __func__, num_to_d(absz), kmax);
+    /* log_trace("[%s] |z|=%.5e, kmax=%d", __func__, num_to_d(absz), kmax); */
 
     /* -sum([z**(-k) * mp.rgamma(beta - alpha*k) for k in range(1, kmax + 1)]) */
     for (k = 1; k <= kmax; k++)
@@ -468,12 +472,12 @@ asymptotic_series (num_t res, const num_t z, const num_t alpha, const num_t beta
 
         /* partial sum = fac1 * fac2 */
         num_mul(tmp, fac1, fac2);
-        log_trace("[%s] k=%d, fac1=%g%+g, fac2=%g%+g, tmp=%g%+g",
-                  __func__,
-                  k,
-                  num_real_d(fac1), num_imag_d(fac1),
-                  num_real_d(fac2), num_imag_d(fac2),
-                  num_real_d(tmp), num_imag_d(tmp));
+        /* log_trace("[%s] k=%d, fac1=%g%+g, fac2=%g%+g, tmp=%g%+g", */
+        /*           __func__, */
+        /*           k, */
+        /*           num_real_d(fac1), num_imag_d(fac1), */
+        /*           num_real_d(fac2), num_imag_d(fac2), */
+        /*           num_real_d(tmp), num_imag_d(tmp)); */
         
         num_add(sum, sum, tmp);
         //log_trace("[%s] k=%d, sum=%g%+g", __func__, k, num_real_d(sum), num_imag_d(sum));
@@ -481,7 +485,7 @@ asymptotic_series (num_t res, const num_t z, const num_t alpha, const num_t beta
     num_set_num(res, sum);
     num_mul_d(res, res, -1.0);
     
-    num_clear(absz), num_clear(one);
-    num_clear(sum), num_clear(tmp);
-    num_clear(fac1), num_clear(fac2);
+    delete(absz), delete(one);
+    delete(sum), delete(tmp);
+    delete(fac1), delete(fac2);
 }

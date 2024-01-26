@@ -16,16 +16,19 @@
  */
 
 /** 
- * @file integration.c
+ * @file quad.c
  * @brief Implementation of the main routines.
  */
+
+#include "quad.h"
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
 
-#include "quad.h"
+#include "new.h"
 #include "num.h"
-#include "log.h"
+
+#include "utils.h"
 
 #include "flint/mag.h"
 #include "flint/acb.h"
@@ -54,7 +57,7 @@ acbtonum (num_t res, acb_t x)
 int
 f_integrand (acb_ptr res, const acb_t z, void * params, slong order, slong prec)
 {
-    log_trace("calling wrapper function?");
+    //log_trace("calling wrapper function?");
     
     if (order > 1)
         flint_abort();  /* Would be needed for Taylor method. */
@@ -63,13 +66,13 @@ f_integrand (acb_ptr res, const acb_t z, void * params, slong order, slong prec)
     num_function_t * F = (num_function_t *) params;
 
     num_t x, y;
-    x = num_init (), y = num_init ();
+    x = new(num), y = new(num);
     acbtonum(x, z);
     (F->function)(y, x, (F->params)); // TODO
     
     acb_set_d_d(res, num_real_d (y), num_imag_d (y));
 
-    num_clear(x), num_clear(y);
+    delete(x), delete(y);
 
     return 0;
 }
@@ -81,7 +84,7 @@ quad_gauss_legendre (num_t res,
                      const num_t from,
                      const num_t to)
 {
-    log_trace("calling gauss legendre integration");
+    //log_trace("calling gauss legendre integration");
     acb_t ret, a, b, aux;
     mag_t tol;
     slong prec, goal;
@@ -100,10 +103,10 @@ quad_gauss_legendre (num_t res,
     acb_set_d_d(a, num_real_d(from), num_imag_d(from));
     acb_set_d_d(b, num_real_d(to), num_imag_d(to));
 
-    log_trace("before integrate with ARB");
+    //log_trace("before integrate with ARB");
     
     acb_calc_integrate(ret, f_integrand, &F, a, b, goal, tol, options, prec);
-    log_trace("after integrate with ARB");
+    /* log_trace("after integrate with ARB"); */
     acbtonum (res, ret);
        
     acb_clear(ret), acb_clear(a), acb_clear(b), acb_clear(aux);
@@ -117,7 +120,8 @@ quad (num_t res,
       const num_t to,
       const int method)
 {
-    log_trace("before call routine integration");
+    UNUSED(method);
+    /* log_trace("before call routine integration"); */
     quad_gauss_legendre (res, F, from, to);
 
     /* switch (method) { */

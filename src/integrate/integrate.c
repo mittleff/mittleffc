@@ -1,14 +1,12 @@
-#include <assert.h>
-
 #include "integrate.h"
-//#include "integration.h"
+
 #include "quad.h"
-
-#include "log.h"
-//#include "new.h"
+#include "new.h"
 #include "num.h"
-#include <math.h>
+#include "utils.h"
 
+#include <math.h>
+#include <assert.h>
 
 /* Parameters for integrating B */
 typedef struct {
@@ -44,7 +42,7 @@ A (num_t res,
    const num_t x)
 {
     num_t zp, cosxa, expz;
-    zp = num_init(), cosxa = num_init(), expz = num_init();
+    zp = new(num), cosxa = new(num), expz = new(num);
 
     /* compute z**((1-beta)/alpha) */
     num_set_num(zp, z);
@@ -62,7 +60,7 @@ A (num_t res,
     num_mul(res, zp, expz);
     num_mul_d(res, res, 1.0/num_to_d(alpha));
        
-    num_clear(zp), num_clear(cosxa), num_clear(expz);
+    delete(zp), delete(cosxa), delete(expz);
 }
 
 static void
@@ -74,9 +72,9 @@ omega(num_t res,
 {
     num_t one_over_alpha, aux, fac1, fac2;
 
-    one_over_alpha = num_init();
-    aux = num_init();
-    fac1 = num_init(), fac2 = num_init();
+    one_over_alpha = new(num);
+    aux = new(num);
+    fac1 = new(num), fac2 = new(num);
     
     num_inv(one_over_alpha, alpha);
 
@@ -94,8 +92,8 @@ omega(num_t res,
     //return pow(x, 1/alpha)*sin(y/alpha) + y*(1 + (1 - beta)/alpha);
 
     num_add(res, fac1, fac2);
-    num_clear(one_over_alpha);
-    num_clear(aux), num_clear(fac1), num_clear(fac2);
+    delete(one_over_alpha);
+    delete(aux), delete(fac1), delete(fac2);
 }
 
 void
@@ -108,8 +106,8 @@ B (num_t res,
 {
     num_t n, d, fac1, fac2;
 
-    n = num_init(), d = num_init();
-    fac1 = num_init(), fac2 = num_init();
+    n = new(num), d = new(num);
+    fac1 = new(num), fac2 = new(num);
 
     /* numerator */
     omega(fac1, r, phi, alpha, beta);
@@ -134,7 +132,7 @@ B (num_t res,
     num_div(res, res, d);
     num_mul_d(res, res, 1.0/M_PI);
 
-    num_clear(n), num_clear(d), num_clear(fac1), num_clear(fac2);
+    delete(n), delete(d), delete(fac1), delete(fac2);
 }
 
 void
@@ -147,8 +145,8 @@ C (num_t res,
 {
     num_t n, d, fac1, fac2, J;
 
-    n = num_init(), d = num_init(), J = num_init();
-    fac1 = num_init(), fac2 = num_init();
+    n = new(num), d = new(num), J = new(num);
+    fac1 = new(num), fac2 = new(num);
 
     num_set_d_d(J, 0.0, 1.0);
 
@@ -174,7 +172,7 @@ C (num_t res,
     num_div(res, res, d);
     num_mul_d(res, res, num_to_d(rho)/(2.0 * M_PI));
 
-    num_clear(n), num_clear(d), num_clear(J), num_clear(fac1), num_clear(fac2);
+    delete(n), delete(d), delete(J), delete(fac1), delete(fac2);
 }
 
 void
@@ -187,12 +185,13 @@ integrate_B (num_t res,
              const num_t to,
              const num_t acc)
 {
-    log_trace("[%s] alpha=%g, beta=%g, z=%g+%g acc=%g",
-              __func__,
-              num_to_d(alpha),
-              num_to_d(beta),
-              num_to_complex(z),
-              num_to_d(acc));
+    UNUSED(acc);
+    /* log_trace("[%s] alpha=%g, beta=%g, z=%g+%g acc=%g", */
+    /*           __func__, */
+    /*           num_to_d(alpha), */
+    /*           num_to_d(beta), */
+    /*           num_to_complex(z), */
+    /*           num_to_d(acc)); */
     /* acb_t _res, t, _from, _to; */
     /* mag_t tol; */
     /* slong prec, goal; */
@@ -225,15 +224,15 @@ integrate_B (num_t res,
     /* flint_cleanup_master(); */
 
 
-    log_trace("before set params");
+    //log_trace("before set params");
     parameters_B p = { .alpha = alpha, .beta = beta, .z = z, .phi = phi };
 
-    log_trace("before set func");
+    /* log_trace("before set func"); */
     num_function_t F;
     F.function = &f_wrap_B;
     F.params = &p;
 
-    log_trace("before integrate");
+    /* log_trace("before integrate"); */
     quad(res, F, from, to, 0);
 }
 
@@ -315,7 +314,7 @@ f_wrap_C(num_t res,
 {
     parameters_C* p = (parameters_C *) ctx;
 
-    /* num_t _z = num_init(); */
+    /* num_t _z = new(num); */
     /* num_set_acb(_z, z); */
     //assert(num_is_real(z));
     //const double r = num_to_d(_z);

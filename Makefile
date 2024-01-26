@@ -16,25 +16,40 @@ all: test_num
 .PHONY: test_num
 test_num:
 	@mkdir --parents build
-	$(CC) $(CFLAGS) -I./modules/Unity/src -DUNITY_INCLUDE_DOUBLE -c ./modules/Unity/src/unity.c -o build/unity.o
+	$(CC) $(CFLAGS) -I./modules/Unity/src -c ./modules/Unity/src/unity.c -o build/unity.o
 	$(CC) $(CFLAGS) -I./src/num -c ./src/num/new.c -o build/new.o
 	$(CC) $(CFLAGS) -I./src/num -c ./src/num/num.c -o build/num.o
 	$(CC) $(CFLAGS) -I./modules/Unity/src -I./src/num -DUNITY_INCLUDE_DOUBLE -c test/test_num.c -o build/test_num.o
-	$(CC) $(CFLAGS) build/unity.o build/new.o build/num.o build/test_num.o -o build/test_num.x -lflint -lgsl -lgslcblas -lm
+	$(CC) $(CFLAGS) \
+		build/unity.o \
+		build/new.o \
+		build/num.o \
+		build/test_num.o \
+		-o build/test_num.x -lflint -lgsl -lgslcblas -lm
 	$(VALGRIND) --log-file=valgrind-test_num.txt ./build/test_num.x
 
 test_mittleff:
 	@mkdir --parents build
-	$(CC) $(CFLAGS) -I./modules/Unity/src -DUNITY_INCLUDE_DOUBLE -c ./modules/Unity/src/unity.c -o build/unity.o
-	$(CC) $(CFLAGS) -I./modules/log.c/src -DLOG_USE_COLOR -c ./modules/log.c/src/log.c -o build/log.o
-	$(CC) $(CFLAGS) -I./modules/log.c/src -I./src/num -c ./src/num/num.c -o build/num.o
-	$(CC) $(CFLAGS) -I./modules/log.c/src -I./include -I./src/include -I./src/num -c ./src/partition.c -o build/partition.o
-	$(CC) $(CFLAGS) -I./modules/log.c/src -I./include -I./src/include -I./src/num -c ./src/algorithm.c -o build/algorithm.o
-	$(CC) $(CFLAGS) -I./modules/log.c/src -I./include -I./src/include -I./src/num -c ./src/quad.c -o build/quad.o
-	$(CC) $(CFLAGS) -I./modules/log.c/src -I./include -I./src/include -I./src/num -c ./src/integrate.c -o build/integrate.o
-	$(CC) $(CFLAGS) -I./modules/log.c/src -I./include -I./src/include -I./src/num -c ./src/mittleff.c -o build/mittleff.o
-	$(CC) $(CFLAGS) -I./include -I./modules/Unity/src -I./src/num -DUNITY_INCLUDE_DOUBLE -c test/test_mittleff.c -o build/test_mittleff.o
-	$(CC) $(CFLAGS) build/unity.o build/log.o build/algorithm.o build/quad.o build/integrate.o build/num.o build/partition.o build/mittleff.o build/test_mittleff.o -o build/test_mittleff.x -lflint -lgsl -lgslcblas -lm
+	$(CC) $(CFLAGS) -I./modules/Unity/src         -c ./modules/Unity/src/unity.c -o build/unity.o
+	$(CC) $(CFLAGS) -I./src/num                   -c ./src/num/new.c             -o build/new.o
+	$(CC) $(CFLAGS) -I./src/num                   -c ./src/num/num.c             -o build/num.o
+	$(CC) $(CFLAGS) -I./src/num -I./src/partition -c ./src/partition/partition.c -o build/partition.o
+	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/quad      -c ./src/quad/quad.c           -o build/quad.o
+	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/quad -I./src/integrate -c ./src/integrate/integrate.c -o build/integrate.o
+	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/integrate -I./src/algorithm -c ./src/algorithm/algorithm.c -o build/algorithm.o
+	$(CC) $(CFLAGS) -I./src/num -I./src/partition -I./src/algorithm -I./src/mittleff  -c ./src/mittleff/mittleff.c   -o build/mittleff.o
+	$(CC) $(CFLAGS) -I./modules/Unity/src -I./src/num -I./src/mittleff -DUNITY_INCLUDE_DOUBLE -c test/test_mittleff.c -o build/test_mittleff.o
+	$(CC) $(CFLAGS) \
+		build/unity.o \
+		build/algorithm.o \
+		build/quad.o \
+		build/integrate.o \
+		build/new.o \
+		build/num.o \
+		build/partition.o \
+		build/mittleff.o \
+		build/test_mittleff.o \
+		-o build/test_mittleff.x -lflint -lgsl -lgslcblas -lm
 	$(VALGRIND) --log-file=valgrind-test_mittleff.txt ./build/test_mittleff.x
 
 # DEV_CFLAGS:=-std=c99
