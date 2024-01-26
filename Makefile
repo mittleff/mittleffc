@@ -38,7 +38,7 @@ test_mittleff:
 	$(CC) $(CFLAGS) -I./src/num -I./src/partition -c ./src/partition/partition.c -o build/partition.o
 	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/quad      -c ./src/quad/quad.c           -o build/quad.o
 	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/quad -I./src/integrate -c ./src/integrate/integrate.c -o build/integrate.o
-	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/integrate -I./src/algorithm -c ./src/algorithm/algorithm.c -o build/algorithm.o
+	$(CC) $(CFLAGS) $(DEBUG) -I./src -I./src/num -I./src/integrate -I./src/algorithm -c ./src/algorithm/algorithm.c -o build/algorithm.o
 	$(CC) $(CFLAGS) $(DEBUG) -I./src/num -I./src/partition -I./src/algorithm -I./src/mittleff  -c ./src/mittleff/mittleff.c   -o build/mittleff.o
 	$(CC) $(CFLAGS) $(DEBUG) -I./modules/Unity/src -I./src/num -I./src/mittleff -DUNITY_INCLUDE_DOUBLE -c test/test_mittleff.c -o build/test_mittleff.o
 	$(CC) $(CFLAGS) \

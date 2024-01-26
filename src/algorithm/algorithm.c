@@ -8,8 +8,12 @@
 #include <math.h>
 #include <stdbool.h>
 
-#define MAX2(a,b) ((a>b)?(a):(b))
-#define MAX3(a,b,c) MAX2(a,MAX2(b,c))
+#ifdef DEBUG
+#include "log.h"
+#endif
+
+/* #define MAX2(a,b) ((a>b)?(a):(b)) */
+/* #define MAX3(a,b,c) MAX2(a,MAX2(b,c)) */
 
 static void
 asymptotic_series (num_t res, const num_t z, const num_t alpha, const num_t beta);
@@ -92,30 +96,71 @@ mittleff1 (num_t res,
            const num_t acc)
 {
 #ifdef DEBUG
-        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G6.",
-                 __func__, num_real_d(z), num_imag_d(z));
+        log_info("\n[\033[1;33m%s\033[0m] (Apply asymptotic series (2.4)) Called with parameters:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n ",
+                 __func__, num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z));
 #endif     
     UNUSED(acc);
-    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
-    /*       num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
-    
-    num_t fac1, fac2, _res;
 
-    fac1 = new(num), fac2 = new(num), _res = new(num);
-    num_set_d(fac1, 1.0);
-    num_sub(fac1, fac1, beta);
-    num_div(fac1, fac1, alpha);
-    num_pow(fac1, z, fac1);
-    num_inv(fac2, alpha);
-    num_pow(fac2, z, fac2);
-    num_exp(fac2, fac2);
-    num_mul(fac1, fac1, fac2);
-    num_inv(_res, alpha);
-    num_mul(fac1, fac1, _res);
+    num_t fac1, fac2, aux1, aux2;
+
+    /*
+     * Python code:
+     *     fac1 = (1.0/alpha) * mp.power(z, (1.0 - beta)/alpha) * mp.exp(mp.power(z, 1.0/alpha))
+     *
+     * This equals to
+     *     fac1 = (1.0/alpha) * aux1 * aux2
+     *     aux1 = mp.power(z, (1.0 - beta)/alpha)
+     *     aux2 = mp.exp(mp.power(z, 1.0/alpha))
+     */
+    fac1 = new(num), aux1 = new(num), aux2 = new(num);
+    /* aux1 = mp.power(z, (1.0 - beta)/alpha) */
+    num_set_d(aux1, 1.0);
+    num_sub(aux1, aux1, beta);
+    num_div(aux1, aux1, alpha);
+    num_pow(aux1, z, aux1);
+    /* aux2 = mp.exp(mp.power(z, 1.0/alpha)) */
+    num_inv(aux2, alpha);
+    num_pow(aux2, z, aux2);
+    num_exp(aux2, aux2);
+    /* compute fac1 */
+    num_inv(fac1, alpha);
+    num_mul(fac1, fac1, aux1);
+    num_mul(fac1, fac1, aux2);
+
+    /*
+     * Python code:
+     *     fac2 = __asymptotic(alpha, beta, z, acc)
+     */
+    fac2 = new(num);
     asymptotic_series(fac2, z, alpha, beta);
-    num_add(_res, fac1, fac2);
-    num_set_num(res, _res);
-    delete(_res), delete(fac1), delete(fac2);
+
+    /*
+     * Python code:
+     *     res = mp.fadd(fac1, fac2)
+     */
+    num_add(res, fac1, fac2);
+
+    delete(fac1), delete(fac2);
+    delete(aux1), delete(aux2);
+
+    
+    
+    /* num_t fac1, fac2, _res; */
+    /* fac1 = new(num), fac2 = new(num), _res = new(num); */
+    /* num_set_d(fac1, 1.0); */
+    /* num_sub(fac1, fac1, beta); */
+    /* num_div(fac1, fac1, alpha); */
+    /* num_pow(fac1, z, fac1); */
+    /* num_inv(fac2, alpha); */
+    /* num_pow(fac2, z, fac2); */
+    /* num_exp(fac2, fac2); */
+    /* num_mul(fac1, fac1, fac2); */
+    /* num_inv(_res, alpha); */
+    /* num_mul(fac1, fac1, _res); */
+    /* asymptotic_series(fac2, z, alpha, beta); */
+    /* num_add(_res, fac1, fac2); */
+    /* num_set_num(res, _res); */
+    /* delete(_res), delete(fac1), delete(fac2); */
 }
 
 void
@@ -437,59 +482,108 @@ mittleff6 (num_t res,
 void
 asymptotic_series (num_t res, const num_t z, const num_t alpha, const num_t beta)
 {
-    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g", __func__, */
-    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z)); */
-    int k, kmax;
-    //double abs_z;
-    num_t absz, sum, tmp, fac1, fac2, one;
+    int kmax;
+    /*
+     * Python code
+     *     kmax = int(ceil((1.0/alpha)*abs(z)**(1.0/alpha)) + 1.0)
+     * which can be written as
+     *     kmax = int( ceil(fac1) + 1.0 )
+     *     fac1 = aux1 * aux2**aux1
+     *     aux1 = (1.0/alpha)
+     *     aux2 = abs(z)
+     */
+    num_t fac1, aux1, aux2;
 
-    absz = new(num), one = new(num);
-    sum = new(num), tmp = new(num);
-    fac1 = new(num), fac2 = new(num);
+    fac1 = new(num), aux1 = new(num), aux2 = new(num);
 
-    num_set_d(one, 1.0);
-    num_abs(absz, z);
-
-    /* compute kmax */
-    num_inv(tmp, alpha);
-    num_pow(fac1, absz, tmp);
-    num_mul(fac1, tmp, fac1);
+    num_inv(aux1, alpha);
+    num_abs(aux2, z);
+    num_pow(fac1, aux2, aux1);
     num_ceil(fac1, fac1);
-    num_add(fac1, fac1, one);    
-    kmax = (int) num_to_d(fac1); //(ceil((1.0/alpha) * pow(abs_z, 1.0/alpha)) + 1.0);
-    //kmax += 10;
-    /* log_trace("[%s] |z|=%.5e, kmax=%d", __func__, num_to_d(absz), kmax); */
+    kmax = ((int) num_to_d(fac1)) + 1;
+#ifdef DEBUG
+    log_info("\n[\033[1;33m%s\033[0m]\n\t    Summing %d terms of the asymptotic series\n ",
+             __func__, kmax);
+#endif
 
-    /* -sum([z**(-k) * mp.rgamma(beta - alpha*k) for k in range(1, kmax + 1)]) */
+    /*
+     * Python code:
+     *     res = 0.0
+     *     for k in range(1, kmax + 1):
+     *         res = mp.fadd(res, mp.fmul(-mp.power(z, -k), mp.rgamma(beta - alpha*k)))
+     * the loop statement can be rewritten as
+     *     res = mp.fadd(res, fac1)
+     *     fac1 = mp.fmul(aux1, aux2)
+     *     aux1 = -mp.power(z, -k)
+     *     aux2 = mp.rgamma(beta - alpha * k)
+     */
+    int k;
+    
+    num_set_d(res, 0.0);
     for (k = 1; k <= kmax; k++)
     {
-        //log_trace("[%s] k=%d", __func__, k);
-        /* fac1 <- z**(-k) */
-        num_pow_d(fac1, z, (double) (-k));
-        //log_trace("[%s] k=%d, fac1=%g%+g", __func__, k, num_real_d(fac1), num_imag_d(fac1));
-
-        /* fac2 <- rgamma(beta - alpha * k) */
-        num_mul_d(fac2, alpha, (double) k);
-        num_sub(fac2, beta, fac2);
-        num_rgamma(fac2, fac2);
-        //log_trace("[%s] k=%d, fac2=%g%+g", __func__, k, num_real_d(fac2), num_imag_d(fac2));
-
-        /* partial sum = fac1 * fac2 */
-        num_mul(tmp, fac1, fac2);
-        /* log_trace("[%s] k=%d, fac1=%g%+g, fac2=%g%+g, tmp=%g%+g", */
-        /*           __func__, */
-        /*           k, */
-        /*           num_real_d(fac1), num_imag_d(fac1), */
-        /*           num_real_d(fac2), num_imag_d(fac2), */
-        /*           num_real_d(tmp), num_imag_d(tmp)); */
-        
-        num_add(sum, sum, tmp);
-        //log_trace("[%s] k=%d, sum=%g%+g", __func__, k, num_real_d(sum), num_imag_d(sum));
+        num_pow_d(aux1, z, ((double) -1.0 * k));
+        num_neg(aux1, aux1);
+        num_mul_d(aux2, alpha, ((double) -1.0 * k));
+        num_add(aux2, aux2, beta);
+        num_rgamma(aux2, aux2);
+        num_mul(fac1, aux1, aux2);
+        num_add(res, res, fac1);
     }
-    num_set_num(res, sum);
-    num_mul_d(res, res, -1.0);
+
+    delete(fac1), delete(aux1), delete(aux2);
     
-    delete(absz), delete(one);
-    delete(sum), delete(tmp);
-    delete(fac1), delete(fac2);
+    /* int k, kmax; */
+    /* //double abs_z; */
+    /* num_t absz, sum, tmp, fac1, fac2, one; */
+
+    /* absz = new(num), one = new(num); */
+    /* sum = new(num), tmp = new(num); */
+    /* fac1 = new(num), fac2 = new(num); */
+
+    /* num_set_d(one, 1.0); */
+    /* num_abs(absz, z); */
+
+    /* /\* compute kmax *\/ */
+    /* num_inv(tmp, alpha); */
+    /* num_pow(fac1, absz, tmp); */
+    /* num_mul(fac1, tmp, fac1); */
+    /* num_ceil(fac1, fac1); */
+    /* num_add(fac1, fac1, one);     */
+    /* kmax = (int) num_to_d(fac1); //(ceil((1.0/alpha) * pow(abs_z, 1.0/alpha)) + 1.0); */
+    /* //kmax += 10; */
+    /* /\* log_trace("[%s] |z|=%.5e, kmax=%d", __func__, num_to_d(absz), kmax); *\/ */
+
+    /* /\* -sum([z**(-k) * mp.rgamma(beta - alpha*k) for k in range(1, kmax + 1)]) *\/ */
+    /* for (k = 1; k <= kmax; k++) */
+    /* { */
+    /*     //log_trace("[%s] k=%d", __func__, k); */
+    /*     /\* fac1 <- z**(-k) *\/ */
+    /*     num_pow_d(fac1, z, (double) (-k)); */
+    /*     //log_trace("[%s] k=%d, fac1=%g%+g", __func__, k, num_real_d(fac1), num_imag_d(fac1)); */
+
+    /*     /\* fac2 <- rgamma(beta - alpha * k) *\/ */
+    /*     num_mul_d(fac2, alpha, (double) k); */
+    /*     num_sub(fac2, beta, fac2); */
+    /*     num_rgamma(fac2, fac2); */
+    /*     //log_trace("[%s] k=%d, fac2=%g%+g", __func__, k, num_real_d(fac2), num_imag_d(fac2)); */
+
+    /*     /\* partial sum = fac1 * fac2 *\/ */
+    /*     num_mul(tmp, fac1, fac2); */
+    /*     /\* log_trace("[%s] k=%d, fac1=%g%+g, fac2=%g%+g, tmp=%g%+g", *\/ */
+    /*     /\*           __func__, *\/ */
+    /*     /\*           k, *\/ */
+    /*     /\*           num_real_d(fac1), num_imag_d(fac1), *\/ */
+    /*     /\*           num_real_d(fac2), num_imag_d(fac2), *\/ */
+    /*     /\*           num_real_d(tmp), num_imag_d(tmp)); *\/ */
+        
+    /*     num_add(sum, sum, tmp); */
+    /*     //log_trace("[%s] k=%d, sum=%g%+g", __func__, k, num_real_d(sum), num_imag_d(sum)); */
+    /* } */
+    /* num_set_num(res, sum); */
+    /* num_mul_d(res, res, -1.0); */
+    
+    /* delete(absz), delete(one); */
+    /* delete(sum), delete(tmp); */
+    /* delete(fac1), delete(fac2); */
 }

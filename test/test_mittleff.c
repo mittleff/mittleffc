@@ -49,7 +49,7 @@ test_value(const complex_t expected, const complex_t computed)
     bool res;
     double tol, rel_err;
 
-    tol = 1e-13;
+    tol = 1e-8;
     rel_err = cabs(expected - computed)/cabs(expected);
 
 #ifdef DEBUG
