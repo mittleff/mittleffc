@@ -91,6 +91,10 @@ mittleff1 (num_t res,
            const num_t z,
            const num_t acc)
 {
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G6.",
+                 __func__, num_real_d(z), num_imag_d(z));
+#endif     
     UNUSED(acc);
     /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
     /*       num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */

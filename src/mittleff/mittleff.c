@@ -34,6 +34,10 @@
 #include <gsl/gsl_math.h>
 #include <stdbool.h>
 
+#ifdef DEBUG
+#include "log.h"
+#endif
+
 // #define MAX2(a,b) ((a>b)?(a):(b))
 // #define MAX3(a,b,c) MAX2(a,MAX2(b,c))
 
@@ -42,35 +46,38 @@ _mittleff (num_t res,
            const num_t alpha,
            const num_t beta,
            const num_t z,
-           const num_t acc)
+           const num_t tol)
 {
-    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
-    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
+#ifdef DEBUG
+    log_info("\n[\033[1;33m%s\033[0m] Calling with parameters:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n\t    \033[1;32mtol\033[0m = %g\n",
+             __func__,
+             num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(tol));
+#endif
     /* Test special cases */
     if (num_is_zero(z)) /* z = 0 */
     {
         num_rgamma(res, beta);
-        /* log_trace("[%s] z = 0.0, res = 1/Gamma(%g) = %g", */
-        /*           __func__, */
-        /*           num_to_d(beta), */
-        /*           num_to_d(res)); */
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] \033[1;31mSpecial Case: z = 0.0\033[0m\n\t    \033[1;32mres\033[0m = 1/Gamma(%g) = %+.14e%+.14e*I\n",
+                 __func__, num_to_d(beta), num_real_d(res), num_imag_d(res));
+#endif        
     }
     else if (num_eq_d(alpha, 1.0) && num_eq_d(beta, 1.0)) /* exp(z) */
     {
         num_exp(res, z);
-        /* log_trace("[%s] alpha=beta=1, res = exp(%g+%g*I) = %g+%g*I", */
-        /*           __func__, */
-        /*           num_to_complex(z), */
-        /*           num_to_complex(res)); */
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] \033[1;31mSpecial Case: alpha = beta = 1\033[0m\n\t    \033[1;32mres\033[0m = exp(z) = %+.14e%+.14e*I\n",
+                 __func__, num_real_d(res), num_imag_d(res));
+#endif        
     }
     else if (num_eq_d(alpha, 2.0) && num_eq_d(beta, 1.0)) /* cosh(sqrt(z)) */
     {
         num_sqrt(res, z);
         num_cosh(res, res);
-        /* log_trace("[%s] alpha=2, beta=1, res = cosh(sqrt(%g+%g*I)) = %g+%g*I", */
-        /*           __func__, */
-        /*           num_to_complex(z), */
-        /*           num_to_complex(res)); */
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] \033[1;31mSpecial Case: alpha = 2, beta = 1\033[0m\n\t    \033[1;32mres\033[0m = cosh(sqrt(z)) = %+.14e%+.14e*I\n",
+                 __func__, num_real_d(res), num_imag_d(res));
+#endif         
     }
     else if (num_eq_d(alpha, 0.5) && num_eq_d(beta, 1.0)) /* exp(z^2)*erfc(-z) */
     {
@@ -90,6 +97,10 @@ _mittleff (num_t res,
         
         num_mul(res, exp_z2, erfc_z);
         delete(exp_z2), delete(erfc_z);
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] \033[1;31mSpecial Case: alpha = 0.5, beta = 1\033[0m\n\t    \033[1;32mres\033[0m = exp(z^2)*erfc(-z) = %+.14e%+.14e*I\n",
+                 __func__, num_real_d(res), num_imag_d(res));
+#endif         
 
         /* log_trace("[%s] alpha=0.5, beta=1, res = exp(z^2)*erfc(-z) = %g+%g*I", */
         /*           __func__, */
@@ -105,9 +116,19 @@ _mittleff (num_t res,
         num_sinh(n, n);
         num_div(res, n, d);
         delete(n), delete(d);
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] \033[1;31mSpecial Case: alpha = beta = 2\033[0m\n\t    \033[1;32mres\033[0m = sinh(sqrt(z))/sqrt(z) = %+.14e%+.14e*I\n",
+                 __func__, num_real_d(res), num_imag_d(res));
+#endif         
     }
     else if (in_region_G0(z))
-        mittleff0(res, alpha, beta, z, acc);
+    {
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G0. Applying Taylor series.",
+                 __func__, num_real_d(z), num_imag_d(z));
+#endif        
+        mittleff0(res, alpha, beta, z, tol);
+    }
     else if (num_gt_d(alpha, 1.0)) /* apply recursive relation (2.2) */
     {
         /* log_trace("[%s] alpha = %+.5e > 1, applying recursive relation", __func__, alpha); */
@@ -125,7 +146,7 @@ _mittleff (num_t res,
         /*     num_pow_d(newz, z, one_over_2mp1); */
         /*     num_mul(newz, newz, exp_th); */
         /*     const double complex _newz = num_to_complex(newz); */
-        /*     _mittleff(_res, alpha * one_over_2mp1, beta, creal(_newz), cimag(_newz), acc); */
+        /*     _mittleff(_res, alpha * one_over_2mp1, beta, creal(_newz), cimag(_newz), tol); */
         /*     num_set_d_d(tmp, _res[0], _res[1]); */
         /*     num_add(sum, sum, tmp); */
         /* } */
@@ -135,18 +156,54 @@ _mittleff (num_t res,
     }
     else /* alpha <= 1 */
     {
-        if (in_region_G1(z, alpha, acc))
-            mittleff1(res, alpha, beta, z, acc);
-        else if (in_region_G2(z, alpha, acc))
-            mittleff2(res, alpha, beta, z, acc);
-        else if (in_region_G3(z, alpha, acc))
-            mittleff3(res, alpha, beta, z, acc);
-        else if (in_region_G4(z, alpha, acc))
-            mittleff4(res, alpha, beta, z, acc);
-        else if (in_region_G5(z, alpha, acc))
-            mittleff5(res, alpha, beta, z, acc);
-        else if (in_region_G6(z, alpha, acc))
-            mittleff6(res, alpha, beta, z, acc);
+        if (in_region_G1(z, alpha, tol))
+        {
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G1.",
+                 __func__, num_real_d(z), num_imag_d(z));
+#endif            
+            mittleff1(res, alpha, beta, z, tol);
+        }
+        else if (in_region_G2(z, alpha, tol))
+        {
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G2.",
+                 __func__, num_real_d(z), num_imag_d(z));
+#endif            
+            mittleff2(res, alpha, beta, z, tol);
+        }
+        else if (in_region_G3(z, alpha, tol))
+        {
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G3.",
+                 __func__, num_real_d(z), num_imag_d(z));
+#endif              
+            mittleff3(res, alpha, beta, z, tol);
+        }
+        else if (in_region_G4(z, alpha, tol))
+        {
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G4.",
+                 __func__, num_real_d(z), num_imag_d(z));
+#endif             
+            mittleff4(res, alpha, beta, z, tol);
+        }
+        else if (in_region_G5(z, alpha, tol))
+        {
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G5.",
+                 __func__, num_real_d(z), num_imag_d(z));
+#endif            
+            mittleff5(res, alpha, beta, z, tol);
+        }
+        else if (in_region_G6(z, alpha, tol))
+        {
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G6.",
+                 __func__, num_real_d(z), num_imag_d(z));
+#endif            
+            mittleff6(res, alpha, beta, z, tol);
+        }
         else
             fprintf(stderr, "None of the regions");
     }
@@ -162,33 +219,29 @@ mittleff_cmplx (double* res,
           const double alpha,
           const double beta,
           const double x, const double y,
-          const double acc)
+          const double tol)
 {
-    /* log_trace("[%s] ==============================", __func__); */
-    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, alpha, beta, x, y, acc); */
-    assert(alpha > 0);
+    #ifdef DEBUG
+    log_info("\n[\033[1;33m%s\033[0m] Calling with parameters:\n\t\t \033[1;32malpha\033[0m = %g\n\t\t \033[1;32mbeta\033[0m  = %g\n\t\t \033[1;32mz\033[0m = %+.14e%+.14e*I\n\t\t \033[1;32mtol\033[0m = %g\n",
+             __func__, alpha, beta, x, y, tol);
+    #endif
+    
+    assert (alpha > 0.0);
 
-    num_t _res, _alpha, _beta, _z, _acc;
+    num_t _res, _alpha, _beta, _z, _tol;
 
-    _alpha = new(num), _beta = new(num),_z = new(num), _acc = new(num);
+    _alpha = new(num), _beta = new(num),_z = new(num), _tol = new(num);
     _res = new(num);
     
     num_set_d(_alpha, alpha), num_set_d(_beta, beta);
-    num_set_d_d(_z, x, y), num_set_d(_acc, acc);
+    num_set_d_d(_z, x, y), num_set_d(_tol, tol);
 
-    _mittleff(_res, _alpha, _beta, _z, _acc);
-    //num_print(_res, true);
-    
-    //log_trace("[%s] Computed", __func__);
+    _mittleff(_res, _alpha, _beta, _z, _tol);
     num_to_d_d(res, _res);
     
     delete(_res);
-    delete(_alpha);
-    delete(_beta);
-    delete(_z);
-    delete(_acc);
-    /* log_trace("[%s] Done", __func__); */
-    /* log_trace("[%s] ==============================", __func__); */
+    delete(_alpha), delete(_beta);
+    delete(_z), delete(_tol);
 
     return EXIT_SUCCESS;
 }

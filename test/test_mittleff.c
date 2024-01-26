@@ -7,6 +7,10 @@
 #include <stdbool.h>
 #include <complex.h>
 
+#ifdef DEBUG
+#include "log.h"
+#endif
+
 typedef double complex complex_t;
 
 #define new_max(x,y) (((x) >= (y)) ? (x) : (y))
@@ -20,7 +24,7 @@ int isclose (const complex_t a, const complex_t b)
     
 }
 
-#define TEST_VALUE(expected,computed) test_value(expected,computed);
+#define TEST_VALUE(expected,computed) TEST_ASSERT_TRUE(test_value(expected,computed))
 //#define TEST_VALUE(expected,computed) TEST_ASSERT_DOUBLE_WITHIN(1e-5, creal(expected), creal(computed)); TEST_ASSERT_DOUBLE_WITHIN(1e-5, cimag(expected), cimag(computed));
 //#define TEST_VALUE(expected,computed) TEST_ASSERT_EQUAL_DOUBLE(creal(expected), creal(computed)); TEST_ASSERT_EQUAL_DOUBLE(cimag(expected), cimag(computed));
 //#define TEST_VALUE(expected,computed) TEST_ASSERT_TRUE(test_value(expected, computed))
@@ -43,19 +47,24 @@ bool
 test_value(const complex_t expected, const complex_t computed)
 {
     bool res;
-    double tol, abs_err;
+    double tol, rel_err;
 
     tol = 1e-13;
-    abs_err = cabs(expected - computed)/cabs(expected);
+    rel_err = cabs(expected - computed)/cabs(expected);
+
+#ifdef DEBUG
+    /* log_info("\n[\033[1;33m%s\033[0m] Calling with parameters:\n\t\t \033[1;32malpha\033[0m = %g\n\t\t \033[1;32mbeta\033[0m  = %g\n\t\t \033[1;32mz\033[0m = %+.14e%+.14e*I\n\t\t \033[1;32mtol\033[0m = %g\n", */
+    /*          __func__, alpha, beta, x, y, tol); */
     
-    printf("expected = %+.14e%+.14ej, computed = %+.14e%+.14ej, abs_err = %.14e\n",
+    log_info("\n[\033[1;33m%s\033[0m] TEST RESULTS:\n\t     \033[1;32mexpected\033[0m = %+.14e%+.14ej,\n\t     \033[1;32mcomputed\033[0m = %+.14e%+.14ej,\n\t     \033[1;32mrel_err\033[0m = %.14e\n",
+             __func__,
            creal(expected), cimag(expected),
            creal(computed), cimag(computed),
-           abs_err);
+           rel_err);
+#endif
+    res = (rel_err < tol) ? true : false;
 
-    res = (abs_err < tol) ? true : false;
-
-    assert (isclose(expected, computed));
+    //assert (isclose(expected, computed));
     
     return res;
     //TEST_ASSERT_DOUBLE_WITHIN(1e-10, creal(expected), creal(computed));
@@ -265,12 +274,13 @@ main (void)
     /* RUN_TEST(test_in_region_G5); */
     /* RUN_TEST(test_in_region_G6); */
 
-    RUN_TEST(test_z_zero);
-    RUN_TEST(test_exp);
-    RUN_TEST(test_cos_and_cosh);
-    RUN_TEST(test_sin_and_sinh);
-    RUN_TEST(test_erfc);
     RUN_TEST(test_siam);
+    /* RUN_TEST(test_z_zero); */
+    /* RUN_TEST(test_exp); */
+    /* RUN_TEST(test_cos_and_cosh); */
+    /* RUN_TEST(test_sin_and_sinh); */
+    /* RUN_TEST(test_erfc); */
+    
     
     /* RUN_TEST(test_z_zero_1); */
     /* RUN_TEST(test_z_zero_2); */

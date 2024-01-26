@@ -28,8 +28,10 @@ test_num:
 		-o build/test_num.x -lflint -lgsl -lgslcblas -lm
 	$(VALGRIND) --log-file=valgrind-test_num.txt ./build/test_num.x
 
+DEBUG = -DDEBUG -DLOG_USE_COLOR -I./modules/log.c/src
 test_mittleff:
 	@mkdir --parents build
+	$(CC) $(CFLAGS) -DLOG_USE_COLOR -I./modules/log.c/src         -c ./modules/log.c/src/log.c -o build/log.o
 	$(CC) $(CFLAGS) -I./modules/Unity/src         -c ./modules/Unity/src/unity.c -o build/unity.o
 	$(CC) $(CFLAGS) -I./src/num                   -c ./src/num/new.c             -o build/new.o
 	$(CC) $(CFLAGS) -I./src/num                   -c ./src/num/num.c             -o build/num.o
@@ -37,9 +39,10 @@ test_mittleff:
 	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/quad      -c ./src/quad/quad.c           -o build/quad.o
 	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/quad -I./src/integrate -c ./src/integrate/integrate.c -o build/integrate.o
 	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/integrate -I./src/algorithm -c ./src/algorithm/algorithm.c -o build/algorithm.o
-	$(CC) $(CFLAGS) -I./src/num -I./src/partition -I./src/algorithm -I./src/mittleff  -c ./src/mittleff/mittleff.c   -o build/mittleff.o
-	$(CC) $(CFLAGS) -I./modules/Unity/src -I./src/num -I./src/mittleff -DUNITY_INCLUDE_DOUBLE -c test/test_mittleff.c -o build/test_mittleff.o
+	$(CC) $(CFLAGS) $(DEBUG) -I./src/num -I./src/partition -I./src/algorithm -I./src/mittleff  -c ./src/mittleff/mittleff.c   -o build/mittleff.o
+	$(CC) $(CFLAGS) $(DEBUG) -I./modules/Unity/src -I./src/num -I./src/mittleff -DUNITY_INCLUDE_DOUBLE -c test/test_mittleff.c -o build/test_mittleff.o
 	$(CC) $(CFLAGS) \
+		build/log.o \
 		build/unity.o \
 		build/algorithm.o \
 		build/quad.o \
