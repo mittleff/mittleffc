@@ -28,11 +28,11 @@ test_num:
 		-o build/test_num.x -lflint -lgsl -lgslcblas -lm
 	$(VALGRIND) --log-file=valgrind-test_num.txt ./build/test_num.x
 
-DEBUG = # -DDEBUG -DLOG_USE_COLOR -I./modules/log.c/src
+DEBUG = -DDEBUG -DLOG_USE_COLOR -I./modules/log.c/src
 test_mittleff:
 	@mkdir --parents build
 	$(CC) $(CFLAGS) -DLOG_USE_COLOR -I./modules/log.c/src         -c ./modules/log.c/src/log.c -o build/log.o
-	$(CC) $(CFLAGS) -I./modules/Unity/src         -c ./modules/Unity/src/unity.c -o build/unity.o
+	$(CC) $(CFLAGS) -D UNITY_OUTPUT_COLOR -I./modules/Unity/src         -c ./modules/Unity/src/unity.c -DUNITY_INCLUDE_DOUBLE -o build/unity.o
 	$(CC) $(CFLAGS) -I./src/num                   -c ./src/num/new.c             -o build/new.o
 	$(CC) $(CFLAGS) -I./src/num                   -c ./src/num/num.c             -o build/num.o
 	$(CC) $(CFLAGS) -I./src/num -I./src/partition -c ./src/partition/partition.c -o build/partition.o
@@ -40,7 +40,7 @@ test_mittleff:
 	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/quad -I./src/integrate -c ./src/integrate/integrate.c -o build/integrate.o
 	$(CC) $(CFLAGS) $(DEBUG) -I./src -I./src/num -I./src/integrate -I./src/algorithm -c ./src/algorithm/algorithm.c -o build/algorithm.o
 	$(CC) $(CFLAGS) $(DEBUG) -I./src/num -I./src/partition -I./src/algorithm -I./src/mittleff  -c ./src/mittleff/mittleff.c   -o build/mittleff.o
-	$(CC) $(CFLAGS) $(DEBUG) -DDEBUG -DLOG_USE_COLOR -I./modules/log.c/src -I./modules/Unity/src -I./src/num -I./src/mittleff -DUNITY_INCLUDE_DOUBLE -c test/test_mittleff.c -o build/test_mittleff.o
+	$(CC) $(CFLAGS) $(DEBUG) -DDEBUG -DLOG_USE_COLOR -D UNITY_OUTPUT_COLOR -I./modules/log.c/src -I./modules/Unity/src -I./src/num -I./src/mittleff -DUNITY_INCLUDE_DOUBLE -c tests/test_mittleff.c -o build/test_mittleff.o
 	$(CC) $(CFLAGS) \
 		build/log.o \
 		build/unity.o \
@@ -55,40 +55,59 @@ test_mittleff:
 		-o build/test_mittleff.x -lflint -lgsl -lgslcblas -lm
 	$(VALGRIND) --log-file=valgrind-test_mittleff.txt ./build/test_mittleff.x
 
+
+.PHONY: python_package
+python_module:
+	$(CC) $(CFLAGS) -fPIC -I./src/num -c ./src/num/new.c -o build/new.o
+	$(CC) $(CFLAGS) -fPIC -I./src/num -c ./src/num/num.c -o build/num.o
+	$(CC) $(CFLAGS) -fPIC -I./src/num -I./src/partition -c ./src/partition/partition.c -o build/partition.o
+	$(CC) $(CFLAGS) -fPIC -I./src -I./src/num -I./src/quad -c ./src/quad/quad.c -o build/quad.o
+	$(CC) $(CFLAGS) -fPIC -I./src -I./src/num -I./src/quad -I./src/integrate -c ./src/integrate/integrate.c -o build/integrate.o
+	$(CC) $(CFLAGS) -fPIC -I./src -I./src/num -I./src/integrate -I./src/algorithm -c ./src/algorithm/algorithm.c -o build/algorithm.o
+	$(CC) $(CFLAGS) -fPIC -I./src/num -I./src/partition -I./src/algorithm -I./src/mittleff  -c ./src/mittleff/mittleff.c -o build/mittleff.o
+	$(CC) $(CFLAGS) -fPIC -fdiagnostics-color=always -MD -MQ -D_FILE_OFFSET_BITS=64 -Winvalid-pch -O3 -I/usr/include/python3.11  -I./src/num -I./src/mittleff -c python/mittleff_module.c -o build/mittleff_module.o
+	$(CC) $(CFLAGS) -fPIC -shared \
+		build/algorithm.o \
+		build/quad.o \
+		build/integrate.o \
+		build/new.o \
+		build/num.o \
+		build/partition.o \
+		build/mittleff.o \
+		build/mittleff_module.o \
+		-o build/mittleff.so -lflint -lgsl -lgslcblas -lm
+
 # DEV_CFLAGS:=-std=c99
 # DEV_INCDIR:=-I./include -I./src/include
 
-# LOGLEVEL ?= 1
-# all: test
-# .PHONY: test
-# test:
-# 	@mkdir --parents build
-# 	$(CC) $(DEV_CFLAGS) -I./modules/log.c/src -DLOG_USE_COLOR -c ./modules/log.c/src/log.c -o build/log.o
-# 	$(CC) $(DEV_CFLAGS) -I./modules/Unity/src -DUNITY_INCLUDE_DOUBLE -c ./modules/Unity/src/unity.c -o build/unity.o
-# 	$(CC) $(DEV_CFLAGS) -I./modules/num.c/include -c ./modules/num.c/src/new.c -o build/new.o
-# 	$(CC) $(DEV_CFLAGS) -I./modules/num.c/include -c ./modules/num.c/src/num.c -o build/num.o
-# 	$(CC) $(DEV_CFLAGS) -I./modules/num.c/include -I./modules/integration.c/include -c ./modules/integration.c/src/qsimp.c -o build/qsimp.o
-# 	$(CC) $(DEV_CFLAGS) -I./modules/num.c/include -I./modules/integration.c/include -c ./modules/integration.c/src/qtanhsinh.c -o build/qtanhsinh.o
-# 	$(CC) $(DEV_CFLAGS) -I./modules/log.c/src -I./modules/num.c/include -I./modules/integration.c/include -I./modules/integration.c/src/include -c ./modules/integration.c/src/integration.c -o build/integration.o
-# 	$(CC) $(DEV_CFLAGS) -I./modules/num.c/include -I./modules/log.c/src -c $(DEV_INCDIR) -I./src -DM_PI=3.14159265359 -c ./src/partition.c -o build/partition.o
-# 	$(CC) $(DEV_CFLAGS) -I./modules/num.c/include -I./modules/integration.c/include -I./modules/log.c/src -c $(DEV_INCDIR) -I./src -DM_PI=3.14159265359 -c ./src/integrate.c -o build/integrate.o
-# 	$(CC) $(DEV_CFLAGS) -I./modules/num.c/include -I./modules/log.c/src -c $(DEV_INCDIR) -I./src -DM_PI=3.14159265359 -c ./src/algorithm.c -o build/algorithm.o
-# 	$(CC) $(DEV_CFLAGS) -I./modules/num.c/include -I./modules/log.c/src -c $(DEV_INCDIR) -I./src -DM_PI=3.14159265359 -c ./src/mittleff.c -o build/mittleff.o
-# 	$(CC) $(DEV_CFLAGS) $(DEV_INCDIR) \
-# 	-I./modules/log.c/src \
-# 	-I./modules/Unity/src  \
-# 	-I./modules/num.c/include -I./module/log.c/src \
-# 	-I./src -I./test  \
-# 	$(DEV_INCDIR) \
-# 	-DLOGLEVEL=$(LOGLEVEL) -DUNITY_INCLUDE_DOUBLE -c ./test/test.c -o build/test.o
-# 	$(CC) $$(ls build/*.o) -o test.out -lm -larb -lflint -lgsl -lgslcblas
-# 	@valgrind \
-# 	--leak-check=full \
-# 	--show-leak-kinds=all \
-#         --track-origins=yes \
-#         --verbose          \
-#         --log-file=valgrind-out.txt \
-#         ./test.out
+LOGLEVEL ?= 1
+all: test
+.PHONY: test
+test:
+	@mkdir --parents build
+	$(CC) $(CFLAGS) -DLOG_USE_COLOR -I./modules/log.c/src         -c ./modules/log.c/src/log.c -o build/log.o
+	$(CC) $(CFLAGS) -D UNITY_OUTPUT_COLOR -I./modules/Unity/src         -c ./modules/Unity/src/unity.c -DUNITY_INCLUDE_DOUBLE -o build/unity.o
+	$(CC) $(CFLAGS) -I./src/num                   -c ./src/num/new.c             -o build/new.o
+	$(CC) $(CFLAGS) -I./src/num                   -c ./src/num/num.c             -o build/num.o
+	$(CC) $(CFLAGS) -I./src/num -I./src/partition -c ./src/partition/partition.c -o build/partition.o
+	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/quad      -c ./src/quad/quad.c           -o build/quad.o
+	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/quad -I./src/integrate -c ./src/integrate/integrate.c -o build/integrate.o
+	$(CC) $(CFLAGS) $(DEBUG) -I./src -I./src/num -I./src/integrate -I./src/algorithm -c ./src/algorithm/algorithm.c -o build/algorithm.o
+	$(CC) $(CFLAGS) $(DEBUG) -I./src/num -I./src/partition -I./src/algorithm -I./src/mittleff  -c ./src/mittleff/mittleff.c   -o build/mittleff.o
+	$(CC) $(CFLAGS) $(DEBUG) -DDEBUG -DLOG_USE_COLOR -D UNITY_OUTPUT_COLOR -I./modules/log.c/src -I./modules/Unity/src -I./src/num -I./src/num -I./src/partition -I./src/mittleff -DUNITY_INCLUDE_DOUBLE -c tests/00-test_suite.c -o build/00-test_suite.o
+	$(CC) $(CFLAGS) \
+		build/log.o \
+		build/unity.o \
+		build/algorithm.o \
+		build/quad.o \
+		build/integrate.o \
+		build/new.o \
+		build/num.o \
+		build/partition.o \
+		build/mittleff.o \
+		build/00-test_suite.o \
+		-o build/test_suite.x -lflint -lgsl -lgslcblas -lm
+	$(VALGRIND)	--log-file=valgrind-out.txt ./build/test_suite.x
 
 
 

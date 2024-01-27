@@ -42,7 +42,7 @@ arbtod(arb_t x)
 
 
 static void
-acbtonum (num_t res, acb_t x)
+acbtonum (num_t res, const acb_t x)
 {
     arb_t re, im;
     arb_init(re), arb_init(im);
@@ -57,6 +57,7 @@ acbtonum (num_t res, acb_t x)
 int
 f_integrand (acb_ptr res, const acb_t z, void * params, slong order, slong prec)
 {
+    UNUSED(prec);
     //log_trace("calling wrapper function?");
     
     if (order > 1)

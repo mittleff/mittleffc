@@ -110,12 +110,12 @@ num_set_num(num_t self, const num_t other)
     acb_set(_self -> dat, _other -> dat);
 }
 
-static void
-num_set_acb(num_t self, const acb_t other)
-{
-    struct num * _self = self;
-    acb_set(_self -> dat, other);
-}
+/* static void */
+/* num_set_acb(num_t self, const acb_t other) */
+/* { */
+/*     struct num * _self = self; */
+/*     acb_set(_self -> dat, other); */
+/* } */
 
 
 void
