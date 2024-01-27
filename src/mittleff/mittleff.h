@@ -19,8 +19,8 @@
  * @file mittleff.h
  * @brief Interface for the main functions of the library.
  */
-#ifndef __ML_MITTLEFF_H__
-#define __ML_MITTLEFF_H__
+#ifndef __MITTLEFF_H__
+#define __MITTLEFF_H__
 
 /**
  * Computes the Mittag-Leffler function
@@ -61,4 +61,4 @@ mittleff_cmplx (double* result,
                 const double im_z,
                 const double accuracy);
 
-#endif /* __ML_MITTLEFF_H__ */
+#endif /* __MITTLEFF_H__ */

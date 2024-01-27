@@ -82,15 +82,9 @@ _mittleff (num_t res,
         exp_z2 = new(num), erfc_z = new(num);
         num_pow_d(exp_z2, z, 2.0);
         num_exp(exp_z2, exp_z2);
-        /* log_trace("[%s] exp(z^2) = %g+%g*I", */
-        /*           __func__, */
-        /*           num_to_complex(exp_z2)); */
         
         num_neg(erfc_z, z);
         num_erfc(erfc_z, erfc_z);
-        /* log_trace("[%s] erfc(-z) = %g+%g*I", */
-        /*           __func__, */
-        /*           num_to_complex(erfc_z)); */
         
         num_mul(res, exp_z2, erfc_z);
         delete(exp_z2), delete(erfc_z);
@@ -98,10 +92,6 @@ _mittleff (num_t res,
         log_info("\n[\033[1;33m%s\033[0m] \033[1;31mSpecial Case: alpha = 0.5, beta = 1\033[0m\n\t    \033[1;32mres\033[0m = exp(z^2)*erfc(-z) = %+.14e%+.14e*I\n",
                  __func__, num_real_d(res), num_imag_d(res));
 #endif         
-
-        /* log_trace("[%s] alpha=0.5, beta=1, res = exp(z^2)*erfc(-z) = %g+%g*I", */
-        /*           __func__, */
-        /*           num_to_complex(res)); */
     }
     else if (num_eq_d(alpha, 2.0) && num_eq_d(beta, 2.0)) /* sinh(sqrt(z))/sqrt(z) */
     {
@@ -163,21 +153,6 @@ _mittleff (num_t res,
         delete(one_over_2mp1);
         delete(alphap);
         delete(zp), delete(aux);
-        /* num_t sum, th, tmp, exp_th, newz; */
-        /* sum = new(num), th = new(num), tmp = new(num), newz = new(num), exp_th = new(num); */
-        /* num_zero(sum); */
-        /* for (int h = -m; h <= m; h++) */
-        /* { */
-        /*     log_trace("[%s] h = %d", __func__, h); */
-            
-        /*     const double complex _newz = num_to_complex(newz); */
-
-        /*     num_set_d_d(tmp, _res[0], _res[1]); */
-        /*     num_add(sum, sum, tmp); */
-        /* } */
-        /* num_mul(sum, sum, one_over_2mp1); */
-        /* num_set_num(res, sum); */
-        /* delete(sum), delete(th), delete(tmp), delete(exp_th); */
     }
     else /* alpha <= 1 */
     {
@@ -232,10 +207,6 @@ _mittleff (num_t res,
         else
             fprintf(stderr, "None of the regions");
     }
-    //num_print(res, true);
-    
-    /* num_set(res, _res); */
-    /* delete(_res); */
 }
 
 /* Main function of the library */

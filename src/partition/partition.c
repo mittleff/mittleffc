@@ -31,9 +31,6 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
-// #define R0 0.95
-// #define GSL_EPSILON_FCMP 1e-15
-
 static bool diskp (const num_t z, const num_t r);
 static bool closure_diskp (const num_t z, const num_t r0);
 static bool wedgep (const num_t z, const num_t phi1, const num_t phi2);
@@ -41,7 +38,6 @@ static bool closure_wedgep (const num_t z, const num_t phi1, const num_t phi2);
 static bool is_between (const num_t c, const num_t a, const num_t b, const bool eq);
 
 /* Equation (4.21) */
-//static double
 static void
 compute_r1 (num_t r1, const num_t alpha, const num_t acc)
 {
@@ -326,5 +322,3 @@ is_between (const num_t c, const num_t a, const num_t b, const bool eq)
 
     return ret;
 }
-
-

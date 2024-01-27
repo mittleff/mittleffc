@@ -33,9 +33,6 @@
 #include "log.h"
 #endif
 
-/* #define MAX2(a,b) ((a>b)?(a):(b)) */
-/* #define MAX3(a,b,c) MAX2(a,MAX2(b,c)) */
-
 static void
 asymptotic_series (num_t res, const num_t z, const num_t alpha, const num_t beta);
 
@@ -45,9 +42,6 @@ mittleff0 (num_t res,
            const num_t z,
            const num_t acc)
 {
-    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
-    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
-    
     int k, kmax;
     num_t absz, sum, tmp, fac1, fac2, k1, k2;
 
@@ -57,8 +51,10 @@ mittleff0 (num_t res,
     tmp = new(num);
     sum = new(num);
 
-    /* Compute the maximum number of terms kmax to be taken into account for the
-     * Taylor series, eq. (4.5) */
+    /* 
+     * Compute the maximum number of terms kmax to be taken into account for the
+     * Taylor series, eq. (4.5) 
+     */
     num_abs(absz, z);
     
     num_set_d(k1, 1.0);
@@ -102,10 +98,6 @@ mittleff0 (num_t res,
     }
     num_set_num(res, sum);
     delete(sum), delete(z), delete(tmp), delete(fac1), delete(fac2);
-
-    //num_print(res, true);
-    //log_trace("[%s] Done.", __func__);
-    
 }
 
 /* compute eq. (2.4) */
@@ -163,25 +155,6 @@ mittleff1 (num_t res,
 
     delete(fac1), delete(fac2);
     delete(aux1), delete(aux2);
-
-    
-    
-    /* num_t fac1, fac2, _res; */
-    /* fac1 = new(num), fac2 = new(num), _res = new(num); */
-    /* num_set_d(fac1, 1.0); */
-    /* num_sub(fac1, fac1, beta); */
-    /* num_div(fac1, fac1, alpha); */
-    /* num_pow(fac1, z, fac1); */
-    /* num_inv(fac2, alpha); */
-    /* num_pow(fac2, z, fac2); */
-    /* num_exp(fac2, fac2); */
-    /* num_mul(fac1, fac1, fac2); */
-    /* num_inv(_res, alpha); */
-    /* num_mul(fac1, fac1, _res); */
-    /* asymptotic_series(fac2, z, alpha, beta); */
-    /* num_add(_res, fac1, fac2); */
-    /* num_set_num(res, _res); */
-    /* delete(_res), delete(fac1), delete(fac2); */
 }
 
 void
@@ -191,8 +164,6 @@ mittleff2 (num_t res,
            const num_t acc)
 {
     UNUSED(acc);
-    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
-    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
     asymptotic_series(res, z, alpha, beta);
 }
 
@@ -206,8 +177,6 @@ mittleff3_4 (num_t res,
              const int flag)
 {
     UNUSED(acc);
-    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
-    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
     num_t c, one, J, pi, aux, th, fac, fac1, fac2, fac3, fac4;
 
     c = new(num), one = new(num);
@@ -273,8 +242,6 @@ mittleff3 (num_t res,
            const num_t z,
            const num_t acc)
 {
-    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
-    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
     mittleff3_4(res, alpha, beta, z, acc, 3);
 }
 
@@ -285,8 +252,6 @@ mittleff4 (num_t res,
            const num_t z,
            const num_t acc)
 {
-    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
-    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
     mittleff3_4(res, alpha, beta, z, acc, 4);
 }
 
@@ -467,185 +432,6 @@ mittleff5_6 (num_t res,
     delete(aux);
     delete(int1), delete(int2);
     delete(integ);
-
-
-
-
-
-    
-    /* log_trace("[%s] alpha=%g, beta=%g, z=%g%+g, acc=%g", __func__, */
-    /*           num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
-    /* num_t zero, rmax, aux, fac1, fac2, fac3, two, one, d, phi; */
-
-    /* one = new(num), two = new(num); */
-    /* rmax = new(num), aux = new(num); */
-    /* fac1 = new(num), fac2 = new(num), fac3 = new(num); */
-    /* d = new(num); */
-    /* zero = new(num); */
-    /* num_set_d(zero, 0.0); */
-    /* phi = new(num); */
-    
-    /* num_set_d(two, 2.0); */
-    /* num_set_d(one, 1.0); */
-    
-    /* if (num_le_d(beta, 1.0)) */
-    /* { */
-    /*     /\* Compute rmax *\/ */
-    /*     num_set_d(rmax, 0.0); */
-    /*     if (num_ge_d(beta, 0.0)) */
-    /*     { */
-    /*         num_abs(fac1, z); */
-    /*         num_mul(fac1, fac1, two); */
-            
-    /*         num_pow(fac2, two, alpha); */
-
-    /*         num_pow(aux, two, beta); */
-    /*         num_mul(aux, aux, acc); */
-    /*         num_mul_d(aux, aux, M_PI/12.0); */
-    /*         num_log(aux, aux); */
-    /*         num_mul_d(aux, aux, -2.0); */
-    /*         num_pow(fac3, aux, alpha); */
-
-    /*         num_max3(rmax, fac1, fac2, fac3); */
-    /*     } */
-    /*     else */
-    /*     { */
-    /*         num_abs(fac1, beta); */
-    /*         num_add(fac1, fac1, one); */
-    /*         num_mul(fac1, fac1, two); */
-    /*         num_pow(fac1, fac1, alpha); */
-
-    /*         num_abs(fac2, z); */
-    /*         num_mul(fac2, fac2, two); */
-
-    /*         num_pow(aux, two, beta); */
-    /*         num_mul(aux, aux, acc); */
-
-    /*         num_abs(aux, beta); */
-    /*         num_mul_d(d, aux, 4.0); */
-    /*         num_pow(d, d, aux); */
-    /*         num_add(aux, aux, two); */
-    /*         num_mul(d, d, aux); */
-    /*         num_mul_d(d, d, 12.0); */
-            
-    /*         num_div(aux, aux, d); */
-    /*         num_log(aux, aux); */
-    /*         num_mul_d(aux, aux, -2.0); */
-    /*         num_pow(fac3, aux, alpha); */
-
-    /*         num_max3(rmax, fac1, fac2, fac3); */
-    /*     } */
-    /*     /\* log_trace("[%s] rmax=%+.15e", __func__, *\/ */
-    /*     /\*       num_to_d(rmax)); *\/ */
-
-    /*     /\* int1 = numerical_integral(lambda r: B(r, alpha, beta, z, c1), 0.0, rmax, acc) *\/ */
-    /*     /\* num_t int1, from, to; *\/ */
-    /*     /\* int1 = new(num), from = new(num), to = new(num); *\/ */
-    /*     /\* num_set_d(int1, 0.0); *\/ */
-    /*     /\* num_set_d(phi, c1); *\/ */
-    /*     /\* num_set_d(from, 0.0); *\/ */
-    /*     /\* num_set_num(to, rmax); *\/ */
-    /*     /\* integrate_B(int1, alpha, beta, z, phi, from, to); *\/ */
-
-    /*     /\* log_trace("[%s] int1=%+.15e", __func__, *\/ */
-    /*     /\*       num_to_d(int1)); *\/ */
-
-    /*     /\* delete(int1), delete(from), delete(to); *\/ */
-
-    /*     /\* num_set_d(res, 0.0); *\/ */
-
-    /*     num_t from, to; */
-    /*     from = new(num), to = new(num); */
-    /*     num_set_d(from, 0.0); */
-    /*     num_set_num(to, rmax); */
-    /*     A(fac1, z, alpha, beta, zero); */
-    /*     num_mul_d(fac1, fac1, c2); */
-    /*     num_set_d(phi, c1); */
-    /*     integrate_B(fac2, alpha, beta, z, phi, from, to, acc); */
-    /*     /\* log_trace("[%s] int1=%+.15e", __func__, *\/ */
-    /*     /\*       num_to_d(fac2)); *\/ */
-    /*     num_add(res, fac1, fac2); */
-    /*     delete(from), delete(to); */
-    /* } */
-    /* else */
-    /* { */
-    /*     if (num_ge_d(beta, 0.0)) */
-    /*     { */
-    /*         /\* fac1 = 2.0 * abs(z) *\/ */
-    /*         num_abs(fac1, z); */
-    /*         num_mul(fac1, fac1, two); */
-
-    /*         /\* fac2 = (-log(pi * eps/6.0))**alpha *\/ */
-    /*         num_mul_d(fac2, acc, M_PI/6.0); */
-    /*         num_log(fac2, fac2); */
-    /*         num_neg(fac2, fac2); */
-    /*         num_pow(fac2, fac2, alpha); */
-
-    /*         num_max3(rmax, one, fac1, fac2); */
-    /*     } */
-    /*     else */
-    /*     { */
-    /*         /\* fac1 = (abs(beta) + 1.0)**alpha *\/ */
-    /*         num_abs(fac1, beta); */
-    /*         num_add(fac1, fac1, one); */
-    /*         num_pow(fac1, fac1, alpha); */
-
-    /*         /\* fac2 = 2.0 * abs(z) *\/ */
-    /*         num_abs(fac2, z); */
-    /*         num_mul(fac2, fac2, two); */
-
-    /*         /\* d = (6.0 * (abs(beta) + 2.0) * (2.0 * abs(beta))**abs(beta)) *\/ */
-    /*         num_abs(aux, beta); */
-    /*         num_add(aux, aux, two); */
-    /*         num_abs(d, beta); */
-    /*         num_mul(d, d, aux); */
-    /*         num_mul_d(d, d, 12.0); */
-    /*         num_abs(aux, beta); */
-    /*         num_pow(d, d, aux); */
-
-    /*         /\* fac3 = (-2.0 * log(pi * eps/d))**alpha *\/ */
-    /*         num_div(fac3, acc, d); */
-    /*         num_mul_d(fac3, fac3, M_PI); */
-    /*         num_log(fac3, fac3); */
-    /*         num_mul_d(fac3, fac3, -2.0); */
-    /*         num_pow(fac3, fac3, alpha); */
-
-    /*         num_max3(rmax, fac1, fac2, fac3); */
-    /*     } */
-
-    /*     num_t int1, int2; */
-    /*     int1 = new(num), int2 = new(num); */
-    /*     num_set_d(int1, 0.0), num_set_d(int2, 0.0); */
-
-    /*     num_t from, to; */
-    /*     from = new(num), to = new(num); */
-        
-    /*     num_set_d(from, 0.5); */
-    /*     num_set_d(to, (1+c2) * num_to_d(rmax)); */
-    /*     num_mul_d(phi, alpha, M_PI); */
-    /*     integrate_B(int1, alpha, beta, z, phi, from, to, acc); */
-
-
-    /*     num_set_d(from, -c1); */
-    /*     num_set_d(to, c1); */
-    /*     num_set_d(phi, 0.5); */
-    /*     integrate_C(int2, alpha, beta, z, phi, from, to); */
-
-    /*     A(aux, z, alpha, beta, zero); */
-    /*     num_mul_d(aux, aux, c2); */
-        
-    /*     num_add(res, int1, int2); */
-    /*     num_add(res, res, aux); */
-        
-    /*     delete(from), delete(to); */
-    /*     delete(int1), delete(int2);         */
-    /* } */
-    /* delete(zero); */
-    /* delete(aux); */
-    /* delete(one), delete(two), delete(d); */
-    /* delete(rmax); */
-    /* delete(fac1), delete(fac2), delete(fac3); */
-    /* delete(phi); */
 }
 
 /* apply eqs. (4.25) and (4.26) */

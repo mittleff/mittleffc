@@ -52,18 +52,14 @@ acbtonum (num_t res, const acb_t x)
 }
 
 
-
-/* f(z) = sin(z) */
 int
 f_integrand (acb_ptr res, const acb_t z, void * params, slong order, slong prec)
 {
     UNUSED(prec);
-    //log_trace("calling wrapper function?");
     
     if (order > 1)
         flint_abort();  /* Would be needed for Taylor method. */
 
-    //struct my_f_params * params = (struct my_f_params *)p;
     num_function_t * F = (num_function_t *) params;
 
     num_t x, y;
@@ -78,14 +74,12 @@ f_integrand (acb_ptr res, const acb_t z, void * params, slong order, slong prec)
     return 0;
 }
 
-
 static void
 quad_gauss_legendre (num_t res,
                      num_function_t F,
                      const num_t from,
                      const num_t to)
 {
-    //log_trace("calling gauss legendre integration");
     acb_t ret, a, b, aux;
     mag_t tol;
     slong prec, goal;
@@ -104,10 +98,7 @@ quad_gauss_legendre (num_t res,
     acb_set_d_d(a, num_real_d(from), num_imag_d(from));
     acb_set_d_d(b, num_real_d(to), num_imag_d(to));
 
-    //log_trace("before integrate with ARB");
-    
     acb_calc_integrate(ret, f_integrand, &F, a, b, goal, tol, options, prec);
-    /* log_trace("after integrate with ARB"); */
     acbtonum (res, ret);
        
     acb_clear(ret), acb_clear(a), acb_clear(b), acb_clear(aux);
@@ -122,7 +113,6 @@ quad (num_t res,
       const int method)
 {
     UNUSED(method);
-    /* log_trace("before call routine integration"); */
     quad_gauss_legendre (res, F, from, to);
 
     /* switch (method) { */
