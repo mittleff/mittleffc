@@ -58,6 +58,7 @@ void tearDown (void)
     delete(acc);
 }
 
+#include "test_num.h"
 #include "test_partition.h"
 #include "test_z_zero.h"
 #include "test_exp.h"
@@ -73,6 +74,12 @@ int
 main (void)
 {
     UNITY_BEGIN();
+
+    RUN_TEST(test_Memory_Management);
+    RUN_TEST(test_Initialization_and_Accessors);
+    RUN_TEST(test_Precision_and_Comparisons);
+    RUN_TEST(test_Arithmetic);
+    RUN_TEST(test_Special_Functions);
 
     RUN_TEST(test_in_region_G0);
     RUN_TEST(test_in_region_G1);

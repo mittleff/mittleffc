@@ -1,22 +1,3 @@
-#include "unity.h"
-
-#include "new.h"
-#include "num.h"
-
-#include <assert.h>
-#include <complex.h>
-#include <stdbool.h>
-
-void
-setUp (void)
-{
-}
-
-void
-tearDown (void)
-{
-}
-
 void
 test_Memory_Management (void)
 {
@@ -137,8 +118,6 @@ test_Arithmetic (void)
     TEST_ASSERT_EQUAL_DOUBLE( +25.0, num_real_d (z) );
     TEST_ASSERT_EQUAL_DOUBLE( 0.0, num_imag_d (z) );
 
-    // Issue when multiplying large and small values
-
     /* div */
     num_div (z, x, y);
     TEST_ASSERT_EQUAL_DOUBLE( -0.28, num_real_d (z) );
@@ -166,17 +145,3 @@ test_Special_Functions (void)
 
     delete(x), delete(y);
 }
-
-int main (void)
-{
-    UNITY_BEGIN();
-
-    RUN_TEST(test_Memory_Management);
-    RUN_TEST(test_Initialization_and_Accessors);
-    RUN_TEST(test_Precision_and_Comparisons);
-    RUN_TEST(test_Arithmetic);
-    RUN_TEST(test_Special_Functions);
-
-    return UNITY_END();
-}
-
