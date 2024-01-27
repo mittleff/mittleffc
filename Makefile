@@ -20,8 +20,8 @@ check: test_suite
 
 .PHONY: num unity log test_suite
 num:
-	$(CC) $(CFLAGS) -I./src/num -c ./src/num/new.c -o build/new.o
-	$(CC) $(CFLAGS) -I./src/num -c ./src/num/num.c -o build/num.o
+	$(CC) $(CFLAGS) -I./src -I./src/num -c ./src/num/new.c -o build/new.o
+	$(CC) $(CFLAGS) -I./src -I./src/num -c ./src/num/num.c -o build/num.o
 unity:
 	$(CC) $(CFLAGS) $(CFLAGS_UNITY) -c ./modules/Unity/src/unity.c -o build/unity.o
 log:
@@ -30,7 +30,7 @@ log:
 DEBUG = -DDEBUG $(CFLAGS_LOG)
 
 test_suite: prepare log num unity
-	$(CC) $(CFLAGS) -I./src/num -I./src/partition -c ./src/partition/partition.c -o build/partition.o
+	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/partition -c ./src/partition/partition.c -o build/partition.o
 	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/quad -c ./src/quad/quad.c -o build/quad.o
 	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/quad -I./src/integrate -c ./src/integrate/integrate.c -o build/integrate.o
 	$(CC) $(CFLAGS) $(DEBUG) -I./src -I./src/num -I./src/integrate -I./src/algorithm -c ./src/algorithm/algorithm.c -o build/algorithm.o

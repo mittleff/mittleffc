@@ -1,18 +1,18 @@
 /*
- * This file is part of num.c (https://github.com/padawanphysicist/num.c).
+ * This file is part of mittleffc (https://github.com/mittleff/mittleffc).
  *
- * num.c is free software: you can redistribute it and/or modify it
+ * mittleffc is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
  *
- * num.c is distributed in the hope that it will be useful, but WITHOUT
+ * mittleffc is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * num.c. If not, see <https://www.gnu.org/licenses/>.
+ * mittleffc. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /** 
@@ -30,12 +30,13 @@
 #include "new.h"
 #include "num.h"
 
+#include "utils.h"
+
 #include <flint/arb.h>
 #include <flint/acb.h>
 #include <flint/acb_hypgeom.h>
 
 #define PREC 53
-#define UNUSED(x) (void)(x)
 
 struct num
 {

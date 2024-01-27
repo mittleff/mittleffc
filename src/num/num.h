@@ -1,18 +1,18 @@
 /*
- * This file is part of num.c (https://github.com/padawanphysicist/num.c).
+ * This file is part of mittleffc (https://github.com/mittleff/mittleffc).
  *
- * num.c is free software: you can redistribute it and/or modify it
+ * mittleffc is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
  *
- * num.c is distributed in the hope that it will be useful, but WITHOUT
+ * mittleffc is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * num.c. If not, see <https://www.gnu.org/licenses/>.
+ * mittleffc. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /** 
@@ -26,11 +26,6 @@
 #include <stdbool.h>
 #include <complex.h>
 #include <stdarg.h>
-
-#ifndef M_PI
-#define M_PI 3.141592653589793238462643383279502884197169399375105820974944
-#endif
-
 
 /**
  * This should be used in the initialization of the variable
@@ -304,4 +299,5 @@ num_max (num_t res, const num_t self, const num_t other);
 
 void
 num_max3 (num_t res, const num_t self, const num_t other, const num_t another);
+
 #endif /* __NUM_H__ */

@@ -1,29 +1,28 @@
 /*
- * This file is part of integration.c (https://github.com/padawanphysicist/integration.c).
+ * This file is part of mittleffc (https://github.com/mittleff/mittleffc).
  *
- * integration.c is free software: you can redistribute it and/or modify it
+ * mittleffc is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation, either version 3 of the License, or (at your option) any
  * later version.
  *
- * integration.c is distributed in the hope that it will be useful, but WITHOUT
+ * mittleffc is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * integration.c. If not, see <https://www.gnu.org/licenses/>.
+ * mittleffc. If not, see <https://www.gnu.org/licenses/>.
  */
 
 /** 
- * @file integration.h
- * @brief Interface for the main routine.
+ * @file quad.h
+ * @brief Interface for the quadrature routines.
  */
-#ifndef _QUAD_H_
-#define _QUAD_H_
+#ifndef __QUAD_H__
+#define __QUAD_H__
 
 #include "num.h"
-// #include "new.h"
 
 typedef struct
 {
@@ -32,12 +31,6 @@ typedef struct
 } num_function_t;
 
 
-//typedef struct
-//{
-//    num_t (*fn)();
-//    void* params;
-//} func_t;
-
 void
 quad (num_t res,
       num_function_t F,
@@ -45,4 +38,4 @@ quad (num_t res,
       const num_t to,
       const int method);
 
-#endif /* _QUAD_H_ */
+#endif /* __QUAD_H__ */

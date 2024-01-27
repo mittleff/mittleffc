@@ -1,5 +1,5 @@
 /*
- * This file is part of integration.c (https://github.com/padawanphysicist/integration.c).
+ * This file is part of mittleffc (https://github.com/padawanphysicist/mittleffc).
  *
  * integration.c is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
