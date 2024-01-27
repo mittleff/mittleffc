@@ -38,9 +38,6 @@
 #include "log.h"
 #endif
 
-// #define MAX2(a,b) ((a>b)?(a):(b))
-// #define MAX3(a,b,c) MAX2(a,MAX2(b,c))
-
 static void
 _mittleff (num_t res,
            const num_t alpha,
@@ -131,27 +128,55 @@ _mittleff (num_t res,
     }
     else if (num_gt_d(alpha, 1.0)) /* apply recursive relation (2.2) */
     {
-        /* log_trace("[%s] alpha = %+.5e > 1, applying recursive relation", __func__, alpha); */
-        /* const int m = (int) (ceil((alpha - 1)/2.0) + 1); */
-        /* const double one_over_2mp1 = 1.0/(2.0 * m + 1.0); */
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] \033[1;31mSpecial Case: alpha > 1\033[0m\n\t    Applying recursive relation",
+                 __func__);
+#endif         
+        const int m = (int) (ceil((num_to_d(alpha) - 1)/2.0) + 1);
 
+        num_t one_over_2mp1, alphap, zp, aux;
+
+        one_over_2mp1 = new(num);
+        alphap = new(num);
+        zp = new(num), aux = new(num);
+
+        num_set_d(one_over_2mp1, 1.0/(2.0 * m + 1.0));
+
+        num_set_d(res, 0.0);
+        for (int h = -m; h <= m; h++)
+        {
+            num_mul(alphap, alpha, one_over_2mp1);
+
+            num_pow(zp, z, one_over_2mp1);
+
+            num_set_d_d(aux, 0.0, 2.0 * M_PI * h * num_to_d(one_over_2mp1));
+            num_exp(aux, aux);
+            num_pow(zp, z, one_over_2mp1);
+            num_mul(zp, zp, aux);
+
+            _mittleff(aux, alphap, beta, zp, tol);
+
+            num_add(res, res, aux);
+        }
+        num_mul(res, res, one_over_2mp1);
+
+        delete(one_over_2mp1);
+        delete(alphap);
+        delete(zp), delete(aux);
         /* num_t sum, th, tmp, exp_th, newz; */
-        /* sum = new(num), th = new(num), z = new(num), tmp = new(num), newz = new(num), exp_th = new(num); */
+        /* sum = new(num), th = new(num), tmp = new(num), newz = new(num), exp_th = new(num); */
         /* num_zero(sum); */
         /* for (int h = -m; h <= m; h++) */
         /* { */
         /*     log_trace("[%s] h = %d", __func__, h); */
-        /*     num_set_d_d(th, 0.0, 2.0 * M_PI * h * one_over_2mp1); */
-        /*     num_exp(exp_th, th); */
-        /*     num_pow_d(newz, z, one_over_2mp1); */
-        /*     num_mul(newz, newz, exp_th); */
+            
         /*     const double complex _newz = num_to_complex(newz); */
-        /*     _mittleff(_res, alpha * one_over_2mp1, beta, creal(_newz), cimag(_newz), tol); */
+
         /*     num_set_d_d(tmp, _res[0], _res[1]); */
         /*     num_add(sum, sum, tmp); */
         /* } */
-        /* num_mul_d(sum, sum, 1.0/(2.0*m + 1.0)); */
-        /* num_set(_res, sum); */
+        /* num_mul(sum, sum, one_over_2mp1); */
+        /* num_set_num(res, sum); */
         /* delete(sum), delete(th), delete(tmp), delete(exp_th); */
     }
     else /* alpha <= 1 */

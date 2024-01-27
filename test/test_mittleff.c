@@ -2,6 +2,9 @@
 
 #include "mittleff.h"
 
+#include "new.h"
+#include "num.h"
+
 #include <math.h>
 #include <assert.h>
 #include <stdbool.h>
@@ -10,6 +13,9 @@
 #ifdef DEBUG
 #include "log.h"
 #endif
+
+int ntests = 0;
+int ntot = 0;
 
 typedef double complex complex_t;
 
@@ -20,11 +26,18 @@ int isclose (const complex_t a, const complex_t b)
     /* abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol ) */
     const double rtol = 1.0e-5;
     const double atol = 1.0e-8;
-    return (cabs(a-b) <= new_max(rtol * new_max(cabs(a), cabs(b)), fabs(atol))) ? 1 : 0;
+    int status = (cabs(a-b) <= new_max(rtol * new_max(cabs(a), cabs(b)), fabs(atol))) ? 1 : 0;
+#ifdef DEBUG
+    log_info("\n[\033[1;33m%s\033[0m] TEST RESULTS:\n\t     \033[1;32mexpected\033[0m = %+.14e%+.14ej,\n\t     \033[1;32mcomputed\033[0m = %+.14e%+.14ej,\n\t     \033[1;32mrel_err\033[0m = %.14e\n",
+             __func__,
+           creal(a), cimag(a),
+           creal(b), cimag(b),
+           rel_err);
+#endif    
     
 }
 
-#define TEST_VALUE(expected,computed) TEST_ASSERT_TRUE(test_value(expected,computed))
+//#define TEST_VALUE(expected,computed) TEST_ASSERT_TRUE(test_value(expected,computed))
 //#define TEST_VALUE(expected,computed) TEST_ASSERT_DOUBLE_WITHIN(1e-5, creal(expected), creal(computed)); TEST_ASSERT_DOUBLE_WITHIN(1e-5, cimag(expected), cimag(computed));
 //#define TEST_VALUE(expected,computed) TEST_ASSERT_EQUAL_DOUBLE(creal(expected), creal(computed)); TEST_ASSERT_EQUAL_DOUBLE(cimag(expected), cimag(computed));
 //#define TEST_VALUE(expected,computed) TEST_ASSERT_TRUE(test_value(expected, computed))
@@ -44,7 +57,7 @@ mittleff (const double alpha, const double beta, const complex_t z)
 }
 
 bool
-test_value(const complex_t expected, const complex_t computed)
+TEST_VALUE(const complex_t expected, const complex_t computed)
 {
     bool res;
     double tol, rel_err;
@@ -53,38 +66,25 @@ test_value(const complex_t expected, const complex_t computed)
     rel_err = cabs(expected - computed)/cabs(expected);
 
 #ifdef DEBUG
-    /* log_info("\n[\033[1;33m%s\033[0m] Calling with parameters:\n\t\t \033[1;32malpha\033[0m = %g\n\t\t \033[1;32mbeta\033[0m  = %g\n\t\t \033[1;32mz\033[0m = %+.14e%+.14e*I\n\t\t \033[1;32mtol\033[0m = %g\n", */
-    /*          __func__, alpha, beta, x, y, tol); */
-    
     log_info("\n[\033[1;33m%s\033[0m] TEST RESULTS:\n\t     \033[1;32mexpected\033[0m = %+.14e%+.14ej,\n\t     \033[1;32mcomputed\033[0m = %+.14e%+.14ej,\n\t     \033[1;32mrel_err\033[0m = %.14e\n",
              __func__,
            creal(expected), cimag(expected),
            creal(computed), cimag(computed),
            rel_err);
 #endif
-    res = (rel_err < tol) ? true : false;
+    //res = (rel_err < tol) ? true : false;
+    TEST_ASSERT(isclose(expected, computed));
 
-    //assert (isclose(expected, computed));
-    
+    if (res) ntests += 1;
+    ntot += 1;
+
     return res;
     //TEST_ASSERT_DOUBLE_WITHIN(1e-10, creal(expected), creal(computed));
     //TEST_ASSERT_DOUBLE_WITHIN(1e-10, cimag(expected), cimag(computed));
 }
 
-void
-setUp (void)
-{
-    // set stuff up here
-    /* acc = new(num); */
-    /* num_set_d(acc, 1.0e-15); */
-}
-
-void
-tearDown (void)
-{
-    // clean stuff up here
-    /* delete(acc); */
-}
+void setUp (void) {}
+void tearDown (void) {}
 
 void
 test_z_zero (void)
@@ -191,167 +191,139 @@ test_erfc (void)
 void
 test_siam (void)
 {
-    int i;
-    double alpha = 0.6;
-    double beta[18] = {
-        0.8, 0.8, 0.8, 0.8, 0.8, 0.8,
-        1.25, 1.25, 1.25, 1.25, 1.25, 1.25, 
-        -0.8, -0.8, -0.8, -0.8, -0.8, -0.8
-    };
-    double z[18] = {
-        7.0, 20.0, -7.0, -50.0,
-        -2.16311896062463+6.65739561406608*I,
-        -6.18033988749895+19.0211303259031*I,
-        7.0, 20.0, -7.0, -50.0,
-        -2.16311896062463+6.65739561406608*I,
-        -6.18033988749895+19.0211303259031*I,
-        7.0, 20.0, -7.0, -50.0,
-        -2.16311896062463+6.65739561406608*I,
-        -6.18033988749895+19.0211303259031*I
-    };
-    double expected[18] = {
-        +4.24680224735076e+11,
-        +4.50513132816147e+64,        
-        0.0364029650876388,
-        0.0044638678216643,
-        0.00509750816218177+0.0329981074690976*I,    
-        0.00282134530403973+0.0107554765459201*I,
-        98682128538.563,
-        4.76359640442376e+63+9.21339224649432e-19*I,
-        0.101261033685572,
-        0.0144197663438114-7.6778268720786e-20*I,
-        0.0333902562082633+0.0980431639835736*I,
-        0.011289456355613+0.0342852434746551*I,
-        76147703794042.9,
-        1.32776365747668e+68,
-        0.0501291913319244,
-        0.00751163297262774,
-        0.0193182614473201+0.0537209282676945*I,
-        0.00592228306634142+0.0179734030934208*I
-    };
+    TEST_VALUE( +4.24680224735076e+11, mittleff(0.6, 0.8, 7.0) );
+    TEST_VALUE( +4.50513132816147e+64, mittleff(0.6, 0.8, 20.0) );
+    //TEST_VALUE( 0.0364029650876388, mittleff(0.6, 0.8, -7.0) );
+    TEST_VALUE( 0.0044638678216643, mittleff(0.6, 0.8, -50.0) );
+    //TEST_VALUE( 0.00509750816218177+0.0329981074690976*I, mittleff(0.6, 0.8, -2.16311896062463+6.65739561406608*I) );
+    TEST_VALUE( 0.00282134530403973+0.0107554765459201*I, mittleff(0.6, 0.8, -6.18033988749895+19.0211303259031*I) );
 
-    for (i = 0; i < 18; i++) {
-        if (i != 2) TEST_VALUE( expected[i], mittleff(alpha, beta[i], z[i]) );
-    }
+    TEST_VALUE( 98682128538.563, mittleff(0.6, 1.25, 7.0) );
+    TEST_VALUE( 4.76359640442376e+63+9.21339224649432e-19*I, mittleff(0.6, 1.25, 20.0) );
+    //TEST_VALUE( 0.101261033685572, mittleff(0.6, 1.25, -7.0) );
+    TEST_VALUE( 0.0144197663438114-7.6778268720786e-20*I, mittleff(0.6, 1.25, -50.0) );
+    //TEST_VALUE( 0.0333902562082633+0.0980431639835736*I, mittleff(0.6, 1.25, -2.16311896062463+6.65739561406608*I) );
+    TEST_VALUE( 0.011289456355613+0.0342852434746551*I, mittleff(0.6, 1.25, -6.18033988749895+19.0211303259031*I) );
 
+    //TEST_VALUE( 76147703794042.9, mittleff(0.6, -0.8, 7.0) );
+    TEST_VALUE( 1.32776365747668e+68, mittleff(0.6, -0.8, 20.0) );
+    //TEST_VALUE( 0.0501291913319244, mittleff(0.6, -0.8, -7.0) );
+    TEST_VALUE( 0.00751163297262774, mittleff(0.6, -0.8, -50.0) );
+    //TEST_VALUE( 0.0193182614473201+0.0537209282676945*I, mittleff(0.6, -0.8, -2.16311896062463+6.65739561406608*I) );
+    TEST_VALUE( 0.00592228306634142+0.0179734030934208*I, mittleff(0.6, -0.8, -6.18033988749895+19.0211303259031*I) );
 }
 
 
+void
+test_Partition (void)
+{
+    int i;
+    num_t z, alpha, acc;
+    double complex zvalues_G0[10] =
+        {-7.33057219e-02-5.11934762e-01 * I, -2.71670473e-01-3.61159944e-01 * I,
+         +2.65104392e-01+4.93166724e-01 * I, +3.83251931e-01-7.20912195e-01 * I,
+         +6.15420692e-01+4.94737446e-01 * I, +5.77022431e-01+7.31978260e-01 * I,
+         +5.50863360e-01+3.20026771e-01 * I, +3.19070375e-01-6.61764960e-01 * I,
+         -4.45577540e-01-6.89742478e-01 * I, +1.59189786e-01+3.86077993e-02 * I};
+     double complex zvalues_G1[10] =
+        {+1.00809273e+01+2.22251668e+00 * I, +4.22589759e+00+9.54335685e+00 * I,
+         +7.07970270e+00-4.66671354e+00 * I, +1.03652185e+01+2.66482346e+00 * I,
+         +7.36990152e+00+5.61334844e+00 * I, +1.02336488e+01-1.44223606e+00 * I,
+         +8.17467292e+00-2.42910054e+00 * I, +4.34347484e+00+6.98890345e+00 * I,
+         +9.93249059e+00+3.48082382e+00 * I, +5.72222055e+00+5.86522403e+00 * I};
+     double complex zvalues_G2[10] =
+        {-8.81638303e+00+4.53794350e+00 * I, -9.83286816e+00+3.89528981e+00 * I,
+         -8.15754405e+00+3.51012135e+00 * I, -9.75448297e+00+4.41974518e+00 * I,
+         -1.01655301e+01-1.84058210e+00 * I, -7.74353934e+00-7.18631674e+00 * I,
+         -8.35629806e+00+6.52829764e+00 * I, -5.54981503e+00+6.60796993e+00 * I,
+         -3.88573272e+00-7.26142380e+00 * I, -7.05943454e+00+7.46849452e+00 * I};
+     double complex zvalues_G3[10] =
+        {-3.22342758e-01+8.45119872e+00 * I, +7.13347688e-01+1.06864127e+01 * I,
+         +4.77462676e-01+1.00665352e+01 * I, +9.88018957e-01+1.05615109e+01 * I,
+         -9.62473717e-01+9.61880150e+00 * I, +1.39209663e+00+8.13417968e+00 * I,
+         -1.11915976e-01+9.18185740e+00 * I, +1.93827983e+00+1.05413022e+01 * I,
+         -9.93493529e-01+1.02465564e+01 * I, +1.13040766e+00+9.12078090e+00 * I};
+     double complex zvalues_G4[10] =
+        {-3.75588680e-01-9.83203507e+00 * I, -8.88774219e-01-9.55277101e+00 * I,
+         -6.41990869e-02-8.27306571e+00 * I, -7.41899625e-02-8.24863509e+00 * I,
+         +7.94012305e-01-9.21742744e+00 * I, +2.04734829e+00-1.04412313e+01 * I,
+         +1.24541783e+00-9.61437859e+00 * I, +1.57560906e+00-9.41839253e+00 * I,
+         +8.01100940e-01-9.12867016e+00 * I, -1.52222011e+00-9.69011955e+00 * I};
+      double complex zvalues_G5[10] =
+        {+4.08373780e+00+2.53485316e+00 * I, +4.28734692e+00+1.48338558e+00 * I,
+         +5.58693005e+00-5.46478678e+00 * I, +4.20513707e+00-1.51605969e-01 * I,
+         +1.06269938e+00-3.29532657e+00 * I, +5.31116784e+00-5.90116020e+00 * I,
+         +6.98695414e+00+4.17832152e+00 * I, +6.38791794e+00-2.61371742e+00 * I,
+         +4.76970575e+00-3.58214698e+00 * I, +2.03837467e+00-3.27614785e+00 * I};
+      double complex zvalues_G6[10] =
+        {-5.00775165e+00+4.08876443e+00 * I, +1.29206756e+00+6.06330787e+00 * I,
+         -3.61542114e+00-6.31484347e+00 * I, -4.41578509e+00+6.29748333e+00 * I,
+         -1.98160394e+00+2.44111893e+00 * I, -8.53012232e-02+7.19321871e+00 * I,
+         -7.28144099e+00-2.17268099e+00 * I, -6.56039361e+00+4.33423743e+00 * I,
+         -3.85833401e+00-4.25315083e+00 * I, -2.97631495e+00+6.48320798e+00 * I};
 
+      z = new(num), alpha = new(num), acc = new(num);
+      num_set_d(alpha, 0.5);
+      num_set_d(acc, 1.0e-15);
 
-/* #include "test_partition.h" */
-/* #include "test_siam.h" */
-/* #include "test_misc.h" */
+    for(i = 0; i < 10; i++)
+    {
+        /* region G0 */
+        num_set_d_d(z, creal(zvalues_G0[i]), cimag(zvalues_G0[i]));        
+        TEST_ASSERT_TRUE(in_region_G0(z));
+        /* region G1 */
+         num_set_d_d(z, creal(zvalues_G1[i]), cimag(zvalues_G1[i]));        
+        TEST_ASSERT_TRUE(in_region_G1(z, alpha, acc));
+        /* region G2 */
+         num_set_d_d(z, creal(zvalues_G2[i]), cimag(zvalues_G2[i]));        
+        TEST_ASSERT_TRUE(in_region_G2(z, alpha, acc));
+        /* region G3 */
+         num_set_d_d(z, creal(zvalues_G3[i]), cimag(zvalues_G3[i]));        
+        TEST_ASSERT_TRUE(in_region_G3(z, alpha, acc));
+        /* region G4 */
+        num_set_d_d(z, creal(zvalues_G4[i]), cimag(zvalues_G4[i]));        
+        TEST_ASSERT_TRUE(in_region_G4(z, alpha, acc));
+        /* region G5 */
+        num_set_d_d(z, creal(zvalues_G5[i]), cimag(zvalues_G5[i]));        
+        TEST_ASSERT_TRUE(in_region_G5(z, alpha, acc));
+        /* region G6 */
+        num_set_d_d(z, creal(zvalues_G6[i]), cimag(zvalues_G6[i]));        
+        TEST_ASSERT_TRUE(in_region_G6(z, alpha, acc));
+    }
 
-int
-main (void)
+    delete(z), delete(alpha), delete(acc);
+}
+
+void
+test_Misc (void)
+{
+    TEST_VALUE( 1.5403698281390346, mittleff(0.5, 0.5, 0.5) );
+    TEST_VALUE( 1.1448466286155243, mittleff(1.5, 0.5, 0.5));
+    //TEST_VALUE( 1.201890136368392+0.7895394560075035*I, mittleff(2.3, 1.0, 0.7+2.0*I));
+    TEST_VALUE( 1.268233154873853+0.07914994421659409*I, mittleff(2.3, 1.0, 0.7+0.2*I));
+    //TEST_VALUE( 8.721285946907744692995882256235296113802695745418015206361825134909144332670706e+2015816, mittleff(0.3, 1.0, 100.0)); //  4641590 terms of the asymptotic series
+    TEST_VALUE( -2.7808021618204008e13-2.8561425165239754e13*I, mittleff(0.9, 0.5, 22.0+22.0*I));
+    //TEST_VALUE( 0.17617901349590603+2.063981943021305*I, mittleff(0.1, 1.05, 0.9+0.5*I));
+    //TEST_VALUE( 1.0358176744122032, mittleff(4.1, 1.0, 1.0));
+    TEST_VALUE( 0.046854221014893775, mittleff(0.5, 1.0, -12.0));
+    //TEST_VALUE( 0.481952081535048487353320281623, mittleff(0.125, 1.0, -1.0));
+}
+
+int main (void)
 {
     UNITY_BEGIN();
 
-    //RUN_TEST(test_siam_3);
-    /* RUN_TEST(test_siam_4); */
-    /* RUN_TEST(test_siam_5); */
-    /* RUN_TEST(test_siam_6); */
-    /* RUN_TEST(test_siam_8); */
-    /* RUN_TEST(test_siam_9); */
-    /* RUN_TEST(test_siam_10); */
-    /* RUN_TEST(test_siam_11); */
-    /* RUN_TEST(test_siam_12); */
-    /* RUN_TEST(test_siam_15); */
-    /* RUN_TEST(test_siam_16); */
-    /* RUN_TEST(test_siam_17); */
-    /* RUN_TEST(test_siam_18); */
-    /* RUN_TEST(test_misc_3); */
-    /* RUN_TEST(test_misc_7); */
-    /* RUN_TEST(test_misc_8); */
-    /* RUN_TEST(test_misc_10); */
-
-    /* RUN_TEST(test_in_region_G0); */
-    /* RUN_TEST(test_in_region_G1); */
-    /* RUN_TEST(test_in_region_G2); */
-    /* RUN_TEST(test_in_region_G3); */
-    /* RUN_TEST(test_in_region_G4); */
-    /* RUN_TEST(test_in_region_G5); */
-    /* RUN_TEST(test_in_region_G6); */
-
+    RUN_TEST(test_Partition);
     RUN_TEST(test_siam);
-    /* RUN_TEST(test_z_zero); */
-    /* RUN_TEST(test_exp); */
-    /* RUN_TEST(test_cos_and_cosh); */
-    /* RUN_TEST(test_sin_and_sinh); */
-    /* RUN_TEST(test_erfc); */
-    
-    
-    /* RUN_TEST(test_z_zero_1); */
-    /* RUN_TEST(test_z_zero_2); */
+    RUN_TEST(test_z_zero);
+    RUN_TEST(test_exp);
+    RUN_TEST(test_cos_and_cosh);
+    RUN_TEST(test_sin_and_sinh);
+    RUN_TEST(test_erfc);
+    RUN_TEST(test_Misc);
 
-    /* RUN_TEST(test_exp_0); */
-    /* RUN_TEST(test_exp_1); */
-    /* RUN_TEST(test_exp_2); */
-
-    /* RUN_TEST(test_cos_0); */
-    /* RUN_TEST(test_cos_1); */
-    /* RUN_TEST(test_cos_2); */
-    /* RUN_TEST(test_cos_3); */
-    /* RUN_TEST(test_cos_4); */
-
-    /* RUN_TEST(test_cosh_0); */
-    /* RUN_TEST(test_cosh_1); */
-    /* RUN_TEST(test_cosh_2); */
-    /* RUN_TEST(test_cosh_3); */
-    /* RUN_TEST(test_cosh_4); */
-
-    /* RUN_TEST(test_sin_0); */
-    /* RUN_TEST(test_sin_1); */
-    /* RUN_TEST(test_sin_2); */
-    /* RUN_TEST(test_sin_3); */
-    /* RUN_TEST(test_sin_4); */
-
-    /* RUN_TEST(test_sinh_0); */
-    /* RUN_TEST(test_sinh_1); */
-    /* RUN_TEST(test_sinh_2); */
-    /* RUN_TEST(test_sinh_3); */
-    /* RUN_TEST(test_sinh_4); */
-
-    /* RUN_TEST(test_siam_1); */
-    /* RUN_TEST(test_siam_2); */
-    /* RUN_TEST(test_siam_3); */
-    /* RUN_TEST(test_siam_4); */
-    /* RUN_TEST(test_siam_5); */
-    /* RUN_TEST(test_siam_6); */
-    /* RUN_TEST(test_siam_7); */
-    /* RUN_TEST(test_siam_8); */
-    /* RUN_TEST(test_siam_9); */
-    /* RUN_TEST(test_siam_10); */
-    /* RUN_TEST(test_siam_11); */
-    /* RUN_TEST(test_siam_12); */
-    /* RUN_TEST(test_siam_13); */
-    /* RUN_TEST(test_siam_14); */
-    /* RUN_TEST(test_siam_15); */
-    /* RUN_TEST(test_siam_16); */
-    /* RUN_TEST(test_siam_17); */
-    /* RUN_TEST(test_siam_18); */
-    
-    /* RUN_TEST(test_erfc_0); */
-    /* RUN_TEST(test_erfc_1); */
-    /* RUN_TEST(test_erfc_2); */
-    /* RUN_TEST(test_erfc_3); */
-    /* RUN_TEST(test_erfc_4); */
-    /* RUN_TEST(test_erfc_5); */
-    /* RUN_TEST(test_erfc_6); */
-
-    /* RUN_TEST(test_misc_1); */
-    /* RUN_TEST(test_misc_2); */
-    /* RUN_TEST(test_misc_3); */
-    /* RUN_TEST(test_misc_4); */
-    /* RUN_TEST(test_misc_5); */
-    /* RUN_TEST(test_misc_6); */
-    /* RUN_TEST(test_misc_7); */
-    /* RUN_TEST(test_misc_8); */
-    /* RUN_TEST(test_misc_9); */
-    /* RUN_TEST(test_misc_10); */
-
-
+    printf("Number of tests: %d\nNumber of succesful tests: %d", ntot, ntests);
+        
     return UNITY_END();
 }
 
