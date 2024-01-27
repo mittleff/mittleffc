@@ -23,6 +23,7 @@
 #include "partition.h"
 #include "num.h"
 #include "new.h"
+#include "utils.h"
 
 #include <math.h>
 #include <stdbool.h>
