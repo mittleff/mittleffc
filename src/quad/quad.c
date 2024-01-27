@@ -51,12 +51,9 @@ acbtonum (num_t res, const acb_t x)
     arb_clear(re), arb_clear(im);
 }
 
-
 int
 f_integrand (acb_ptr res, const acb_t z, void * params, slong order, slong prec)
 {
-    UNUSED(prec);
-    
     if (order > 1)
         flint_abort();  /* Would be needed for Taylor method. */
 
@@ -64,8 +61,16 @@ f_integrand (acb_ptr res, const acb_t z, void * params, slong order, slong prec)
 
     num_t x, y;
     x = new(num), y = new(num);
-    acbtonum(x, z);
-    (F->function)(y, x, (F->params)); // TODO
+    //acbtonum(x, z);
+
+    arb_t re, im;
+    arb_init(re), arb_init(im);
+    acb_get_real(re, z), acb_get_imag(im, z);
+    num_set_d_d (x, arbtod(re), arbtod(im));
+    arb_clear(re), arb_clear(im);
+    
+    (F->function)(y, x, (F->params));
+    printf("%g %g %g %g\n", num_real_d(x), num_imag_d(x), num_real_d(y), num_imag_d(y));
     
     acb_set_d_d(res, num_real_d (y), num_imag_d (y));
 
@@ -76,59 +81,48 @@ f_integrand (acb_ptr res, const acb_t z, void * params, slong order, slong prec)
 
 static void
 quad_gauss_legendre (num_t res,
-                     num_function_t F,
+                     num_function_t * F,
                      const num_t from,
                      const num_t to)
 {
-    acb_t ret, a, b, aux;
+    acb_t ret, a, b;
     mag_t tol;
     slong prec, goal;
     acb_calc_integrate_opt_t options;
 
     acb_calc_integrate_opt_init(options);
 
-    prec = 63, goal = prec;
+    options->verbose = 2;
 
-    acb_init(ret), acb_init(a), acb_init(b), acb_init(aux);
+    prec = 64;
+    goal = prec;
+
+    acb_init(ret), acb_init(a), acb_init(b);
     mag_init(tol);
 
-    mag_set_d(tol, 1.0e-15);
+    mag_set_ui_2exp_si(tol, 1, -prec);
 
     /* Set integration limits */
     acb_set_d_d(a, num_real_d(from), num_imag_d(from));
     acb_set_d_d(b, num_real_d(to), num_imag_d(to));
 
-    acb_calc_integrate(ret, f_integrand, &F, a, b, goal, tol, options, prec);
-    acbtonum (res, ret);
+    acb_calc_integrate(ret, f_integrand, F, a, b, goal, tol, options, prec);
+   
+    arb_t re, im;
+    arb_init(re), arb_init(im);
+    acb_get_real(re, ret), acb_get_imag(im, ret);
+    num_set_d_d (res, arbtod(re), arbtod(im));
+    arb_clear(re), arb_clear(im);
        
-    acb_clear(ret), acb_clear(a), acb_clear(b), acb_clear(aux);
+    acb_clear(ret), acb_clear(a), acb_clear(b);
     mag_clear(tol);
 }
 
 void
 quad (num_t res,
-      num_function_t F,
+      num_function_t * F,
       const num_t from,
-      const num_t to,
-      const int method)
+      const num_t to)
 {
-    UNUSED(method);
     quad_gauss_legendre (res, F, from, to);
-
-    /* switch (method) { */
-    /* case 0: */
-    /*     // tanh-sinh quadrature */
-    /*     num_t tolerance, est_err, num_eval; */
-    /*     tolerance = new(num), est_err = new(num), num_eval = new(num); */
-    /*     num_set_d(tolerance, 1.0e-15); */
-    /*     quad_tanhsinh_quad(res, f, ctx, from, to, tolerance, est_err, num_eval); */
-    /*     delete(tolerance), delete(est_err), delete(num_eval); */
-    /*     break; */
-    /* default: */
-    /*     num_t n; */
-    /*     n = new(num); */
-    /*     num_set_d(n, 100.0); */
-    /*     integration_qsimp(res, f, ctx, from, to, n); */
-    /*     delete(n); */
-    /* } */
 }

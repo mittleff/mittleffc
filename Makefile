@@ -16,7 +16,7 @@ CFLAGS_UNITY=-DUNITY_OUTPUT_COLOR -DUNITY_INCLUDE_DOUBLE -I./modules/Unity/src
 CFLAGS_LOG=-DLOG_USE_COLOR -I./modules/log.c/src
 LDLIBS=-lflint -lgsl -lgslcblas -lm
 
-check: test_suite
+check: test_quad test_suite
 
 .PHONY: num unity log test_suite
 num:
@@ -28,6 +28,19 @@ log:
 	$(CC) $(CFLAGS) $(CFLAGS_LOG) -c ./modules/log.c/src/log.c -o build/log.o
 
 DEBUG = -DDEBUG $(CFLAGS_LOG)
+
+test_quad: prepare log num unity
+	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/quad -c ./src/quad/quad.c -o build/quad.o
+	$(CC) $(CFLAGS) $(DEBUG) $(CFLAGS_UNITY) -I./src/quad -I./src/num -c tests/test_quad.c -o build/test_quad.o
+	$(CC) $(CFLAGS) \
+		build/log.o \
+		build/unity.o \
+		build/quad.o \
+		build/new.o \
+		build/num.o \
+		build/test_quad.o \
+		-o build/test_quad.x $(LDLIBS)
+	$(VALGRIND) --log-file=valgrind-test_quad.log ./build/test_quad.x
 
 test_suite: prepare log num unity
 	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/partition -c ./src/partition/partition.c -o build/partition.o
