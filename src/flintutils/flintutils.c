@@ -16,52 +16,25 @@
  */
 
 /** 
- * @file new.c
- * @brief Implementation of the initialization routines of the classes.
+ * @file flintutils.h
+ * @brief Implementation of interace with FLINT.
  */
-#include <assert.h>
-#include <stdlib.h>
 
-#include "new.h"
-#include "abc.h"
+#include <flintutils.h>
+#include <flint/arf.h>
+#include <math.h>
 
-void *
-new (const void * _class, ...)
+double
+arbtod (const arb_t x)
 {
-    const struct ABC * class = _class;
-	void * p = calloc(1, class -> size);
-
-	assert(p);
-	* (const struct ABC **) p = class;
-
-	if (class -> ctor)
-	{
-        va_list ap;
-
-		va_start(ap, _class);
-		p = class -> ctor(p, &ap);
-		va_end(ap);
-	}
-	return p;
+    return arf_get_d(arb_midref(x), ARF_RND_NEAR);
 }
 
 void
-delete (void * self)
+arb_fmod (arb_t res, const arb_t self, const arb_t other)
 {
-    const struct ABC ** cp = self;
-
-	if (self && (*cp) && (*cp) -> dtor)
-		self = (*cp) -> dtor(self);
+    const double _self = arbtod(self);
+    const double _other = arbtod(other);
     
-	free(self);
-}
-
-size_t
-size_of (const void* self)
-{
-    const struct ABC * const * cp = self;
-
-	assert(self && (*cp));
-    
-	return (*cp) -> size;
+    arb_set_d(res, fmod(_self, _other));
 }

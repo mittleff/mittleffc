@@ -25,8 +25,8 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "new.h"
-#include "num.h"
+/* #include "new.h" */
+/* #include "num.h" */
 
 #include "utils.h"
 
@@ -34,95 +34,96 @@
 #include "flint/acb.h"
 #include "flint/acb_calc.h"
 
-static double
-arbtod(arb_t x)
-{
-    return arf_get_d(arb_midref(x), ARF_RND_NEAR);
-}
+/* static double */
+/* arbtod(arb_t x) */
+/* { */
+/*     return arf_get_d(arb_midref(x), ARF_RND_NEAR); */
+/* } */
 
 
-static void
-acbtonum (num_t res, const acb_t x)
-{
-    arb_t re, im;
-    arb_init(re), arb_init(im);
-    acb_get_real(re, x), acb_get_imag(im, x);
-    num_set_d_d (res, arbtod(re), arbtod(im));
-    arb_clear(re), arb_clear(im);
-}
+/* static void */
+/* acbtonum (num_t res, const acb_t x) */
+/* { */
+/*     arb_t re, im; */
+/*     arb_init(re), arb_init(im); */
+/*     acb_get_real(re, x), acb_get_imag(im, x); */
+/*     num_set_d_d (res, arbtod(re), arbtod(im)); */
+/*     arb_clear(re), arb_clear(im); */
+/* } */
 
-int
-f_integrand (acb_ptr res, const acb_t z, void * params, slong order, slong prec)
-{
-    if (order > 1)
-        flint_abort();  /* Would be needed for Taylor method. */
+/* int */
+/* f_integrand (acb_ptr res, const acb_t z, void * params, slong order, slong prec) */
+/* { */
+/*     if (order > 1) */
+/*         flint_abort();  /\* Would be needed for Taylor method. *\/ */
 
-    num_function_t * F = (num_function_t *) params;
+/*     num_function_t * F = (num_function_t *) params; */
 
-    num_t x, y;
-    x = new(num), y = new(num);
-    //acbtonum(x, z);
+/*     num_t x, y; */
+/*     x = new(num), y = new(num); */
+/*     //acbtonum(x, z); */
 
-    arb_t re, im;
-    arb_init(re), arb_init(im);
-    acb_get_real(re, z), acb_get_imag(im, z);
-    num_set_d_d (x, arbtod(re), arbtod(im));
-    arb_clear(re), arb_clear(im);
+/*     arb_t re, im; */
+/*     arb_init(re), arb_init(im); */
+/*     acb_get_real(re, z), acb_get_imag(im, z); */
+/*     num_set_d_d (x, arbtod(re), arbtod(im)); */
+/*     arb_clear(re), arb_clear(im); */
     
-    (F->function)(y, x, (F->params));
-    printf("%g %g %g %g\n", num_real_d(x), num_imag_d(x), num_real_d(y), num_imag_d(y));
+/*     (F->function)(y, x, (F->params)); */
+/*     printf("%g %g %g %g\n", num_real_d(x), num_imag_d(x), num_real_d(y), num_imag_d(y)); */
     
-    acb_set_d_d(res, num_real_d (y), num_imag_d (y));
+/*     acb_set_d_d(res, num_real_d (y), num_imag_d (y)); */
 
-    delete(x), delete(y);
+/*     delete(x), delete(y); */
 
-    return 0;
-}
+/*     return 0; */
+/* } */
 
-static void
-quad_gauss_legendre (num_t res,
-                     num_function_t * F,
-                     const num_t from,
-                     const num_t to)
-{
-    acb_t ret, a, b;
-    mag_t tol;
-    slong prec, goal;
-    acb_calc_integrate_opt_t options;
+/* static void */
+/* quad_gauss_legendre (num_t res, */
+/*                      num_function_t * F, */
+/*                      const num_t from, */
+/*                      const num_t to) */
+/* { */
+/*     acb_t ret, a, b; */
+/*     mag_t tol; */
+/*     slong prec, goal; */
+/*     acb_calc_integrate_opt_t options; */
 
-    acb_calc_integrate_opt_init(options);
+/*     acb_calc_integrate_opt_init(options); */
 
-    options->verbose = 2;
+/*     options->verbose = 2; */
 
-    prec = 64;
-    goal = prec;
+/*     prec = 64; */
+/*     goal = prec; */
 
-    acb_init(ret), acb_init(a), acb_init(b);
-    mag_init(tol);
+/*     acb_init(ret), acb_init(a), acb_init(b); */
+/*     mag_init(tol); */
 
-    mag_set_ui_2exp_si(tol, 1, -prec);
+/*     mag_set_ui_2exp_si(tol, 1, -prec); */
 
-    /* Set integration limits */
-    acb_set_d_d(a, num_real_d(from), num_imag_d(from));
-    acb_set_d_d(b, num_real_d(to), num_imag_d(to));
+/*     /\* Set integration limits *\/ */
+/*     acb_set_d_d(a, num_real_d(from), num_imag_d(from)); */
+/*     acb_set_d_d(b, num_real_d(to), num_imag_d(to)); */
 
-    acb_calc_integrate(ret, f_integrand, F, a, b, goal, tol, options, prec);
+/*     acb_calc_integrate(ret, f_integrand, F, a, b, goal, tol, options, prec); */
    
-    arb_t re, im;
-    arb_init(re), arb_init(im);
-    acb_get_real(re, ret), acb_get_imag(im, ret);
-    num_set_d_d (res, arbtod(re), arbtod(im));
-    arb_clear(re), arb_clear(im);
+/*     arb_t re, im; */
+/*     arb_init(re), arb_init(im); */
+/*     acb_get_real(re, ret), acb_get_imag(im, ret); */
+/*     num_set_d_d (res, arbtod(re), arbtod(im)); */
+/*     arb_clear(re), arb_clear(im); */
        
-    acb_clear(ret), acb_clear(a), acb_clear(b);
-    mag_clear(tol);
-}
+/*     acb_clear(ret), acb_clear(a), acb_clear(b); */
+/*     mag_clear(tol); */
+/* } */
 
 void
-quad (num_t res,
+quad (acb_t res,
       num_function_t * F,
-      const num_t from,
-      const num_t to)
+      const acb_t from,
+      const acb_t to)
 {
-    quad_gauss_legendre (res, F, from, to);
+    acb_zero(res);
+    //quad_gauss_legendre (res, F, from, to);
 }

@@ -22,27 +22,19 @@
 #ifndef __QUAD_H__
 #define __QUAD_H__
 
-#include "num.h"
-
 #include "flint/acb.h"
 #include "flint/acb_calc.h"
 
 typedef struct
 {
-    void (* function) (num_t res, const num_t x, void * params);
+    void (* function) (acb_t res, const acb_t x, void * params);
     void * params;
 } num_function_t;
 
-//typedef void * num_function_t;
-
-/* int */
-/* f_integrand (acb_ptr res, const acb_t z, void * params, slong order, slong prec); */
-
-
 void
-quad (num_t res,
+quad (acb_t res,
       num_function_t * F,
-      const num_t from,
-      const num_t to);
+      const acb_t from,
+      const acb_t to);
 
 #endif /* __QUAD_H__ */

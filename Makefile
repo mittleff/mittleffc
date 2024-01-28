@@ -16,12 +16,10 @@ CFLAGS_UNITY=-DUNITY_OUTPUT_COLOR -DUNITY_INCLUDE_DOUBLE -I./modules/Unity/src
 CFLAGS_LOG=-DLOG_USE_COLOR -I./modules/log.c/src
 LDLIBS=-lflint -lgsl -lgslcblas -lm
 
-check: test_quad test_suite
+check: test_partition 
 
-.PHONY: num unity log test_suite
-num:
-	$(CC) $(CFLAGS) -I./src -I./src/num -c ./src/num/new.c -o build/new.o
-	$(CC) $(CFLAGS) -I./src -I./src/num -c ./src/num/num.c -o build/num.o
+.PHONY: unity log test_suite
+
 unity:
 	$(CC) $(CFLAGS) $(CFLAGS_UNITY) -c ./modules/Unity/src/unity.c -o build/unity.o
 log:
@@ -29,7 +27,21 @@ log:
 
 DEBUG = -DDEBUG $(CFLAGS_LOG)
 
-test_quad: prepare log num unity
+INCDIR = -I./src/flintutils -I./src/partition
+
+test_partition: prepare unity
+	$(CC) $(CFLAGS) $(INCDIR) -c ./src/flintutils/flintutils.c -o build/flintutils.o
+	$(CC) $(CFLAGS) $(INCDIR) -c ./src/partition/partition.c -o build/partition.o
+	$(CC) $(CFLAGS) $(DEBUG) $(CFLAGS_UNITY) -I./src/partition -I./src/num -c tests/00-test_partition.c -o build/test_partition.o
+	$(CC) $(CFLAGS) \
+		build/unity.o \
+		build/flintutils.o \
+		build/partition.o \
+		build/test_partition.o \
+		-o build/test_partition.x $(LDLIBS)
+	$(VALGRIND) --log-file=valgrind-test_partition.log ./build/test_partition.x
+
+test_quad: prepare log unity
 	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/quad -c ./src/quad/quad.c -o build/quad.o
 	$(CC) $(CFLAGS) $(DEBUG) $(CFLAGS_UNITY) -I./src/quad -I./src/num -c tests/test_quad.c -o build/test_quad.o
 	$(CC) $(CFLAGS) \
@@ -42,21 +54,19 @@ test_quad: prepare log num unity
 		-o build/test_quad.x $(LDLIBS)
 	$(VALGRIND) --log-file=valgrind-test_quad.log ./build/test_quad.x
 
-test_suite: prepare log num unity
-	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/partition -c ./src/partition/partition.c -o build/partition.o
-	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/quad -c ./src/quad/quad.c -o build/quad.o
-	$(CC) $(CFLAGS) -I./src -I./src/num -I./src/quad -I./src/integrate -c ./src/integrate/integrate.c -o build/integrate.o
-	$(CC) $(CFLAGS) $(DEBUG) -I./src -I./src/num -I./src/integrate -I./src/algorithm -c ./src/algorithm/algorithm.c -o build/algorithm.o
-	$(CC) $(CFLAGS) $(DEBUG) -I./src/num -I./src/partition -I./src/algorithm -I./src/mittleff -c ./src/mittleff/mittleff.c -o build/mittleff.o
-	$(CC) $(CFLAGS) $(DEBUG) $(CFLAGS_UNITY) -I./src/num -I./src/partition -I./src/mittleff -c tests/00-test_suite.c -o build/00-test_suite.o
+test_suite: prepare log unity
+	$(CC) $(CFLAGS) -I./src  -I./src/partition -c ./src/partition/partition.c -o build/partition.o
+	$(CC) $(CFLAGS) -I./src  -I./src/quad -c ./src/quad/quad.c -o build/quad.o
+	$(CC) $(CFLAGS) -I./src  -I./src/quad -I./src/integrate -c ./src/integrate/integrate.c -o build/integrate.o
+	$(CC) $(CFLAGS) $(DEBUG) -I./src -I./src/integrate -I./src/algorithm -c ./src/algorithm/algorithm.c -o build/algorithm.o
+	$(CC) $(CFLAGS) $(DEBUG)  -I./src/partition -I./src/algorithm -I./src/mittleff -c ./src/mittleff/mittleff.c -o build/mittleff.o
+	$(CC) $(CFLAGS) $(DEBUG) $(CFLAGS_UNITY)  -I./src/partition -I./src/mittleff -c tests/00-test_suite.c -o build/00-test_suite.o
 	$(CC) $(CFLAGS) \
 		build/log.o \
 		build/unity.o \
 		build/algorithm.o \
 		build/quad.o \
 		build/integrate.o \
-		build/new.o \
-		build/num.o \
 		build/partition.o \
 		build/mittleff.o \
 		build/00-test_suite.o \

@@ -20,16 +20,16 @@
  * @brief Implementation of the main functions of the library.
  */
 #include "mittleff.h"
-#include <stdio.h>
-#include <stdlib.h>
+//#include <stdio.h>
+//#include <stdlib.h>
 #include <math.h>
 #include <complex.h>
 #include <assert.h>
 
-#include "num.h"
-#include "new.h"
 #include "partition.h"
 #include "algorithm.h"
+
+#include "flintutils.h"
 
 #include <gsl/gsl_math.h>
 #include <stdbool.h>
@@ -38,170 +38,128 @@
 #include "log.h"
 #endif
 
+// Converts an arb_t number to double.
+/* static double */
+/* arbtod (const arb_t x) */
+/* { */
+/*     return arf_get_d(arb_midref(x), ARF_RND_NEAR); */
+/* } */
+
 static void
-_mittleff (num_t res,
-           const num_t alpha,
-           const num_t beta,
-           const num_t z,
-           const num_t tol)
+_mittleff (acb_t res,
+           const arb_t alpha,
+           const arb_t beta,
+           const acb_t z,
+           const arb_t tol)
 {
-#ifdef DEBUG
-    log_info("\n[\033[1;33m%s\033[0m] Calling with parameters:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n\t    \033[1;32mtol\033[0m = %g\n",
-             __func__,
-             num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(tol));
-#endif
+    arb_t zero, one, two, half;
+    slong prec = 64;
+
+    arb_init(zero);
+    arb_init(one);
+    arb_init(two);
+    arb_init(half);
+
+    arb_zero(zero);
+    arb_one(one);
+    arb_set_d(two, 2.0);
+    arb_set_d(half, 0.5);
+    
     /* Test special cases */
-    if (num_is_zero(z)) /* z = 0 */
-    {
-        num_rgamma(res, beta);
-#ifdef DEBUG
-        log_info("\n[\033[1;33m%s\033[0m] \033[1;31mSpecial Case: z = 0.0\033[0m\n\t    \033[1;32mres\033[0m = 1/Gamma(%g) = %+.14e%+.14e*I\n",
-                 __func__, num_to_d(beta), num_real_d(res), num_imag_d(res));
-#endif        
+    if (acb_is_zero(z)) { /* z = 0 */
+        acb_hypgeom_rgamma(res, z, prec);
     }
-    else if (num_eq_d(alpha, 1.0) && num_eq_d(beta, 1.0)) /* exp(z) */
-    {
-        num_exp(res, z);
-#ifdef DEBUG
-        log_info("\n[\033[1;33m%s\033[0m] \033[1;31mSpecial Case: alpha = beta = 1\033[0m\n\t    \033[1;32mres\033[0m = exp(z) = %+.14e%+.14e*I\n",
-                 __func__, num_real_d(res), num_imag_d(res));
-#endif        
+    else if (arb_eq(alpha, one) && arb_eq(beta, one)) { /* exp(z) */
+        acb_exp(res, z, prec);
     }
-    else if (num_eq_d(alpha, 2.0) && num_eq_d(beta, 1.0)) /* cosh(sqrt(z)) */
-    {
-        num_sqrt(res, z);
-        num_cosh(res, res);
-#ifdef DEBUG
-        log_info("\n[\033[1;33m%s\033[0m] \033[1;31mSpecial Case: alpha = 2, beta = 1\033[0m\n\t    \033[1;32mres\033[0m = cosh(sqrt(z)) = %+.14e%+.14e*I\n",
-                 __func__, num_real_d(res), num_imag_d(res));
-#endif         
+    else if (arb_eq(alpha, two) && arb_eq(beta, one)) { /* cosh(sqrt(z)) */
+        acb_sqrt(res, z, prec);
+        acb_cosh(res, res, prec);
     }
-    else if (num_eq_d(alpha, 0.5) && num_eq_d(beta, 1.0)) /* exp(z^2)*erfc(-z) */
-    {
-        num_t exp_z2, erfc_z;
-        exp_z2 = new(num), erfc_z = new(num);
-        num_pow_d(exp_z2, z, 2.0);
-        num_exp(exp_z2, exp_z2);
+    else if (arb_eq(alpha, half) && arb_eq(beta, one)) { /* exp(z^2)*erfc(-z) */
+        acb_t exp_z2, erfc_z;
         
-        num_neg(erfc_z, z);
-        num_erfc(erfc_z, erfc_z);
+        acb_init(exp_z2);
+        acb_init(erfc_z);
+        acb_pow(exp_z2, z, two, prec);
+        acb_exp(exp_z2, exp_z2);
         
-        num_mul(res, exp_z2, erfc_z);
-        delete(exp_z2), delete(erfc_z);
-#ifdef DEBUG
-        log_info("\n[\033[1;33m%s\033[0m] \033[1;31mSpecial Case: alpha = 0.5, beta = 1\033[0m\n\t    \033[1;32mres\033[0m = exp(z^2)*erfc(-z) = %+.14e%+.14e*I\n",
-                 __func__, num_real_d(res), num_imag_d(res));
-#endif         
+        acb_neg(erfc_z, z);
+        acb_hypgeom_erfc(erfc_z, erfc_z, prec);
+        
+        acb_mul(res, exp_z2, erfc_z, prec);
+
+        acb_clear(exp_z2);
+        acb_clear(erfc_z);
     }
-    else if (num_eq_d(alpha, 2.0) && num_eq_d(beta, 2.0)) /* sinh(sqrt(z))/sqrt(z) */
-    {
-        num_t n, d;
-        n = new(num);
-        d = new(num);
-        num_sqrt(n, z);
-        num_sqrt(d, z);
-        num_sinh(n, n);
-        num_div(res, n, d);
-        delete(n), delete(d);
-#ifdef DEBUG
-        log_info("\n[\033[1;33m%s\033[0m] \033[1;31mSpecial Case: alpha = beta = 2\033[0m\n\t    \033[1;32mres\033[0m = sinh(sqrt(z))/sqrt(z) = %+.14e%+.14e*I\n",
-                 __func__, num_real_d(res), num_imag_d(res));
-#endif         
+    else if (arb_eq(alpha, two) && arb_eq(beta, two)) { /* sinh(sqrt(z))/sqrt(z) */
+        acb_t n, d;
+
+        acb_init(n);
+        acb_init(d);
+
+        acb_sqrt(n, z, prec);
+        acb_sqrt(d, z, prec);
+        acb_sinh(n, n, prec);
+        acb_div(res, n, d, prec);
+
+        acb_clear(n);
+        acb_clear(d);
     }
-    else if (in_region_G0(z))
-    {
-#ifdef DEBUG
-        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G0. Applying Taylor series.",
-                 __func__, num_real_d(z), num_imag_d(z));
-#endif        
+    else if (in_region_G0(z)) {
         mittleff0(res, alpha, beta, z, tol);
     }
-    else if (num_gt_d(alpha, 1.0)) /* apply recursive relation (2.2) */
-    {
-#ifdef DEBUG
-        log_info("\n[\033[1;33m%s\033[0m] \033[1;31mSpecial Case: alpha > 1\033[0m\n\t    Applying recursive relation",
-                 __func__);
-#endif         
-        const int m = (int) (ceil((num_to_d(alpha) - 1)/2.0) + 1);
+    else if (arb_gt(alpha, one)) { /* apply recursive relation (2.2) */ 
+        int m, h;
+        arb_t alphap, one_over_2mp1;
+        acb_t zp, aux;
+        
+        arb_init(alphap);
+        arb_init(one_over_2mp1);
+        acb_init(zp);
+        acb_init(aux);
 
-        num_t one_over_2mp1, alphap, zp, aux;
+        m = (int) (ceil((arbtod(alpha) - 1.0)/2.0) + 1.0);
+        arb_set_d(one_over_2mp1, 1.0/(2.0 * m + 1.0));
+        acb_zero(res);
+        
+        for (h = -m; h <= m; h++) {
+            arb_mul(alphap, alpha, one_over_2mp1, prec);
 
-        one_over_2mp1 = new(num);
-        alphap = new(num);
-        zp = new(num), aux = new(num);
+            acb_pow_arb(zp, z, one_over_2mp1, prec);
 
-        num_set_d(one_over_2mp1, 1.0/(2.0 * m + 1.0));
-
-        num_set_d(res, 0.0);
-        for (int h = -m; h <= m; h++)
-        {
-            num_mul(alphap, alpha, one_over_2mp1);
-
-            num_pow(zp, z, one_over_2mp1);
-
-            num_set_d_d(aux, 0.0, 2.0 * M_PI * h * num_to_d(one_over_2mp1));
-            num_exp(aux, aux);
-            num_pow(zp, z, one_over_2mp1);
-            num_mul(zp, zp, aux);
+            acb_set_d_d(aux, 0.0, 2.0 * M_PI * h * arbtod(one_over_2mp1));
+            acb_exp(aux, aux, prec);
+            acb_pow_arb(zp, z, one_over_2mp1, prec);
+            acb_mul(zp, zp, aux, prec);
 
             _mittleff(aux, alphap, beta, zp, tol);
 
-            num_add(res, res, aux);
+            acb_add(res, res, aux, prec);
         }
-        num_mul(res, res, one_over_2mp1);
+        acb_mul_arb(res, res, one_over_2mp1, prec);
 
-        delete(one_over_2mp1);
-        delete(alphap);
-        delete(zp), delete(aux);
-    }
-    else /* alpha <= 1 */
-    {
-        if (in_region_G1(z, alpha, tol))
-        {
-#ifdef DEBUG
-        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G1.",
-                 __func__, num_real_d(z), num_imag_d(z));
-#endif            
+        arb_clear(one_over_2mp1);
+        arb_clear(alphap);
+        acb_clear(zp);
+        acb_clear(aux);
+    } else { /* alpha <= 1 */
+        if (in_region_G1(z, alpha, tol)) {            
             mittleff1(res, alpha, beta, z, tol);
         }
-        else if (in_region_G2(z, alpha, tol))
-        {
-#ifdef DEBUG
-        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G2.",
-                 __func__, num_real_d(z), num_imag_d(z));
-#endif            
+        else if (in_region_G2(z, alpha, tol)) {           
             mittleff2(res, alpha, beta, z, tol);
         }
-        else if (in_region_G3(z, alpha, tol))
-        {
-#ifdef DEBUG
-        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G3.",
-                 __func__, num_real_d(z), num_imag_d(z));
-#endif              
+        else if (in_region_G3(z, alpha, tol)) {             
             mittleff3(res, alpha, beta, z, tol);
         }
-        else if (in_region_G4(z, alpha, tol))
-        {
-#ifdef DEBUG
-        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G4.",
-                 __func__, num_real_d(z), num_imag_d(z));
-#endif             
+        else if (in_region_G4(z, alpha, tol)) {            
             mittleff4(res, alpha, beta, z, tol);
         }
-        else if (in_region_G5(z, alpha, tol))
-        {
-#ifdef DEBUG
-        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G5.",
-                 __func__, num_real_d(z), num_imag_d(z));
-#endif            
+        else if (in_region_G5(z, alpha, tol)) {            
             mittleff5(res, alpha, beta, z, tol);
         }
-        else if (in_region_G6(z, alpha, tol))
-        {
-#ifdef DEBUG
-        log_info("\n[\033[1;33m%s\033[0m]\n\t z = %+.14e%+.14e*I located in region G6.",
-                 __func__, num_real_d(z), num_imag_d(z));
-#endif            
+        else if (in_region_G6(z, alpha, tol)) {            
             mittleff6(res, alpha, beta, z, tol);
         }
         else
@@ -217,27 +175,30 @@ mittleff_cmplx (double* res,
           const double x, const double y,
           const double tol)
 {
-    #ifdef DEBUG
-    log_info("\n[\033[1;33m%s\033[0m] Calling with parameters:\n\t\t \033[1;32malpha\033[0m = %g\n\t\t \033[1;32mbeta\033[0m  = %g\n\t\t \033[1;32mz\033[0m = %+.14e%+.14e*I\n\t\t \033[1;32mtol\033[0m = %g\n",
-             __func__, alpha, beta, x, y, tol);
-    #endif
-    
     assert (alpha > 0.0);
 
-    num_t _res, _alpha, _beta, _z, _tol;
+    arb_t _alpha, _beta, _tol;
+    acb_t _z;
 
-    _alpha = new(num), _beta = new(num),_z = new(num), _tol = new(num);
-    _res = new(num);
-    
-    num_set_d(_alpha, alpha), num_set_d(_beta, beta);
-    num_set_d_d(_z, x, y), num_set_d(_tol, tol);
+    arb_init(_alpha);
+    arb_init(_beta);
+    arb_init(_tol);
+    acb_init(_res);
+
+    arb_set_d(_alpha, alpha);
+    arb_set_d(_beta, beta);
+    arb_set_d(_tol, tol);
+    acb_set_d_d(_z, x, y);
 
     _mittleff(_res, _alpha, _beta, _z, _tol);
-    num_to_d_d(res, _res);
+
+    //num_to_d_d(res, _res);
     
-    delete(_res);
-    delete(_alpha), delete(_beta);
-    delete(_z), delete(_tol);
+    arb_clear(_alpha);
+    arb_clear(_beta);
+    arb_clear(_tol);
+    acb_clear(_z)
+    arb_clear(_res);
 
     return EXIT_SUCCESS;
 }

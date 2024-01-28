@@ -15,31 +15,29 @@
  * mittleffc. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * @file abc.h
- * @brief Interface for the Abstract Base Class (ABC).
+/** 
+ * @file flintutils.h
+ * @brief Misc interface for interacting with FLINT.
  */
-#ifndef __ABC_H__
-#define __ABC_H__
+#ifndef __FLINTUTILS_H__
+#define __FLINTUTILS_H__
 
-#include <stdarg.h>
-#include <stdio.h>
+#include <flint/arb.h>
 
-struct ABC
-{
-    size_t size;
-    /**
-     * Constructor
-     */
-    void* (* ctor) (void* self, va_list* app);
-    /**
-     * Destructor
-     */
-    void* (* dtor) (void* self);
-    /**
-     * Clone object
-     */
-    /* void* (* clone) (const void* self); */
-};
+#ifndef M_PI
+#define M_PI 3.141592653589793238462643383279502884197169399375105820974944
+#endif
 
-#endif /* __ABC_H__ */
+/* Default precision for FLINT */
+#define PREC 64
+
+/**
+ * Converts an arb_t object to double.
+ */
+double
+arbtod (const arb_t x);
+
+void
+arb_fmod (arb_t res, const arb_t self, const arb_t other);
+
+#endif /* __FLINTUTILS_H__ */

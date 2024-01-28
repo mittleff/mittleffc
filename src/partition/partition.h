@@ -22,49 +22,50 @@
 #ifndef __PARTITION_H__
 #define __PARTITION_H__
 
-#include "num.h"
+#include <flint/arb.h>
+#include <flint/acb.h>
 #include <stdbool.h>
 
 /**
  * Size in bytes of the object
  */
 bool
-in_region_G0 (const num_t z);
+in_region_G0 (const acb_t z);
 
 /**
  * Size in bytes of the object
  */
 bool
-in_region_G1 (const num_t z, const num_t alpha, const num_t acc);
+in_region_G1 (const acb_t z, const arb_t alpha, const arb_t acc);
 
 /**
  * Size in bytes of the object
  */
 bool
-in_region_G2 (const num_t z, const num_t alpha, const num_t acc);
+in_region_G2 (const acb_t z, const arb_t alpha, const arb_t acc);
 
 /**
  * Size in bytes of the object
  */
 bool
-in_region_G3 (const num_t z, const num_t alpha, const num_t acc);
+in_region_G3 (const acb_t z, const arb_t alpha, const arb_t acc);
 
 /**
  * Size in bytes of the object
  */
 bool
-in_region_G4 (const num_t z, const num_t alpha, const num_t acc);
+in_region_G4 (const acb_t z, const arb_t alpha, const arb_t acc);
 
 /**
  * Size in bytes of the object
  */
 bool
-in_region_G5 (const num_t z, const num_t alpha, const num_t acc);
+in_region_G5 (const acb_t z, const arb_t alpha, const arb_t acc);
 
 /**
  * Size in bytes of the object
  */
 bool
-in_region_G6 (const num_t z, const num_t alpha, const num_t acc);
+in_region_G6 (const acb_t z, const arb_t alpha, const arb_t acc);
 
 #endif /* __PARTITION_H__ */

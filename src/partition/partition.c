@@ -21,305 +21,353 @@
  */
 
 #include "partition.h"
-#include "num.h"
-#include "new.h"
-#include "utils.h"
+#include "flintutils.h"
 
 #include <math.h>
 #include <stdbool.h>
-#include <gsl/gsl_math.h>
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
-static bool diskp (const num_t z, const num_t r);
-static bool closure_diskp (const num_t z, const num_t r0);
-static bool wedgep (const num_t z, const num_t phi1, const num_t phi2);
-static bool closure_wedgep (const num_t z, const num_t phi1, const num_t phi2);
-static bool is_between (const num_t c, const num_t a, const num_t b, const bool eq);
+static bool diskp          (const acb_t z, const arb_t r);
+static bool closure_diskp  (const acb_t z, const arb_t r0);
+static bool wedgep         (const acb_t z, const arb_t phi1, const arb_t phi2);
+static bool closure_wedgep (const acb_t z, const arb_t phi1, const arb_t phi2);
+static bool is_between     (const arb_t c, const arb_t a, const arb_t b, const bool eq);
 
 /* Equation (4.21) */
 static void
-compute_r1 (num_t r1, const num_t alpha, const num_t acc)
+compute_r1 (arb_t r1, const arb_t alpha, const arb_t acc)
 {
-    num_t one, pi, c0, n, d, aux;
+    arb_t one, pi, c0, n, d, aux, two;
 
-    pi = new(num), one = new(num);
-    num_set_d(pi, M_PI);
-    num_set_d(one, 1.0);
+    arb_init(one);
+    arb_init(pi);
+    arb_init(c0);
+    arb_init(n);
+    arb_init(d);
+    arb_init(aux);
+    arb_init(two);
+
+    arb_one(one);
+    arb_const_pi(pi, PREC);
+    arb_set_d(two, 2.0);
 
     /* Compute C0 */
     /* pow(1.3, 1.0 - alpha) */
-    n = new(num), aux = new(num);
-    num_set_d(n, 1.3);
-    num_sub(aux, one, alpha);
-    num_pow(n, n, aux);
+    arb_set_d(n, 1.3);
+    arb_sub(aux, one, alpha, PREC);
+    arb_pow(n, n, aux, PREC);
     /* M_PI * sin(M_PI * alpha) */
-    d = new(num);
-    num_mul(d, pi, alpha);
-    num_sin(d, d);
-    num_mul(d, d, pi);
-    c0 = new(num);
-    num_div(c0, n, d);
+    arb_mul(d, pi, alpha, PREC);
+    arb_sin(d, d, PREC);
+    arb_mul(d, d, pi, PREC);
+    arb_div(c0, n, d, PREC);
 
-    num_div(aux, acc, c0);
-    num_log(aux, aux);
-    num_mul_d(aux, aux, -2.0);
-    num_pow(r1, aux, alpha);
+    arb_div(aux, acc, c0, PREC);
+    arb_log(aux, aux, PREC);
+    arb_mul(aux, aux, two, PREC);
+    arb_neg(aux, aux);
+    arb_pow(r1, aux, alpha, PREC);
     
-    delete(pi), delete(one), delete(c0), delete(n), delete(d), delete(aux);    
+    arb_clear(pi);
+    arb_clear(one);
+    arb_clear(c0);
+    arb_clear(n);
+    arb_clear(d);
+    arb_clear(aux);
 }
 
 bool
-in_region_G0 (const num_t z)
+in_region_G0 (const acb_t z)
 {
     bool ret;
-    num_t r0;
+    arb_t r0;
 
-    r0 = new(num);
-    num_set_d(r0, 0.95);
+    arb_init(r0);
+    arb_set_d(r0, 0.95);
     ret = closure_diskp(z, r0);
-    delete(r0);
+    arb_clear(r0);
 
     return ret;
 }
 
 bool
-in_region_G1 (const num_t z, const num_t alpha, const num_t acc)
+in_region_G1 (const acb_t z, const arb_t alpha, const arb_t acc)
 {
     bool ret;
-    num_t r1, delta, phi1, phi2;
+    arb_t r1, delta, phi1, phi2;
 
-    r1 = new(num);
+    arb_init(r1);
     compute_r1(r1, alpha, acc);
     
     /* Compute delta */
-    delta = new(num);
-    num_set_d(delta, M_PI * num_to_d(alpha)/8.0);
+    arb_init(delta);
+    arb_set_d(delta, M_PI * arbtod(alpha)/8.0);
     
     /* Compute phi1, phi2 */
-    phi1 = new(num), phi2 = new(num);
-    num_set_d(phi1, - M_PI * num_to_d(alpha) + num_to_d(delta) );
-    num_set_d(phi2, + M_PI * num_to_d(alpha) - num_to_d(delta));
+    arb_init(phi1);
+    arb_init(phi2);
+    arb_set_d(phi1, - M_PI * arbtod(alpha) + arbtod(delta) );
+    arb_set_d(phi2, + M_PI * arbtod(alpha) - arbtod(delta));
 
     ret = (!diskp(z, r1)) && wedgep(z, phi1, phi2);
     
-    delete(r1), delete(delta), delete(phi1), delete(phi2);
+    arb_clear(r1);
+    arb_clear(delta);
+    arb_clear(phi1);
+    arb_clear(phi2);
 
     return ret;
 }
 
 bool
-in_region_G2 (const num_t z, const num_t alpha, const num_t acc)
+in_region_G2 (const acb_t z, const arb_t alpha, const arb_t acc)
 {
     bool ret;
-    num_t r1, deltat, phi1, phi2;
+    arb_t r1, deltat, phi1, phi2;
 
-    r1 = new(num);
+    arb_init(r1);
     compute_r1(r1, alpha, acc);
 
     /* Compute deltat */
-    deltat = new(num);
-    num_set_d(deltat, MIN(M_PI * num_to_d(alpha)/8.0, M_PI * (num_to_d(alpha) + 1.0)/2.0));
+    arb_init(deltat);
+    arb_set_d(deltat, MIN(M_PI * arbtod(alpha)/8.0, M_PI * (arbtod(alpha) + 1.0)/2.0));
 
     /* Compute phi1, phi2 */
-    phi1 = new(num), phi2 = new(num);
-    num_set_d(phi1, M_PI * num_to_d(alpha) + num_to_d(deltat));
-    num_set_d(phi2, -num_to_d(phi1));
+    arb_init(phi1);
+    arb_init(phi2);
+    arb_set_d(phi1, M_PI * arbtod(alpha) + arbtod(deltat));
+    arb_set_d(phi2, -arbtod(phi1));
 
     ret = (!diskp(z, r1)) && wedgep(z, phi1, phi2);
 
-    delete(r1), delete(deltat), delete(phi1), delete(phi2);
+    arb_clear(r1);
+    arb_clear(deltat);
+    arb_clear(phi1);
+    arb_clear(phi2);
 
     return ret;
 }
 
 bool
-in_region_G3 (const num_t z, const num_t alpha, const num_t acc)
+in_region_G3 (const acb_t z, const arb_t alpha, const arb_t acc)
 {
     bool ret;
-    num_t r1, delta, deltat, phi1, phi2;
+    arb_t r1, delta, deltat, phi1, phi2;
 
-    r1 = new(num);
+    arb_init(r1);
     compute_r1(r1, alpha, acc);
 
     /* Compute delta, deltat */
-    delta = new(num), deltat = new(num);
-    num_set_d(delta, M_PI * num_to_d(alpha)/8.0);
-    num_set_d(deltat, MIN(M_PI * num_to_d(alpha)/8.0, M_PI * (num_to_d(alpha) + 1.0)/2.0));
+    arb_init(delta);
+    arb_init(deltat);
+    arb_set_d(delta, M_PI * arbtod(alpha)/8.0);
+    arb_set_d(deltat, MIN(M_PI * arbtod(alpha)/8.0, M_PI * (arbtod(alpha) + 1.0)/2.0));
 
     /* Compute phi1, phi2 */
-    phi1 = new(num), phi2 = new(num);
-    num_set_d(phi1, M_PI * num_to_d(alpha) - num_to_d(delta));
-    num_set_d(phi2, M_PI * num_to_d(alpha) + num_to_d(deltat));
+    arb_init(phi1);
+    arb_init(phi2);
+    arb_set_d(phi1, M_PI * arbtod(alpha) - arbtod(delta));
+    arb_set_d(phi2, M_PI * arbtod(alpha) + arbtod(deltat));
 
     ret = (!diskp(z, r1)) && closure_wedgep(z, phi1, phi2);
 
-    delete(r1), delete(deltat), delete(phi1), delete(phi2);
+    arb_clear(r1);
+    arb_clear(deltat);
+    arb_clear(phi1);
+    arb_clear(phi2);
 
     return ret;
 }
 
 bool
-in_region_G4 (const num_t z, const num_t alpha, const num_t acc)
+in_region_G4 (const acb_t z, const arb_t alpha, const arb_t acc)
 {
     bool ret;
-    num_t r1, delta, deltat, phi1, phi2;
+    arb_t r1, delta, deltat, phi1, phi2;
 
-    r1 = new(num);
+    arb_init(r1);
     compute_r1(r1, alpha, acc);
 
     /* Compute delta, deltat */
-    delta = new(num), deltat = new(num);
-    num_set_d(delta, M_PI * num_to_d(alpha)/8.0);
-    num_set_d(deltat, MIN(M_PI * num_to_d(alpha)/8.0, M_PI * (num_to_d(alpha) + 1.0)/2.0));
+    arb_init(delta);
+    arb_init(deltat);
+    arb_set_d(delta, M_PI * arbtod(alpha)/8.0);
+    arb_set_d(deltat, MIN(M_PI * arbtod(alpha)/8.0, M_PI * (arbtod(alpha) + 1.0)/2.0));
 
     /* Compute phi1, phi2 */
-    phi1 = new(num), phi2 = new(num);
-    num_set_d(phi1, -(M_PI * num_to_d(alpha) + num_to_d(deltat)));
-    num_set_d(phi2, -M_PI * num_to_d(alpha) + num_to_d(delta));
+    arb_init(phi1);
+    arb_init(phi2);
+    arb_set_d(phi1, -(M_PI * arbtod(alpha) + arbtod(deltat)));
+    arb_set_d(phi2, -M_PI * arbtod(alpha) + arbtod(delta));
 
     ret = (!diskp(z, r1)) && closure_wedgep(z, phi1, phi2);
 
-    delete(r1), delete(delta), delete(deltat), delete(phi1), delete(phi2);
+    arb_clear(r1);
+    arb_clear(delta);
+    arb_clear(deltat);
+    arb_clear(phi1);
+    arb_clear(phi2);
 
     return ret;
 }
 
 bool
-in_region_G5 (const num_t z, const num_t alpha, const num_t acc)
+in_region_G5 (const acb_t z, const arb_t alpha, const arb_t acc)
 {
     bool ret;
-    num_t r0, r1, phi1, phi2;
+    arb_t r0, r1, phi1, phi2;
 
-    r0 = new(num);
-    num_set_d(r0, 0.95);
+    arb_init(r0);
+    arb_set_d(r0, 0.95);
 
-    r1 = new(num);
+    arb_init(r1);
     compute_r1(r1, alpha, acc);
    
     /* Compute phi1, phi2 */
-    phi1 = new(num), phi2 = new(num);
-    num_set_d(phi1, -5.0 * M_PI * num_to_d(alpha)/6.0);
-    num_set_d(phi2, +5.0 * M_PI * num_to_d(alpha)/6.0);
+    arb_init(phi1);
+    arb_init(phi2);
+    arb_set_d(phi1, -5.0 * M_PI * arbtod(alpha)/6.0);
+    arb_set_d(phi2, +5.0 * M_PI * arbtod(alpha)/6.0);
 
     ret = diskp(z, r1) && (closure_wedgep(z, phi1, phi2) && !diskp(z, r0));
 
-    delete(r0), delete(r1), delete(phi1), delete(phi2);
+    arb_clear(r0);
+    arb_clear(r1);
+    arb_clear(phi1);
+    arb_clear(phi2);
 
     return ret;    
 }
 
 bool
-in_region_G6 (const num_t z, const num_t alpha, const num_t acc)
+in_region_G6 (const acb_t z, const arb_t alpha, const arb_t acc)
 {
     bool ret;
-    num_t r0, r1, phi1, phi2;
+    arb_t r0, r1, phi1, phi2;
 
-    r0 = new(num);
-    num_set_d(r0, 0.95);
+    arb_init(r0);
+    arb_set_d(r0, 0.95);
 
-    r1 = new(num);
+    arb_init(r1);
     compute_r1(r1, alpha, acc);
    
     /* Compute phi1, phi2 */
-    phi1 = new(num), phi2 = new(num);
-    num_set_d(phi1, +5.0 * M_PI * num_to_d(alpha)/6.0);
-    num_set_d(phi2, -5.0 * M_PI * num_to_d(alpha)/6.0);
+    arb_init(phi1);
+    arb_init(phi2);
+    arb_set_d(phi1, +5.0 * M_PI * arbtod(alpha)/6.0);
+    arb_set_d(phi2, -5.0 * M_PI * arbtod(alpha)/6.0);
 
     ret = diskp(z, r1) && (closure_wedgep(z, phi1, phi2) && !diskp(z, r0));
 
-    delete(r0), delete(r1), delete(phi1), delete(phi2);
+    arb_clear(r0);
+    arb_clear(r1);
+    arb_clear(phi1);
+    arb_clear(phi2);
 
     return ret;
 }
 
 
 static bool
-_diskp (const num_t z, const num_t r, const bool closure)
+_diskp (const acb_t z, const arb_t r, const bool closure)
 {
-    num_t absz;
+    arb_t absz;
     bool ret;
     
-    absz = new(num);
-    num_abs(absz, z);
+    arb_init(absz);
+    acb_abs(absz, z, PREC);
     if (closure == true)
-        ret = diskp(z, r) || num_eq(absz, r);
+        ret = diskp(z, r) || arb_eq(absz, r);
     else
-        ret = num_lt(absz, r);
-    delete(absz);
+        ret = arb_lt(absz, r);
+
+    arb_clear(absz);
     
     return ret;
 }
 
 static bool
-diskp (const num_t z, const num_t r)
+diskp (const acb_t z, const arb_t r)
 {
     return _diskp(z, r, false);
 }
 
 static bool
-closure_diskp (const num_t z, const num_t r)
+closure_diskp (const acb_t z, const arb_t r)
 {
     return _diskp(z, r, true);
 }
 
 static bool
-_wedgep (const num_t z, const num_t phi1, const num_t phi2, const double closure)
+_wedgep (const acb_t z, const arb_t phi1, const arb_t phi2, const double closure)
 {
     bool res;
-    num_t argz;
+    arb_t argz;
 
-    argz = new(num);
-    num_arg(argz, z);
+    arb_init(argz);
+
+    acb_arg(argz, z, PREC);
     res = is_between(argz, phi1, phi2, closure);
-    delete(argz);
+
+    arb_clear(argz);
+    
     return res;
 }
 
 static bool
-wedgep (const num_t z, const num_t phi1, const num_t phi2)
+wedgep (const acb_t z, const arb_t phi1, const arb_t phi2)
 {
     return _wedgep(z, phi1, phi2, false);
 }
 
 static bool
-closure_wedgep (const num_t z, const num_t phi1, const num_t phi2)
+closure_wedgep (const acb_t z, const arb_t phi1, const arb_t phi2)
 {
     return _wedgep(z, phi1, phi2, true);
 }
 
 /* Checks if _c is between _a and _b */
 static bool
-is_between (const num_t c, const num_t a, const num_t b, const bool eq)
+is_between (const arb_t c, const arb_t a, const arb_t b, const bool eq)
 {
     bool ret;
-    num_t _a, _b, _c, n;
+    arb_t _a, _b, _c, n;
     
-    _a = new(num), _b = new(num), _c = new(num), n = new(num);
-    num_set_d(n, 2.0 * M_PI);
+    arb_init(_a);
+    arb_init(_b);
+    arb_init(_c);
+    arb_init(n);
+    arb_set_d(n, 2.0 * M_PI);
 
-    num_fmod(_a, a, n);
-    num_fmod(_b, b, n);
-    num_fmod(_c, c, n);
+    arb_fmod(_a, a, n);
+    arb_fmod(_b, b, n);
+    arb_fmod(_c, c, n);
 
-    if (num_lt(_a, _b))
+    if (arb_lt(_a, _b))
     {
         if (eq)
-            ret = (num_le(_a, _c) && num_le(_c, _b)) ? true : false;
+            ret = (arb_le(_a, _c) && arb_le(_c, _b)) ? true : false;
         else
-            ret = (num_lt(_a, _c) && num_lt(_c, _b)) ? true : false;
+            ret = (arb_lt(_a, _c) && arb_lt(_c, _b)) ? true : false;
     }
     else
     { /* b < a */
         /* if in [b, a] then not in [a, b] */
         if (eq)
-            ret = (num_le(_b, _c) && num_le(_c, _a)) ? false : true;
+            ret = (arb_le(_b, _c) && arb_le(_c, _a)) ? false : true;
         else
-            ret = (num_lt(_b, _c) && num_lt(_c, _a)) ? false : true;
+            ret = (arb_lt(_b, _c) && arb_lt(_c, _a)) ? false : true;
     }
 
-    delete(_a), delete(_b), delete(_c), delete(n);
+    arb_clear(_a);
+    arb_clear(_b);
+    arb_clear(_c);
+    arb_clear(n);
 
     return ret;
 }
+
+#undef MIN
+#undef MAX
