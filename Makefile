@@ -27,7 +27,7 @@ log:
 
 DEBUG = -DDEBUG $(CFLAGS_LOG)
 
-INCDIR = -I./src/flintutils -I./src/partition
+INCDIR = -I./src/flintutils -I./src/partition -I./src
 
 test_partition: prepare unity
 	$(CC) $(CFLAGS) $(INCDIR) -c ./src/flintutils/flintutils.c -o build/flintutils.o

@@ -29,6 +29,9 @@
 #include <math.h>
 #include <stdbool.h>
 
+#include "flintutils.h"
+#include "types.h"
+
 #ifdef DEBUG
 #include "log.h"
 #endif
@@ -40,92 +43,87 @@
 /*                    const arb_t beta); */
 
 void
-mittleff0 (acb_t res,
-           const arb_t alpha,
-           const arb_t beta,
-           const acb_t z,
-           const acb_t acc) 
+mittleff0 (acb_t res, const acb_t z, void * ctx)
 {
+    ctx_t* p = (ctx_t*) ctx;
+    double a, b;
     int k, kmax;
-    arb_t k1, k2;
-    acb_t absz, sum, tmp, fac1, fac2;
+    arb_t one, aux, absz, k1, k2, eps;
+    acb_t  sum, tmp, fac1, fac2;
 
+    arb_init(one);
+    arb_init(absz);
+    arb_init(k1);
+    arb_init(k2);
+    acb_init(fac1);
+    acb_init(fac2);
+    acb_init(tmp);
+    acb_init(sum);
+    arb_init(aux);
+
+    arb_one(one);
+
+    arb_mul_2exp_si(eps, one, -p->prec);
+
+    /*
+     * Compute the maximum number of terms kmax to be taken into account for the
+     * Taylor series, eq. (4.5)
+     */
+    acb_abs(absz, z, p->prec);
+    
+    arb_set_d(aux, 2.0);
+    arb_sub(aux, aux, p->beta, p->prec);
+    arb_div(aux, aux, p->alpha, p->prec);
+    arb_ceil(aux, aux, p->prec);
+    arb_add(k1, aux, one, p->prec);
+    
+    arb_sub(fac1, one, absz, p->prec);
+    arb_mul(fac1, fac1, eps, p->prec);
+    arb_log(fac1, fac1, p->prec);
+    arb_log(fac2, absz, p->prec);
+    arb_div(aux, fac1, fac2, p->prec);
+    arb_ceil(aux, aux, p->prec);
+    arb_add(k2, aux, one, p->prec);
+    
+    // k1 = (int) (ceil((2 - b)/a) + 1);
+    // k2 = (int) (ceil(log(acc * (1 - abs_z))/log(abs_z)) + 1);
+    kmax = arb_gt(k1, k2) ? (int) arbtod(k1) : (int) arbtod(k2);
+
+    acb_t kk;
     acb_zero(res);
+    acb_init(kk);
+    /* Sum Taylor series */
+    for (k = 0; k <= kmax; k++)
+    {
+        acb_set_d(kk, (double)k);
 
-    /* acb_init(absz); */
-    /* arb_init(k1); */
-    /* arb_init(k2); */
-    /* acb_init(fac1); */
-    /* acb_init(fac2); */
-    /* acb_init(tmp); */
-    /* acb_init(sum); */
+        /* fac1 <- z**k */
+        acb_pow(fac1, z, kk, p->prec);
 
-    /* mag_set_ui_2exp_si(tol, 1, -prec); */
+        /* fac2 <- rgamma(alpha * k + beta) */
+        acb_mul_arb(fac2, kk, p->alpha, p->prec);
+        acb_add_arb(fac2, fac2, p->beta, p->prec);
+        acb_rgamma(fac2, fac2, p->prec);
 
-    /* /\*  */
-    /*  * Compute the maximum number of terms kmax to be taken into account for the */
-    /*  * Taylor series, eq. (4.5)  */
-    /*  *\/ */
-    /* acb_abs(absz, z); */
-    
-    /* arb_set_d(k1, 1.0); */
-    /* acb_set_d(tmp, 2.0); */
-    /* acb_sub(tmp, tmp, beta); */
-    /* acb_div(tmp, tmp, alpha); */
-    /* acb_ceil(tmp, tmp); */
-    /* acb_add(k1, tmp, k1); */
-    
-    /* arb_set_d(k2, 1.0); */
-    /* acb_set_d(fac1, 1.0); */
-    /* acb_sub(fac1, fac1, absz); */
-    /* acb_mul(fac1, fac1, acc); */
-    /* acb_log(fac1, fac1); */
-    /* acb_log(fac2, absz); */
-    /* acb_div(tmp, fac1, fac2); */
-    /* acb_ceil(tmp, tmp); */
-    /* acb_add(k2, tmp, k2); */
-    
-    /* // k1 = (int) (ceil((2 - b)/a) + 1); */
-    /* // k2 = (int) (ceil(log(acc * (1 - abs_z))/log(abs_z)) + 1); */
-    /* kmax = arb_gt(k1, k2) ? (int) arbtod(k1) : (int) arbtod(k2); */
-    /* arb_clear(k1); */
-    /* arb_clear(k2); */
-
-    /* /\* Sum Taylor series *\/ */
-    /* for (k = 0; k <= kmax; k++) */
-    /* { */
-    /*     /\* fac1 <- z**k *\/ */
-    /*     num_pow_d(fac1, z, (double) k);  */
-
-    /*     /\* fac2 <- rgamma(alpha * k + beta) *\/ */
-    /*     num_set_d(fac2, (double) k); */
-    /*     num_mul(fac2, fac2, alpha); */
-    /*     num_add(fac2, fac2, beta); */
-    /*     num_rgamma(fac2, fac2); */
-
-    /*     /\* partial sum = fac1 * fac2 *\/ */
-    /*     num_mul(tmp, fac1, fac2); */
+        /* partial sum = fac1 * fac2 */
+        acb_mul(tmp, fac1, fac2, p->prec);
         
-    /*     num_add(sum, sum, tmp); */
-    /* } */
-    /* num_set_num(res, sum); */
-
-    /* acb_clear(absz); */
-    /* acb_clear(k1),; */
-    /* acb_clear(k2); */
-    /* acb_clear(fac1); */
-    /* acb_clear(fac2); */
-    /* acb_clear(tmp); */
-    /* acb_clear(sum); */
+        acb_add(res, res, tmp, p->prec);
+    }
+    acb_clear(kk);
+    arb_clear(aux);
+    acb_clear(fac1);
+    acb_clear(fac2);
+    acb_clear(tmp);
+    acb_clear(sum);
+    arb_clear(one);
+    arb_clear(k1);
+    arb_clear(k2);
 }
 
 /* compute eq. (2.4) */
 void
-mittleff1 (acb_t res,
-           const arb_t alpha,
-           const arb_t beta,
-           const acb_t z,
-           const acb_t acc) 
+mittleff1 (acb_t res, const acb_t z, void * ctx)
 {
 
     acb_zero(res);
@@ -179,11 +177,7 @@ mittleff1 (acb_t res,
 }
 
 void
-mittleff2 (acb_t res,
-           const arb_t alpha,
-           const arb_t beta,
-           const acb_t z,
-           const acb_t acc) 
+mittleff2 (acb_t res, const acb_t z, void * ctx) 
 {
     acb_zero(res);
     /* UNUSED(acc); */
@@ -260,11 +254,7 @@ mittleff3_4 (acb_t res,
 }
 
 void
-mittleff3 (acb_t res,
-           const arb_t alpha,
-           const arb_t beta,
-           const acb_t z,
-           const acb_t acc) 
+mittleff3 (acb_t res, const acb_t z, void * ctx) 
 
 {
     acb_zero(res);
@@ -272,11 +262,7 @@ mittleff3 (acb_t res,
 }
 
 void
-mittleff4 (acb_t res,
-           const arb_t alpha,
-           const arb_t beta,
-           const acb_t z,
-           const acb_t acc)
+mittleff4 (acb_t res, const acb_t z, void * ctx)
 {
      acb_zero(res);
      //mittleff3_4 (res, alpha, beta, z, acc, 4);
@@ -464,11 +450,7 @@ mittleff5_6 (acb_t res,
 
 /* apply eqs. (4.25) and (4.26) */
 void
-mittleff5 (acb_t res,
-           const arb_t alpha,
-           const arb_t beta,
-           const acb_t z,
-           const acb_t acc)
+mittleff5 (acb_t res, const acb_t z, void * ctx)
 {
     acb_zero(res);
     /* num_t phi, c2; */
@@ -480,11 +462,7 @@ mittleff5 (acb_t res,
 }
 
 void
-mittleff6 (acb_t res,
-           const arb_t alpha,
-           const arb_t beta,
-           const acb_t z,
-           const acb_t acc)
+mittleff6 (acb_t res, const acb_t z, void * ctx)
 {
     acb_zero(res);
     /* num_t phi, c2; */

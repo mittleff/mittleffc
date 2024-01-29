@@ -47,18 +47,18 @@
  * 47(1), 69–88 (2008)
  *
  * @param[in,out] result Holds the final result of the computation
- * @param[in] alpha   Real positive escalar parameter.
- * @param[in] beta    Real scalar parameter.
- * @param[in] re_z    Real part of the complex number argument.
- * @param[in] im_z    Imaginary part of the complex number argument.
- * @param[in] accuracy     Accuracy for the computation.
+ * @param[in] a   Real positive escalar parameter.
+ * @param[in] b    Real scalar parameter.
+ * @param[in] x    Real part of the complex number argument.
+ * @param[in] y    Imaginary part of the complex number argument.
+ * @param[in] prec     Accuracy for the computation.
  */
 int
-mittleff_cmplx (double* result,
-                const double alpha,
-                const double beta,
-                const double re_z,
-                const double im_z,
-                const double accuracy);
+mittleff_cmplx (double* res,
+          const double a,
+          const double b,
+          const double x,
+          const double y,
+          const unsigned short int prec);
 
 #endif /* __MITTLEFF_H__ */

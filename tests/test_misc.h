@@ -1,3 +1,11 @@
+/* void */
+/* test_misc_0 (void) */
+/* { */
+/*     const double complex computed = mittleff(0.5, 0.5, 0.5); */
+/*     const double complex expected = 1.5403698281390346; */
+/*     TEST_VALUE(expected, computed); */
+/* } */
+
 void
 test_misc_1 (void)
 {

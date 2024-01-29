@@ -22,6 +22,8 @@
 
 #include "partition.h"
 #include "flintutils.h"
+#include "types.h"
+#include "utils.h"
 
 #include <math.h>
 #include <stdbool.h>
@@ -37,9 +39,10 @@ static bool is_between     (const arb_t c, const arb_t a, const arb_t b, const b
 
 /* Equation (4.21) */
 static void
-compute_r1 (arb_t r1, const arb_t alpha, const arb_t acc)
+compute_r1 (arb_t r1, void * ctx)
 {
-    arb_t one, pi, c0, n, d, aux, two;
+    arb_t acc, one, pi, c0, n, d, aux, two;
+    ctx_t* p = (ctx_t*) ctx;
 
     arb_init(one);
     arb_init(pi);
@@ -48,27 +51,31 @@ compute_r1 (arb_t r1, const arb_t alpha, const arb_t acc)
     arb_init(d);
     arb_init(aux);
     arb_init(two);
+    arb_init(acc);
+
+    arb_mul_2exp_si(acc, one, -p->prec);
+    
 
     arb_one(one);
-    arb_const_pi(pi, PREC);
+    arb_const_pi(pi, p->prec);
     arb_set_d(two, 2.0);
 
     /* Compute C0 */
     /* pow(1.3, 1.0 - alpha) */
     arb_set_d(n, 1.3);
-    arb_sub(aux, one, alpha, PREC);
-    arb_pow(n, n, aux, PREC);
+    arb_sub(aux, one, p->alpha, p->prec);
+    arb_pow(n, n, aux, p->prec);
     /* M_PI * sin(M_PI * alpha) */
-    arb_mul(d, pi, alpha, PREC);
-    arb_sin(d, d, PREC);
-    arb_mul(d, d, pi, PREC);
-    arb_div(c0, n, d, PREC);
+    arb_mul(d, pi, p->alpha, p->prec);
+    arb_sin(d, d, p->prec);
+    arb_mul(d, d, pi, p->prec);
+    arb_div(c0, n, d, p->prec);
 
-    arb_div(aux, acc, c0, PREC);
-    arb_log(aux, aux, PREC);
-    arb_mul(aux, aux, two, PREC);
+    arb_div(aux, acc, c0, p->prec);
+    arb_log(aux, aux, p->prec);
+    arb_mul(aux, aux, two, p->prec);
     arb_neg(aux, aux);
-    arb_pow(r1, aux, alpha, PREC);
+    arb_pow(r1, aux, p->alpha, p->prec);
     
     arb_clear(pi);
     arb_clear(one);
@@ -76,14 +83,16 @@ compute_r1 (arb_t r1, const arb_t alpha, const arb_t acc)
     arb_clear(n);
     arb_clear(d);
     arb_clear(aux);
+    arb_clear(acc);
 }
 
 bool
-in_region_G0 (const acb_t z)
+in_region_G0 (const acb_t z, void * ctx)
 {
+    UNUSED(ctx);
     bool ret;
     arb_t r0;
-
+    
     arb_init(r0);
     arb_set_d(r0, 0.95);
     ret = closure_diskp(z, r0);
@@ -93,23 +102,24 @@ in_region_G0 (const acb_t z)
 }
 
 bool
-in_region_G1 (const acb_t z, const arb_t alpha, const arb_t acc)
+in_region_G1 (const acb_t z, void * ctx)
 {
     bool ret;
     arb_t r1, delta, phi1, phi2;
+    ctx_t* p = (ctx_t*) ctx;
 
     arb_init(r1);
-    compute_r1(r1, alpha, acc);
+    compute_r1(r1, ctx);
     
     /* Compute delta */
     arb_init(delta);
-    arb_set_d(delta, M_PI * arbtod(alpha)/8.0);
+    arb_set_d(delta, M_PI * arbtod(p->alpha)/8.0);
     
     /* Compute phi1, phi2 */
     arb_init(phi1);
     arb_init(phi2);
-    arb_set_d(phi1, - M_PI * arbtod(alpha) + arbtod(delta) );
-    arb_set_d(phi2, + M_PI * arbtod(alpha) - arbtod(delta));
+    arb_set_d(phi1, - M_PI * arbtod(p->alpha) + arbtod(delta) );
+    arb_set_d(phi2, + M_PI * arbtod(p->alpha) - arbtod(delta));
 
     ret = (!diskp(z, r1)) && wedgep(z, phi1, phi2);
     
@@ -122,22 +132,23 @@ in_region_G1 (const acb_t z, const arb_t alpha, const arb_t acc)
 }
 
 bool
-in_region_G2 (const acb_t z, const arb_t alpha, const arb_t acc)
+in_region_G2 (const acb_t z, void * ctx)
 {
     bool ret;
     arb_t r1, deltat, phi1, phi2;
+    ctx_t* p = (ctx_t*) ctx;
 
     arb_init(r1);
-    compute_r1(r1, alpha, acc);
+    compute_r1(r1, ctx);
 
     /* Compute deltat */
     arb_init(deltat);
-    arb_set_d(deltat, MIN(M_PI * arbtod(alpha)/8.0, M_PI * (arbtod(alpha) + 1.0)/2.0));
+    arb_set_d(deltat, MIN(M_PI * arbtod(p->alpha)/8.0, M_PI * (arbtod(p->alpha) + 1.0)/2.0));
 
     /* Compute phi1, phi2 */
     arb_init(phi1);
     arb_init(phi2);
-    arb_set_d(phi1, M_PI * arbtod(alpha) + arbtod(deltat));
+    arb_set_d(phi1, M_PI * arbtod(p->alpha) + arbtod(deltat));
     arb_set_d(phi2, -arbtod(phi1));
 
     ret = (!diskp(z, r1)) && wedgep(z, phi1, phi2);
@@ -151,25 +162,26 @@ in_region_G2 (const acb_t z, const arb_t alpha, const arb_t acc)
 }
 
 bool
-in_region_G3 (const acb_t z, const arb_t alpha, const arb_t acc)
+in_region_G3 (const acb_t z, void * ctx)
 {
     bool ret;
     arb_t r1, delta, deltat, phi1, phi2;
+    ctx_t* p = (ctx_t*) ctx;
 
     arb_init(r1);
-    compute_r1(r1, alpha, acc);
+    compute_r1(r1, ctx);
 
     /* Compute delta, deltat */
     arb_init(delta);
     arb_init(deltat);
-    arb_set_d(delta, M_PI * arbtod(alpha)/8.0);
-    arb_set_d(deltat, MIN(M_PI * arbtod(alpha)/8.0, M_PI * (arbtod(alpha) + 1.0)/2.0));
+    arb_set_d(delta, M_PI * arbtod(p->alpha)/8.0);
+    arb_set_d(deltat, MIN(M_PI * arbtod(p->alpha)/8.0, M_PI * (arbtod(p->alpha) + 1.0)/2.0));
 
     /* Compute phi1, phi2 */
     arb_init(phi1);
     arb_init(phi2);
-    arb_set_d(phi1, M_PI * arbtod(alpha) - arbtod(delta));
-    arb_set_d(phi2, M_PI * arbtod(alpha) + arbtod(deltat));
+    arb_set_d(phi1, M_PI * arbtod(p->alpha) - arbtod(delta));
+    arb_set_d(phi2, M_PI * arbtod(p->alpha) + arbtod(deltat));
 
     ret = (!diskp(z, r1)) && closure_wedgep(z, phi1, phi2);
 
@@ -182,25 +194,26 @@ in_region_G3 (const acb_t z, const arb_t alpha, const arb_t acc)
 }
 
 bool
-in_region_G4 (const acb_t z, const arb_t alpha, const arb_t acc)
+in_region_G4 (const acb_t z, void * ctx)
 {
     bool ret;
     arb_t r1, delta, deltat, phi1, phi2;
+    ctx_t* p = (ctx_t*) ctx;
 
     arb_init(r1);
-    compute_r1(r1, alpha, acc);
+    compute_r1(r1, ctx);
 
     /* Compute delta, deltat */
     arb_init(delta);
     arb_init(deltat);
-    arb_set_d(delta, M_PI * arbtod(alpha)/8.0);
-    arb_set_d(deltat, MIN(M_PI * arbtod(alpha)/8.0, M_PI * (arbtod(alpha) + 1.0)/2.0));
+    arb_set_d(delta, M_PI * arbtod(p->alpha)/8.0);
+    arb_set_d(deltat, MIN(M_PI * arbtod(p->alpha)/8.0, M_PI * (arbtod(p->alpha) + 1.0)/2.0));
 
     /* Compute phi1, phi2 */
     arb_init(phi1);
     arb_init(phi2);
-    arb_set_d(phi1, -(M_PI * arbtod(alpha) + arbtod(deltat)));
-    arb_set_d(phi2, -M_PI * arbtod(alpha) + arbtod(delta));
+    arb_set_d(phi1, -(M_PI * arbtod(p->alpha) + arbtod(deltat)));
+    arb_set_d(phi2, -M_PI * arbtod(p->alpha) + arbtod(delta));
 
     ret = (!diskp(z, r1)) && closure_wedgep(z, phi1, phi2);
 
@@ -214,22 +227,23 @@ in_region_G4 (const acb_t z, const arb_t alpha, const arb_t acc)
 }
 
 bool
-in_region_G5 (const acb_t z, const arb_t alpha, const arb_t acc)
+in_region_G5 (const acb_t z, void * ctx)
 {
     bool ret;
     arb_t r0, r1, phi1, phi2;
+    ctx_t* p = (ctx_t*) ctx;
 
     arb_init(r0);
     arb_set_d(r0, 0.95);
 
     arb_init(r1);
-    compute_r1(r1, alpha, acc);
+    compute_r1(r1, ctx);
    
     /* Compute phi1, phi2 */
     arb_init(phi1);
     arb_init(phi2);
-    arb_set_d(phi1, -5.0 * M_PI * arbtod(alpha)/6.0);
-    arb_set_d(phi2, +5.0 * M_PI * arbtod(alpha)/6.0);
+    arb_set_d(phi1, -5.0 * M_PI * arbtod(p->alpha)/6.0);
+    arb_set_d(phi2, +5.0 * M_PI * arbtod(p->alpha)/6.0);
 
     ret = diskp(z, r1) && (closure_wedgep(z, phi1, phi2) && !diskp(z, r0));
 
@@ -242,22 +256,23 @@ in_region_G5 (const acb_t z, const arb_t alpha, const arb_t acc)
 }
 
 bool
-in_region_G6 (const acb_t z, const arb_t alpha, const arb_t acc)
+in_region_G6 (const acb_t z, void * ctx)
 {
     bool ret;
     arb_t r0, r1, phi1, phi2;
+    ctx_t* p = (ctx_t*) ctx;
 
     arb_init(r0);
     arb_set_d(r0, 0.95);
 
     arb_init(r1);
-    compute_r1(r1, alpha, acc);
+    compute_r1(r1, ctx);
    
     /* Compute phi1, phi2 */
     arb_init(phi1);
     arb_init(phi2);
-    arb_set_d(phi1, +5.0 * M_PI * arbtod(alpha)/6.0);
-    arb_set_d(phi2, -5.0 * M_PI * arbtod(alpha)/6.0);
+    arb_set_d(phi1, +5.0 * M_PI * arbtod(p->alpha)/6.0);
+    arb_set_d(phi2, -5.0 * M_PI * arbtod(p->alpha)/6.0);
 
     ret = diskp(z, r1) && (closure_wedgep(z, phi1, phi2) && !diskp(z, r0));
 

@@ -23,69 +23,46 @@
 #define __ALGORITHM_H__
 
 #include <flint/acb.h>
-//#include "num.h"
 
 /**
  * Compute ML function in region G_0
  */
 void
-mittleff0 (acb_t res,
-           const arb_t alpha, const arb_t beta,
-           const acb_t z,
-           const acb_t acc);
+mittleff0 (acb_t res, const acb_t z, void * ctx);
 
 /**
  * Compute ML function in region G_1
  */
 void
-mittleff1 (acb_t res,
-           const arb_t alpha, const arb_t beta,
-           const acb_t z,
-           const acb_t acc);
+mittleff1 (acb_t res, const acb_t z, void * ctx);
 /**
  * Compute ML function in region G_2
  */
 void
-mittleff2 (acb_t res,
-           const arb_t alpha, const arb_t beta,
-           const acb_t z,
-           const acb_t acc);
+mittleff2 (acb_t res, const acb_t z, void * ctx);
 
 /**
  * Compute ML function in region G_3
  */
 void
-mittleff3 (acb_t res,
-           const arb_t alpha, const arb_t beta,
-           const acb_t z,
-           const acb_t acc);
+mittleff3 (acb_t res, const acb_t z, void * ctx);
 
 /**
  * Compute ML function in region G_4
  */
 void
-mittleff4 (acb_t res,
-           const arb_t alpha, const arb_t beta,
-           const acb_t z,
-           const acb_t acc);
+mittleff4 (acb_t res, const acb_t z, void * ctx);
 
 /**
  * Compute ML function in region G_5
  */
 void
-mittleff5 (acb_t res,
-           const arb_t alpha, const arb_t beta,
-           const acb_t z,
-           const acb_t acc);
+mittleff5 (acb_t res, const acb_t z, void * ctx);
 
 /**
  * Compute ML function in region G_6
  */
 void
-mittleff6 (acb_t res,
-           const arb_t alpha,
-           const arb_t beta,
-           const acb_t z,
-           const acb_t acc);
+mittleff6 (acb_t res, const acb_t z, void * ctx);
 
 #endif /* __ALGORITHM_H__ */

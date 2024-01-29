@@ -16,16 +16,20 @@
  */
 
 /** 
- * @file utils.h
- * @brief Misc definitions for the other modules.
+ * @file types.h
+ * @brief Custom types the other modules.
  */
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#ifndef __TYPES_H__
+#define __TYPES_H__
 
-#define UNUSED(x) (void)(x)
+#include <flint/arb.h>
 
-#ifndef M_PI
-#define M_PI 3.141592653589793238462643383279502884197169399375105820974944
-#endif
+typedef struct {
+    arb_t alpha;
+    arb_t beta;
+    unsigned short int prec;
+} ctx_t;
 
-#endif /* __UTILS_H__ */
+#endif /* __TYPES_H__ */
+
+
