@@ -44,4 +44,9 @@ arb_fmod (arb_t res, const arb_t self, const arb_t other);
 void
 acbtod (double* res, const acb_t x);
 
+double
+acb_real_d(const acb_t x);
+
+double
+acb_imag_d(const acb_t x);
 #endif /* __FLINTUTILS_H__ */

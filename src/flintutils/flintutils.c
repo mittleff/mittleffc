@@ -56,3 +56,31 @@ arb_fmod (arb_t res, const arb_t self, const arb_t other)
     
     arb_set_d(res, fmod(_self, _other));
 }
+
+double
+acb_real_d(const acb_t x)
+{
+    double res;
+    arb_t r;
+
+    arb_init(r);    
+    acb_get_real(r, x);
+    res = arbtod(r);
+    arb_clear(r);
+
+    return res;
+}
+
+double
+acb_imag_d(const acb_t x)
+{
+    double res;
+    arb_t i;
+
+    arb_init(i);    
+    acb_get_imag(i, x);
+    res = arbtod(i);
+    arb_clear(i);
+
+    return res;
+}

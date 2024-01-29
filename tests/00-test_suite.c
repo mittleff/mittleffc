@@ -91,66 +91,65 @@ main (void)
     /* RUN_TEST(test_in_region_G5); */
     /* RUN_TEST(test_in_region_G6); */
 
-    /* RUN_TEST(test_z_zero_0); */
-    /* RUN_TEST(test_z_zero_1); */
-    /* RUN_TEST(test_z_zero_2); */
+    RUN_TEST(test_z_zero_0);
+    RUN_TEST(test_z_zero_1);
+    RUN_TEST(test_z_zero_2);
 
-    /* RUN_TEST(test_exp_0); */
-    /* RUN_TEST(test_exp_1); */
-    /* RUN_TEST(test_exp_2); */
+    RUN_TEST(test_exp_0);
+    RUN_TEST(test_exp_1);
+    RUN_TEST(test_exp_2);
 
-    /* RUN_TEST(test_cos_0); */
-    /* RUN_TEST(test_cos_1); */
-    /* RUN_TEST(test_cos_2); */
-    /* RUN_TEST(test_cos_3); */
-    /* RUN_TEST(test_cos_4); */
+    RUN_TEST(test_cos_0);
+    RUN_TEST(test_cos_1);
+    RUN_TEST(test_cos_2);
+    RUN_TEST(test_cos_3);
+    RUN_TEST(test_cos_4);
 
-    /* RUN_TEST(test_cosh_0); */
-    /* RUN_TEST(test_cosh_1); */
-    /* RUN_TEST(test_cosh_2); */
-    /* RUN_TEST(test_cosh_3); */
-    /* RUN_TEST(test_cosh_4); */
+    RUN_TEST(test_cosh_0);
+    RUN_TEST(test_cosh_1);
+    RUN_TEST(test_cosh_2);
+    RUN_TEST(test_cosh_3);
+    RUN_TEST(test_cosh_4);
 
-    /* RUN_TEST(test_sin_0); */
-    /* RUN_TEST(test_sin_1); */
-    /* RUN_TEST(test_sin_2); */
-    /* RUN_TEST(test_sin_3); */
-    /* RUN_TEST(test_sin_4); */
+    RUN_TEST(test_sin_0);
+    RUN_TEST(test_sin_1);
+    RUN_TEST(test_sin_2);
+    RUN_TEST(test_sin_3);
+    RUN_TEST(test_sin_4);
 
-    /* RUN_TEST(test_sinh_0); */
-    /* RUN_TEST(test_sinh_1); */
-    /* RUN_TEST(test_sinh_2); */
-    /* RUN_TEST(test_sinh_3); */
-    /* RUN_TEST(test_sinh_4); */
+    RUN_TEST(test_sinh_0);
+    RUN_TEST(test_sinh_1);
+    RUN_TEST(test_sinh_2);
+    RUN_TEST(test_sinh_3);
+    RUN_TEST(test_sinh_4);
 
-    /* RUN_TEST(test_erfc_0); */
-    /* RUN_TEST(test_erfc_1); */
-    /* RUN_TEST(test_erfc_2); */
-    /* RUN_TEST(test_erfc_3); */
-    /* RUN_TEST(test_erfc_4); */
-    /* RUN_TEST(test_erfc_5); */
-    /* RUN_TEST(test_erfc_6); */
+    RUN_TEST(test_erfc_0);
+    RUN_TEST(test_erfc_1);
+    RUN_TEST(test_erfc_2);
+    RUN_TEST(test_erfc_3);
+    RUN_TEST(test_erfc_4);
+    RUN_TEST(test_erfc_5);
+    RUN_TEST(test_erfc_6);
 
-    /* RUN_TEST(test_siam_1); */
-    /* RUN_TEST(test_siam_2); */
-    /* RUN_TEST(test_siam_3); */
-    /* RUN_TEST(test_siam_4); */
-    /* RUN_TEST(test_siam_5); */
-    /* RUN_TEST(test_siam_6); */
-    /* RUN_TEST(test_siam_7); */
-    /* RUN_TEST(test_siam_8); */
-    /* RUN_TEST(test_siam_9); */
-    /* RUN_TEST(test_siam_10); */
-    /* RUN_TEST(test_siam_11); */
-    /* RUN_TEST(test_siam_12); */
-    /* RUN_TEST(test_siam_13); */
-    /* RUN_TEST(test_siam_14); */
-    /* RUN_TEST(test_siam_15); */
-    /* RUN_TEST(test_siam_16); */
-    /* RUN_TEST(test_siam_17); */
-    /* RUN_TEST(test_siam_18); */
+    RUN_TEST(test_siam_1);
+    RUN_TEST(test_siam_2);
+    RUN_TEST(test_siam_3);
+    RUN_TEST(test_siam_4);
+    RUN_TEST(test_siam_5);
+    RUN_TEST(test_siam_6);
+    RUN_TEST(test_siam_7);
+    RUN_TEST(test_siam_8);
+    RUN_TEST(test_siam_9);
+    RUN_TEST(test_siam_10);
+    RUN_TEST(test_siam_11);
+    RUN_TEST(test_siam_12);
+    RUN_TEST(test_siam_13);
+    RUN_TEST(test_siam_14);
+    RUN_TEST(test_siam_15);
+    RUN_TEST(test_siam_16);
+    RUN_TEST(test_siam_17);
+    RUN_TEST(test_siam_18);
 
-    //RUN_TEST(test_misc_0);
     RUN_TEST(test_misc_1);
     RUN_TEST(test_misc_2);
     RUN_TEST(test_misc_3);

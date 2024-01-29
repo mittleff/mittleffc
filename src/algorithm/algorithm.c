@@ -46,10 +46,15 @@ void
 mittleff0 (acb_t res, const acb_t z, void * ctx)
 {
     ctx_t* p = (ctx_t*) ctx;
-    double a, b;
+    //double a, b;
     int k, kmax;
     arb_t one, aux, absz, k1, k2, eps;
     acb_t  sum, tmp, fac1, fac2;
+
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] Called with parameters:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n ",
+                 __func__, arbtod(p->alpha), arbtod(p->beta), acb_real_d(z), acb_imag_d(z));
+#endif    
 
     arb_init(one);
     arb_init(absz);
@@ -125,6 +130,12 @@ mittleff0 (acb_t res, const acb_t z, void * ctx)
 void
 mittleff1 (acb_t res, const acb_t z, void * ctx)
 {
+    ctx_t* p = (ctx_t*) ctx;
+    
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] Called with parameters:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n ",
+                 __func__, arbtod(p->alpha), arbtod(p->beta), acb_real_d(z), acb_imag_d(z));
+#endif     
 
     acb_zero(res);
 /* #ifdef DEBUG */
@@ -135,45 +146,55 @@ mittleff1 (acb_t res, const acb_t z, void * ctx)
 
 /*     num_t fac1, fac2, aux1, aux2; */
 
-/*     /\* */
-/*      * Python code: */
-/*      *     fac1 = (1.0/alpha) * mp.power(z, (1.0 - beta)/alpha) * mp.exp(mp.power(z, 1.0/alpha)) */
-/*      * */
-/*      * This equals to */
-/*      *     fac1 = (1.0/alpha) * aux1 * aux2 */
-/*      *     aux1 = mp.power(z, (1.0 - beta)/alpha) */
-/*      *     aux2 = mp.exp(mp.power(z, 1.0/alpha)) */
-/*      *\/ */
-/*     fac1 = new(num), aux1 = new(num), aux2 = new(num); */
-/*     /\* aux1 = mp.power(z, (1.0 - beta)/alpha) *\/ */
-/*     num_set_d(aux1, 1.0); */
-/*     num_sub(aux1, aux1, beta); */
-/*     num_div(aux1, aux1, alpha); */
-/*     num_pow(aux1, z, aux1); */
-/*     /\* aux2 = mp.exp(mp.power(z, 1.0/alpha)) *\/ */
-/*     num_inv(aux2, alpha); */
-/*     num_pow(aux2, z, aux2); */
-/*     num_exp(aux2, aux2); */
-/*     /\* compute fac1 *\/ */
-/*     num_inv(fac1, alpha); */
-/*     num_mul(fac1, fac1, aux1); */
-/*     num_mul(fac1, fac1, aux2); */
+	acb_t fac1, fac2, aux1, aux2;
 
-/*     /\* */
-/*      * Python code: */
-/*      *     fac2 = __asymptotic(alpha, beta, z, acc) */
-/*      *\/ */
-/*     fac2 = new(num); */
-/*     asymptotic_series(fac2, z, alpha, beta); */
+	acb_init(fac1);
+    acb_init(fac2);
+    acb_init(aux1);
+    acb_init(aux2);
 
-/*     /\* */
-/*      * Python code: */
-/*      *     res = mp.fadd(fac1, fac2) */
-/*      *\/ */
-/*     num_add(res, fac1, fac2); */
+    /*
+     * Python code:
+     *     fac1 = (1.0/alpha) * mp.power(z, (1.0 - beta)/alpha) * mp.exp(mp.power(z, 1.0/alpha))
+     *
+     * This equals to
+     *     fac1 = (1.0/alpha) * aux1 * aux2
+     *     aux1 = mp.power(z, (1.0 - beta)/alpha)
+     *     aux2 = mp.exp(mp.power(z, 1.0/alpha))
+     */
+    /* aux1 = mp.power(z, (1.0 - beta)/alpha) */
+    acb_set_d(aux1, 1.0);
+    acb_sub_arb(aux1, aux1, p->beta, p->prec);
+    acb_div_arb(aux1, aux1, p->alpha, p->prec);
+    acb_pow(aux1, z, aux1, p->prec);
+    /* aux2 = mp.exp(mp.power(z, 1.0/alpha)) */
+	acb_set_arb(aux2, p->alpha);
+    acb_inv(aux2, aux2, p->prec);
+    acb_pow(aux2, z, aux2, p->prec);
+    acb_exp(aux2, aux2, p->prec);
+    /* compute fac1 */
+	acb_set_arb(fac1, p->alpha);
+    acb_inv(fac1, fac1, p->prec);
+    acb_mul(fac1, fac1, aux1, p->prec);
+    acb_mul(fac1, fac1, aux2, p->prec);
 
-/*     delete(fac1), delete(fac2); */
-/*     delete(aux1), delete(aux2); */
+    /*
+     * Python code:
+     *     fac2 = __asymptotic(alpha, beta, z, acc)
+     */
+    acb_init(fac2);
+    asymptotic_series(fac2, z, ctx);
+
+    /*
+     * Python code:
+     *     res = mp.fadd(fac1, fac2)
+     */
+    acb_add(res, fac1, fac2, p->prec);
+
+    acb_clear(fac1);
+    acb_clear(fac2);
+    acb_clear(aux1);
+    acb_clear(aux2);
 }
 
 void
@@ -473,62 +494,85 @@ mittleff6 (acb_t res, const acb_t z, void * ctx)
     /* delete(phi), delete(c2); */
 }
 
+
+static int
+compute_kmax_asymptotic (const acb_t z, void * ctx)
+{
+		int kmax;
+		ctx_t* p = (ctx_t*) ctx;
+		arb_t res, aux1, aux2;
+
+		arb_init(res);
+		arb_init(aux1);
+		arb_init(aux2);
+		
+		/*
+		 * Python code
+		 *     kmax = int(ceil((1.0/alpha)*abs(z)**(1.0/alpha)) + 1.0)
+		 * which can be written as
+		 *     kmax = int( ceil(fac1) + 1.0 )
+		 *     fac1 = aux1 * aux2**aux1
+		 *     aux1 = (1.0/alpha)
+		 *     aux2 = abs(z)
+		 */
+		arb_inv(aux1, p->alpha, p->prec);
+		acb_abs(aux2, z, p->prec);
+		arb_pow(res, aux2, aux1, p->prec);
+		arb_ceil(res, res, p->prec);
+
+		kmax = ((int) arbtod(res)) + 1;
+
+		arb_clear(res);
+		arb_clear(aux1);
+		arb_clear(aux2);
+
+		return kmax;
+}
+
 /* rhs of equation (2.3) */
-/* void */
-/* asymptotic_series (acb_t res, */
-/*                    const acb_t z, */
-/*                    const arb_t alpha, */
-/*                    const arb_t beta)     */
-/* { */
-/*     int kmax; */
-/*     /\* */
-/*      * Python code */
-/*      *     kmax = int(ceil((1.0/alpha)*abs(z)**(1.0/alpha)) + 1.0) */
-/*      * which can be written as */
-/*      *     kmax = int( ceil(fac1) + 1.0 ) */
-/*      *     fac1 = aux1 * aux2**aux1 */
-/*      *     aux1 = (1.0/alpha) */
-/*      *     aux2 = abs(z) */
-/*      *\/ */
-/*     num_t fac1, aux1, aux2; */
+void
+asymptotic_series (acb_t res, const acb_t z, void * ctx)
+{
+		ctx_t* p = (ctx_t*) ctx;
+		int k, kmax;
+		acb_t fac1, aux1, aux2, kk;
 
-/*     fac1 = new(num), aux1 = new(num), aux2 = new(num); */
+		acb_init(fac1);
+		acb_init(aux1);
+		acb_init(aux2);
+		acb_init(kk);
 
-/*     num_inv(aux1, alpha); */
-/*     num_abs(aux2, z); */
-/*     num_pow(fac1, aux2, aux1); */
-/*     num_ceil(fac1, fac1); */
-/*     kmax = ((int) num_to_d(fac1)) + 1; */
+		kmax = compute_kmax_asymptotic(z, ctx);
     
-/* #ifdef DEBUG */
-/*     log_info("\n[\033[1;33m%s\033[0m]\n\t    Summing %d terms of the asymptotic series\n ", */
-/*              __func__, kmax); */
-/* #endif */
-
-/*     /\* */
-/*      * Python code: */
-/*      *     res = 0.0 */
-/*      *     for k in range(1, kmax + 1): */
-/*      *         res = mp.fadd(res, mp.fmul(-mp.power(z, -k), mp.rgamma(beta - alpha*k))) */
-/*      * the loop statement can be rewritten as */
-/*      *     res = mp.fadd(res, fac1) */
-/*      *     fac1 = mp.fmul(aux1, aux2) */
-/*      *     aux1 = -mp.power(z, -k) */
-/*      *     aux2 = mp.rgamma(beta - alpha * k) */
-/*      *\/ */
-/*     int k; */
-    
-/*     num_set_d(res, 0.0); */
-/*     for (k = 1; k <= kmax; k++) */
-/*     { */
-/*         num_pow_d(aux1, z, ((double) -1.0 * k)); */
-/*         num_neg(aux1, aux1); */
-/*         num_mul_d(aux2, alpha, ((double) -1.0 * k)); */
-/*         num_add(aux2, aux2, beta); */
-/*         num_rgamma(aux2, aux2); */
-/*         num_mul(fac1, aux1, aux2); */
-/*         num_add(res, res, fac1); */
-/*     } */
-
-/*     delete(fac1), delete(aux1), delete(aux2);     */
-/* } */
+#ifdef DEBUG
+		log_info("\n[\033[1;33m%s\033[0m]\n\t    Summing %d terms\n",
+				 __func__, kmax);
+#endif
+		/*
+		 * Python code:
+		 *     res = 0.0
+		 *     for k in range(1, kmax + 1):
+		 *         res = mp.fadd(res, mp.fmul(-mp.power(z, -k), mp.rgamma(beta - alpha*k)))
+		 * the loop statement can be rewritten as
+		 *     res = mp.fadd(res, fac1)
+		 *     fac1 = mp.fmul(aux1, aux2)
+		 *     aux1 = -mp.power(z, -k)
+		 *     aux2 = mp.rgamma(beta - alpha * k)
+		 */
+		acb_zero(res);
+		for (k = 1; k <= kmax; k++) {
+				/* printf("k = %d\n", k); */
+				acb_set_d(kk, ((double) -1.0 * k));
+				acb_pow(aux1, z, kk, p->prec);
+				acb_neg(aux1, aux1);
+				acb_mul_arb(aux2, kk, p->alpha, p->prec);
+				acb_add_arb(aux2, aux2, p->beta, p->prec);
+				acb_rgamma(aux2, aux2, p->prec);
+				acb_mul(fac1, aux1, aux2, p->prec);
+				acb_add(res, res, fac1, p->prec);
+		}
+		acb_clear(kk);
+		acb_clear(fac1);
+		acb_clear(aux1);
+		acb_clear(aux2);
+}
