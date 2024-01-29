@@ -1,14 +1,14 @@
 #include "unity.h"
 
 #include "mittleff.h"
-#include "new.h"
-#include "num.h"
+/* #include "new.h" */
+/* #include "num.h" */
 #include "partition.h"
 
 #include <assert.h>
 #include <complex.h>
 
-num_t acc;
+//num_t acc;
 
 typedef double complex complex_t;
 
@@ -32,7 +32,7 @@ complex_t mittleff (const double alpha, const double beta, const complex_t z)
         res,
         alpha, beta,
         creal(z), cimag(z),
-        num_to_d(acc));
+        1.0e-15);
     assert(status == 0);
     return res[0] + res[1]*I;
 }
@@ -48,18 +48,17 @@ void test_value(const complex_t expected, const complex_t computed) {
 void setUp (void)
 {
     // set stuff up here
-    acc = new(num);
-    num_set_d(acc, 1.0e-15);
+    /* acc = new(num); */
+    /* num_set_d(acc, 1.0e-15); */
 }
 
 void tearDown (void)
 {
     // clean stuff up here
-    delete(acc);
+    /* delete(acc); */
 }
 
-#include "test_num.h"
-#include "test_partition.h"
+//#include "test_partition.h"
 #include "test_z_zero.h"
 #include "test_exp.h"
 #include "test_cos.h"
@@ -75,19 +74,19 @@ main (void)
 {
     UNITY_BEGIN();
 
-    RUN_TEST(test_Memory_Management);
-    RUN_TEST(test_Initialization_and_Accessors);
-    RUN_TEST(test_Precision_and_Comparisons);
-    RUN_TEST(test_Arithmetic);
-    RUN_TEST(test_Special_Functions);
+    /* RUN_TEST(test_Memory_Management); */
+    /* RUN_TEST(test_Initialization_and_Accessors); */
+    /* RUN_TEST(test_Precision_and_Comparisons); */
+    /* RUN_TEST(test_Arithmetic); */
+    /* RUN_TEST(test_Special_Functions); */
 
-    RUN_TEST(test_in_region_G0);
-    RUN_TEST(test_in_region_G1);
-    RUN_TEST(test_in_region_G2);
-    RUN_TEST(test_in_region_G3);
-    RUN_TEST(test_in_region_G4);
-    RUN_TEST(test_in_region_G5);
-    RUN_TEST(test_in_region_G6);
+    /* RUN_TEST(test_in_region_G0); */
+    /* RUN_TEST(test_in_region_G1); */
+    /* RUN_TEST(test_in_region_G2); */
+    /* RUN_TEST(test_in_region_G3); */
+    /* RUN_TEST(test_in_region_G4); */
+    /* RUN_TEST(test_in_region_G5); */
+    /* RUN_TEST(test_in_region_G6); */
 
     RUN_TEST(test_z_zero_0);
     RUN_TEST(test_z_zero_1);

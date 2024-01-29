@@ -23,6 +23,7 @@
 #define __FLINTUTILS_H__
 
 #include <flint/arb.h>
+#include <flint/acb.h>
 
 #ifndef M_PI
 #define M_PI 3.141592653589793238462643383279502884197169399375105820974944
@@ -39,5 +40,8 @@ arbtod (const arb_t x);
 
 void
 arb_fmod (arb_t res, const arb_t self, const arb_t other);
+
+void
+acbtod (double* res, const acb_t x);
 
 #endif /* __FLINTUTILS_H__ */

@@ -55,17 +55,17 @@ test_quad: prepare log unity
 	$(VALGRIND) --log-file=valgrind-test_quad.log ./build/test_quad.x
 
 test_suite: prepare log unity
-	$(CC) $(CFLAGS) -I./src  -I./src/partition -c ./src/partition/partition.c -o build/partition.o
-	$(CC) $(CFLAGS) -I./src  -I./src/quad -c ./src/quad/quad.c -o build/quad.o
-	$(CC) $(CFLAGS) -I./src  -I./src/quad -I./src/integrate -c ./src/integrate/integrate.c -o build/integrate.o
-	$(CC) $(CFLAGS) $(DEBUG) -I./src -I./src/integrate -I./src/algorithm -c ./src/algorithm/algorithm.c -o build/algorithm.o
-	$(CC) $(CFLAGS) $(DEBUG)  -I./src/partition -I./src/algorithm -I./src/mittleff -c ./src/mittleff/mittleff.c -o build/mittleff.o
-	$(CC) $(CFLAGS) $(DEBUG) $(CFLAGS_UNITY)  -I./src/partition -I./src/mittleff -c tests/00-test_suite.c -o build/00-test_suite.o
+	$(CC) $(CFLAGS) $(INCDIR) -c ./src/flintutils/flintutils.c -o build/flintutils.o
+	$(CC) $(CFLAGS) $(INCDIR) -c ./src/partition/partition.c -o build/partition.o
+	$(CC) $(CFLAGS) $(INCDIR) -I./src/integrate -c ./src/integrate/integrate.c -o build/integrate.o
+	$(CC) $(CFLAGS) $(INCDIR) $(DEBUG) -I./src/integrate -I./src/algorithm -c ./src/algorithm/algorithm.c -o build/algorithm.o
+	$(CC) $(CFLAGS) $(INCDIR) $(DEBUG) -I./src/algorithm -I./src/mittleff -c ./src/mittleff/mittleff.c -o build/mittleff.o
+	$(CC) $(CFLAGS) $(INCDIR) $(DEBUG) $(CFLAGS_UNITY) -I./src/mittleff -c tests/00-test_suite.c -o build/00-test_suite.o
 	$(CC) $(CFLAGS) \
 		build/log.o \
 		build/unity.o \
+		build/flintutils.o \
 		build/algorithm.o \
-		build/quad.o \
 		build/integrate.o \
 		build/partition.o \
 		build/mittleff.o \

@@ -31,6 +31,24 @@ arbtod (const arb_t x)
 }
 
 void
+acbtod (double* res, const acb_t x)
+{
+    arb_t r, i;
+    
+    arb_init(r);
+    arb_init(i);
+    
+    acb_get_real(r, x);
+    acb_get_imag(i, x);
+
+    res[0] = arbtod(r);
+    res[1] = arbtod(i);
+
+    arb_clear(r);
+    acb_clear(i);
+}
+
+void
 arb_fmod (arb_t res, const arb_t self, const arb_t other)
 {
     const double _self = arbtod(self);

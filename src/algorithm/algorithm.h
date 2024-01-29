@@ -22,69 +22,70 @@
 #ifndef __ALGORITHM_H__
 #define __ALGORITHM_H__
 
-#include "num.h"
+#include <flint/acb.h>
+//#include "num.h"
 
 /**
  * Compute ML function in region G_0
  */
 void
-mittleff0 (num_t res,
-           const num_t a, const num_t b,
-           const num_t z,
-           const num_t acc);
+mittleff0 (acb_t res,
+           const arb_t alpha, const arb_t beta,
+           const acb_t z,
+           const acb_t acc);
 
 /**
  * Compute ML function in region G_1
  */
 void
-mittleff1 (num_t res,
-           const num_t a, const num_t b,
-           const num_t z,
-           const num_t acc);
+mittleff1 (acb_t res,
+           const arb_t alpha, const arb_t beta,
+           const acb_t z,
+           const acb_t acc);
 /**
  * Compute ML function in region G_2
  */
 void
-mittleff2 (num_t res,
-           const num_t a, const num_t b,
-           const num_t z,
-           const num_t acc);
+mittleff2 (acb_t res,
+           const arb_t alpha, const arb_t beta,
+           const acb_t z,
+           const acb_t acc);
 
 /**
  * Compute ML function in region G_3
  */
 void
-mittleff3 (num_t res,
-           const num_t a, const num_t b,
-           const num_t z,
-           const num_t acc);
+mittleff3 (acb_t res,
+           const arb_t alpha, const arb_t beta,
+           const acb_t z,
+           const acb_t acc);
 
 /**
  * Compute ML function in region G_4
  */
 void
-mittleff4 (num_t res,
-           const num_t a, const num_t b,
-           const num_t z,
-           const num_t acc);
+mittleff4 (acb_t res,
+           const arb_t alpha, const arb_t beta,
+           const acb_t z,
+           const acb_t acc);
 
 /**
  * Compute ML function in region G_5
  */
 void
-mittleff5 (num_t res,
-           const num_t a, const num_t b,
-           const num_t z,
-           const num_t acc);
+mittleff5 (acb_t res,
+           const arb_t alpha, const arb_t beta,
+           const acb_t z,
+           const acb_t acc);
 
 /**
  * Compute ML function in region G_6
  */
 void
-mittleff6 (num_t res,
-           const num_t alpha,
-           const num_t beta,
-           const num_t z,
-           const num_t acc);
+mittleff6 (acb_t res,
+           const arb_t alpha,
+           const arb_t beta,
+           const acb_t z,
+           const acb_t acc);
 
 #endif /* __ALGORITHM_H__ */

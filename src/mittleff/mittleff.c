@@ -20,8 +20,6 @@
  * @brief Implementation of the main functions of the library.
  */
 #include "mittleff.h"
-//#include <stdio.h>
-//#include <stdlib.h>
 #include <math.h>
 #include <complex.h>
 #include <assert.h>
@@ -31,7 +29,6 @@
 
 #include "flintutils.h"
 
-#include <gsl/gsl_math.h>
 #include <stdbool.h>
 
 #ifdef DEBUG
@@ -82,7 +79,7 @@ _mittleff (acb_t res,
         acb_init(exp_z2);
         acb_init(erfc_z);
         acb_pow(exp_z2, z, two, prec);
-        acb_exp(exp_z2, exp_z2);
+        acb_exp(exp_z2, exp_z2, PREC);
         
         acb_neg(erfc_z, z);
         acb_hypgeom_erfc(erfc_z, erfc_z, prec);
@@ -178,7 +175,7 @@ mittleff_cmplx (double* res,
     assert (alpha > 0.0);
 
     arb_t _alpha, _beta, _tol;
-    acb_t _z;
+    acb_t _z, _res;
 
     arb_init(_alpha);
     arb_init(_beta);
@@ -192,13 +189,13 @@ mittleff_cmplx (double* res,
 
     _mittleff(_res, _alpha, _beta, _z, _tol);
 
-    //num_to_d_d(res, _res);
+    acbtod(res, _res);
     
     arb_clear(_alpha);
     arb_clear(_beta);
     arb_clear(_tol);
-    acb_clear(_z)
+    acb_clear(_z);
     arb_clear(_res);
 
-    return EXIT_SUCCESS;
+    return 0;
 }
