@@ -165,7 +165,11 @@ compute_mittleff (acb_t res, const acb_t z, void * ctx)
 		else if (in_region_G0(z, ctx)) {
 				mittleff0(res, z, ctx);
 		}
-		else if (arb_gt(p->alpha, one)) { /* apply recursive relation (2.2) */ 
+		else if (arb_gt(p->alpha, one)) { /* apply recursive relation (2.2) */
+/* #ifdef DEBUG */
+/*         log_info("\n[\033[1;33m%s\033[0m] Recursive:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n ", */
+/*                  __func__, arbtod(p->alpha), arbtod(p->beta), acb_real_d(z), acb_imag_d(z)); */
+/* #endif  */
 				int m, h;
 				arb_t alphap, one_over_2mp1;
 				acb_t zp, aux;
@@ -181,6 +185,7 @@ compute_mittleff (acb_t res, const acb_t z, void * ctx)
         
 				for (h = -m; h <= m; h++) {
 						arb_mul(alphap, p->alpha, one_over_2mp1, p->prec);
+						
 
 						acb_pow_arb(zp, z, one_over_2mp1, p->prec);
 
@@ -189,12 +194,23 @@ compute_mittleff (acb_t res, const acb_t z, void * ctx)
 						acb_pow_arb(zp, z, one_over_2mp1, p->prec);
 						acb_mul(zp, zp, aux, p->prec);
 
-						ctx_t new_ctx = {
-								.alpha = alphap,
-								.beta = p->beta,
-								.prec = p->prec
-						};
+						ctx_t new_ctx;
+                        arb_init(new_ctx.alpha);
+                        arb_init(new_ctx.beta);
+
+                        arb_set(new_ctx.alpha, alphap);
+                        arb_set(new_ctx.beta, p->beta);
+                        new_ctx.prec = p->prec;
+
+/* #ifdef DEBUG */
+/*         log_info("\n[\033[1;33m%s\033[0m] k=%d, alphap=%g", */
+/*                  __func__, h, arbtod(alphap)); */
+/* #endif						 */
+                        						
 						compute_mittleff(aux, zp, &new_ctx);
+
+                        arb_clear(new_ctx.alpha);
+                        arb_clear(new_ctx.beta);
 
 						acb_add(res, res, aux, p->prec);
 				}

@@ -152,7 +152,7 @@ main (void)
 
     RUN_TEST(test_misc_1);
     RUN_TEST(test_misc_2);
-    RUN_TEST(test_misc_3);
+    RUN_TEST(test_misc_3); /* Recurrence relation */
     RUN_TEST(test_misc_4);
     RUN_TEST(test_misc_5);
     RUN_TEST(test_misc_6);
