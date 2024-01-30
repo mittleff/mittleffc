@@ -319,184 +319,204 @@ mittleff4 (acb_t res, const acb_t z, void * ctx)
 	 mittleff3_4(res, z, ctx, 4);
 }
 
-/* static void */
-/* compute_rmax (num_t res, */
-/*               const num_t alpha, */
-/*               const num_t beta, */
-/*               const num_t z, */
-/*               const num_t eps) */
-/* { */
-/*     num_t r1, r2, r3, aux, den; */
+static void
+compute_rmax (arb_t res,
+              const acb_t z,
+			  void * ctx)
+{
+		ctx_t* p = (ctx_t*) ctx;
+		arb_t zero, one, two;
+		arb_t r1, r2, r3, aux, aux2, den, eps, pi;
 
-/*     r1 = new(num), r2 = new(num), r3 = new(num); */
-/*     aux = new(num), den = new(num); */
-    
-/*     if (num_le_d(beta, 1.0)) */
-/*     { */
-/*         if (num_ge_d(beta, 0.0)) */
-/*         { */
-/*             /\* */
-/*              * r1 = 2.0 * abs(z) */
-/*              * r2 = 2.0**alpha */
-/*              * r3 = (-2.0 * log(pi * eps * (2.0**beta)/12.0))**alpha */
-/*              *\/ */
-/*             num_abs(r1, z); */
-/*             num_mul_d(r1, r1, 2.0); */
-            
-/*             num_set_d(r2, 2.0); */
-/*             num_pow(r2, r2, alpha); */
-            
-/*             num_set_d(r3, 2.0); */
-/*             num_pow(r3, r3, beta); */
-/*             num_mul_d(r3, r3, M_PI*num_to_d(eps)/12.0); */
-/*             num_log(r3, r3); */
-/*             num_mul_d(r3, r3, -2.0); */
-/*             num_pow(r3, r3, alpha); */
-/*         } */
-/*         else */
-/*         { */
-/*             /\* */
-/*              * r1 = (2.0 * (abs(beta) + 1.0))**alpha */
-/*              * r2 = 2.0 * abs(z) */
-/*              * den = 12.0 * (abs(beta) + 2.0) * (4.0 * abs(beta))**abs(beta) */
-/*              * r3 = (-4.0 * log(pi * eps * (2.0**beta)/den))**alpha */
-/*              *\/ */
-/*             num_abs(r1, beta); */
-/*             num_set_d(aux, 1.0); */
-/*             num_add(r1, r1, aux); */
-/*             num_mul_d(r1, r1, 2.0); */
-/*             num_pow(r1, r1, alpha); */
+		arb_init(r1);
+		arb_init(r2);
+		arb_init(r3);
+		arb_init(zero);
+		arb_init(one);
+		arb_init(two);
+		arb_init(pi);
+		arb_init(eps);
+		arb_init(aux);
+		arb_init(aux2);
 
-/*             num_abs(r2, z); */
-/*             num_mul_d(r2, r2, 2.0); */
+		arb_zero(zero);
+		arb_one(one);
+		arb_set_d(two, 2.0);
+		arb_const_pi(pi, p->prec);
+		
+		if (arb_le(p->beta, one)) {
+				if (arb_ge(p->beta, zero)) {
+						/*
+						 * r1 = 2.0 * abs(z)
+						 * r2 = 2.0**alpha
+						 * r3 = (-2.0 * log(pi * eps * (2.0**beta)/12.0))**alpha
+						 */
+						acb_abs(r1, z, p->prec);
+						arb_mul(r1, r1, two, p->prec);
 
-/*             num_abs(aux, beta); */
-/*             num_mul_d(den, aux, 4.0); */
-/*             num_pow(den, den, aux); */
-/*             num_mul_d(den, den, 12.0); */
-/*             num_add_d(aux, aux, 2.0); */
-/*             num_mul(den, den, aux); */
+						arb_pow(r2, two, p->alpha, p->prec);
 
-/*             num_set_d(r3, 2.0); */
-/*             num_pow(r3, r3, beta); */
-/*             num_div(r3, r3, den); */
-/*             num_mul_d(r3, r3, M_PI * num_to_d(eps)); */
-/*             num_log(r3, r3); */
-/*             num_mul_d(r3, r3, -4.0); */
-/*             num_pow(r3, r3, alpha); */
-/*         } */
-/*     } */
-/*     else */
-/*     { */
-/*         if (num_ge_d(beta, 0.0)) */
-/*         { */
-/*             /\* */
-/*              * r1 = 1.0 */
-/*              * r2 = 2.0 * abs(z) */
-/*              * r3 = (-mp.log(pi*eps/6))**alpha */
-/*              *\/ */
-/*             num_set_d(r1, 1.0); */
+						arb_set_d(aux, 1.0/12.0);
+						arb_mul(aux, aux, eps, p->prec);
+						arb_mul(aux, aux, pi, p->prec);
+						arb_pow(r3, two, p->beta, p->prec);
+						arb_mul(r3, r3, aux, p->prec);
+						arb_log(r3, r3, p->prec);
+						arb_mul(r3, r3, two, p->prec);
+						arb_neg(r3, r3);
+						arb_pow(r3, r3, p->alpha, p->prec);
+						
+				}
+				else {
+						/*
+						 * r1 = (2.0 * (abs(beta) + 1.0))**alpha
+						 * r2 = 2.0 * abs(z)
+						 * den = 12.0 * (abs(beta) + 2.0) * (4.0 * abs(beta))**abs(beta)
+						 * r3 = (-4.0 * log(pi * eps * (2.0**beta)/den))**alpha
+						 */
+						arb_abs(r1, p->beta);
+						arb_add(r1, r1, one, p->prec);
+						arb_mul(r1, r1, two, p->prec);
+						arb_pow(r1, r1, p->alpha, p->prec);
 
-/*             num_abs(r2, z); */
-/*             num_mul_d(r2, r2, 2.0); */
+						acb_abs(r2, z, p->prec);
+						arb_mul(r2, r2, two, p->prec);
 
-/*             num_set_d(r3, M_PI * num_to_d(eps) * 1.0/6.0); */
-/*             num_log(r3, r3); */
-/*             num_neg(r3, r3); */
-/*             num_pow(r3, r3, alpha); */
-/*         } */
-/*         else */
-/*         { */
-/*             /\* */
-/*              * r1 = (abs(beta) + 1.0)**alpha */
-/*              * r2 = 2.0 * abs(z) */
-/*              * den = 6.0 * (abs(beta) + 2.0) * (2.0 * abs(beta))**abs(beta) */
-/*              * r3 = (-2.0 * log(pi * eps/den))**alpha */
-/*              *\/ */
-/*             num_abs(r1, beta); */
-/*             num_add_d(r1, r1, 1.0); */
-/*             num_pow(r1, r1, alpha); */
+						arb_abs(aux, p->beta);
+						arb_mul(den, aux, two, p->prec);
+						arb_mul(den, den, two, p->prec);
+						arb_pow(den, den, aux, p->prec);
+						arb_set_d(aux, 12.0);
+						arb_mul(den, den, aux, p->prec);
+						
+						arb_add(aux, aux, two, p->prec);
+						arb_mul(den, den, aux, p->prec);
 
-/*             num_abs(aux, z); */
-/*             num_set_d(r2, 2.0); */
-/*             num_pow(r2, r2, aux); */
+						arb_pow(r3, two, p->beta, p->prec);
+						arb_div(r3, r3, den, p->prec);
 
-/*             num_abs(aux, beta); */
-/*             num_mul_d(den, aux, 2.0); */
-/*             num_pow(den, den, aux); */
-/*             num_mul_d(den, den, 6.0); */
-/*             num_add_d(aux, aux, 2.0); */
-/*             num_mul(den, den, aux); */
+						arb_mul(r3, r3, pi, p->prec);
+						arb_mul(r3, r3, eps, p->prec);
+						//num_mul_d(r3, r3, M_PI * num_to_d(eps));
+						
+						arb_log(r3, r3, p->prec);
+						arb_set_d(aux, -4.0);
+						arb_mul(r3, r3, aux, p->prec);
+						arb_pow(r3, r3, p->alpha, p->prec);
+				}
+		}
+		else {
+				if (arb_ge(p->beta, zero)) {
+						/*
+						 * r1 = 1.0
+						 * r2 = 2.0 * abs(z)
+						 * r3 = (-mp.log(pi*eps/6))**alpha
+						 */
+						arb_set(r1, one);
 
-/*             num_inv(r3, den); */
-/*             num_mul_d(r3, r3, M_PI * num_to_d(eps)); */
-/*             num_log(r3, r3); */
-/*             num_mul_d(r3, r3, -2.0); */
-/*             num_pow(r3, r3,alpha); */
-/*         } */
-/*     } */
-/*     num_max3(res, r1, r2, r3); */
-/*     delete(r1), delete(r2), delete(r3); */
-/*     delete(aux), delete(den); */
-/* } */
+						acb_abs(r2, z, p->prec);
+						arb_mul(r2, r2, two, p->prec); 
+
+						arb_set_d(r3, M_PI * arbtod(eps) * 1.0/6.0);
+						arb_log(r3, r3, p->prec);
+						arb_neg(r3, r3);
+						arb_pow(r3, r3, p->alpha, p->prec);
+				}
+				else {
+						/*
+						 * r1 = (abs(beta) + 1.0)**alpha
+						 * r2 = 2.0 * abs(z)
+						 * den = 6.0 * (abs(beta) + 2.0) * (2.0 * abs(beta))**abs(beta)
+						 * r3 = (-2.0 * log(pi * eps/den))**alpha
+						 */
+						arb_abs(r1, p->beta);
+						arb_add(r1, r1, one, p->prec);
+						arb_pow(r1, r1, p->alpha, p->prec);
+
+						acb_abs(aux, z, p->prec);
+						arb_pow(r2, two, aux, p->prec);
+
+						arb_abs(aux, p->beta);
+						arb_mul(den, aux, two, p->prec);
+						arb_pow(den, den, aux, p->prec);
+						arb_set_d(aux2, 6.0);
+						arb_mul(den, den, aux2, p->prec);
+						arb_add(aux, aux, two, p->prec);
+						arb_mul(den, den, aux, p->prec);
+
+						arb_inv(r3, den, p->prec);
+						arb_set_d(aux2, M_PI * arbtod(eps));
+						arb_mul(r3, r3, aux2, p->prec);
+						arb_log(r3, r3, p->prec);
+						arb_set_d(aux2, -2.0);
+						arb_mul(r3, r3, aux2, p->prec);
+						arb_pow(r3, r3, p->alpha, p->prec);
+				}
+		}
+		arb_max(res, r1, r2, p->prec);
+		arb_max(res, res, r3, p->prec);
+}
 
 void
 mittleff5_6 (acb_t res,
-             const arb_t alpha,
-             const arb_t beta,
              const acb_t z,
-             const acb_t acc,
              const arb_t phi,
-             const arb_t c2)    
+             const arb_t c2,
+			 void * ctx)    
 {
-    acb_zero(res);
-/* #ifdef DEBUG */
-/*     log_info("\n[\033[1;33m%s\033[0m] Calling with parameters:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n\t    \033[1;32mtol\033[0m = %g\n", */
-/*              __func__, */
-/*              num_to_d(alpha), num_to_d(beta), num_real_d(z), num_imag_d(z), num_to_d(acc)); */
-/* #endif */
+		ctx_t* p = (ctx_t*) ctx;
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] Called with parameters:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n ",
+                 __func__, arbtod(p->alpha), arbtod(p->beta), acb_real_d(z), acb_imag_d(z));
+#endif  
 
-/*     num_t rmax, from, to, aux, int1, int2, integ; */
+		arb_t zero, one;
+		acb_t rmax, from, to, aux, int1, int2, integ;
 
-/*     rmax = new(num); */
-/*     from = new(num), to = new(num); */
-/*     aux = new(num); */
-/*     int1 = new(num), int2 = new(num); */
-/*     integ = new(num); */
+		acb_init(rmax);
+		acb_init(from);
+		acb_init(to);
+		acb_init(aux);
+		acb_init(int1);
+		acb_init(int2);
+		acb_init(integ);
+		arb_init(zero);
+		arb_init(one);
 
-/*     compute_rmax(rmax, alpha, beta, z, acc); */
+		compute_rmax(rmax, z, ctx);
 
-/*      num_set_d(aux, 0.0); */
-/*      A(aux, z, alpha, beta, aux);         */
-/*      num_mul(aux, aux, c2); */
+		arb_zero(zero);
+		arb_one(one);
+		fn_A(aux, z, p->alpha, p->beta, zero);
+		acb_mul(aux, aux, c2, p->prec);
 
-/*     if (num_le_d(beta, 1.0)) */
-/*     { */
-/*         num_set_d(from, 0.0); */
-/*         num_set_num(to, rmax); */
-/*         integrate_B(integ, alpha, beta, z, phi, from, to, acc); */
-/*     } */
-/*     else */
-/*     { */
-/*         num_set_d(from, 0.5); */
-/*         num_set_d(to, 1.0 + num_to_d(c2)); */
-/*         num_mul(to, to, rmax); */
-/*         integrate_B(int1, alpha, beta, z, phi, from, to, acc); */
+		if (arb_le(p->beta, one)) {
+				acb_set_d(from, 0.0);
+				acb_set(to, rmax);
+				quadb(integ, z, phi, from, to, ctx);
+		}
+		else {
+				acb_set_d(from, 0.5);
+				acb_set_d(to, 1.0 + arbtod(c2));
+				acb_mul(to, to, rmax, p->prec);
+				quadb(int1, z, phi, from, to, ctx);
 
-/*         num_neg(from, phi); */
-/*         num_set_num(to, phi); */
-/*         integrate_C(int2, alpha, beta, z, phi, from, to/\* , acc *\/); */
+				arb_neg(from, phi);
+				arb_set(to, phi);
+				quadc(int2, z, phi, from, to, ctx);
 
-/*         num_add(integ, int1, int2); */
-/*     } */
+				acb_add(integ, int1, int2, p->prec);
+		}
 
-/*     num_add(res, aux, integ); */
+		acb_add(res, aux, integ, p->prec);
     
-/*     delete(rmax); */
-/*     delete(from), delete(to); */
-/*     delete(aux); */
-/*     delete(int1), delete(int2); */
-/*     delete(integ); */
+		acb_clear(rmax);
+		acb_clear(from);
+		acb_clear(to);
+		acb_clear(aux);
+		acb_clear(int1);
+		acb_clear(int2);
+		acb_clear(integ);
 }
 
 /* apply eqs. (4.25) and (4.26) */
@@ -508,13 +528,21 @@ mittleff5 (acb_t res, const acb_t z, void * ctx)
         log_info("\n[\033[1;33m%s\033[0m] Called with parameters:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n ",
                  __func__, arbtod(p->alpha), arbtod(p->beta), acb_real_d(z), acb_imag_d(z));
 #endif 	
-    acb_zero(res);
-    /* num_t phi, c2; */
-    /* phi = new(num), c2 = new(num); */
-    /* num_set_d(phi, M_PI*num_to_d(alpha)); */
-    /* num_set_d(c2, 1.0); */
-    /* mittleff5_6(res, alpha, beta, z, acc, phi,c2); */
-    /* delete(phi), delete(c2); */
+
+		arb_t pi, phi, c2;
+		
+		arb_init(phi);
+		arb_init(c2);
+		arb_init(pi);
+		
+		arb_const_pi(pi, p->prec);
+		arb_mul(phi, pi, p->alpha, p->prec);
+		arb_one(c2);
+		mittleff5_6(res, z, phi, c2, ctx);
+		
+		arb_clear(phi);
+		arb_clear(c2);
+		arb_clear(pi);
 }
 
 void
@@ -532,6 +560,23 @@ mittleff6 (acb_t res, const acb_t z, void * ctx)
     /* num_set_d(c2, 0.0); */
     /* mittleff5_6(res, alpha, beta, z, acc, phi, c2); */
     /* delete(phi), delete(c2); */
+
+	arb_t pi, phi, c2;
+		
+	arb_init(phi);
+	arb_init(c2);
+	arb_init(pi);
+		
+	arb_const_pi(pi, p->prec);
+	arb_set_d(phi, 2.0/3.0);
+	arb_mul(phi, phi, pi, p->prec);
+	arb_mul(phi, phi, p->alpha, p->prec);
+	arb_zero(c2);
+	mittleff5_6(res, z, phi, c2, ctx);
+		
+	arb_clear(phi);
+	arb_clear(c2);
+	arb_clear(pi);
 }
 
 

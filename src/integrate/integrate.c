@@ -30,6 +30,8 @@
 //#include "num.h"
 //#include "utils.h"
 
+#include "types.h"
+
 #include <math.h>
 #include <assert.h>
 
@@ -354,31 +356,31 @@ fn_C (acb_ptr res, const acb_t ph, void * param, slong order, slong prec)
 
 void
 quadb (acb_t res,
-       const arb_t alpha,
-       const arb_t beta,
        const acb_t z,
        const arb_t phi,
        const acb_t from,
-       const acb_t to)
+       const acb_t to,
+       void * ctx)
 {
-    slong prec, goal;
+    ctx_t* p = (ctx_t*) ctx;
+    
+    slong goal;
     mag_t tol;
     acb_calc_integrate_opt_t options;
-    integ_params_t p  = {
-        .alpha = alpha,
-        .beta = beta,
+    integ_params_t par = {
+        .alpha = p->alpha,
+        .beta = p->beta,
         .z = z,
         .c = phi
     };
 
-    prec = PREC;
-    goal = prec;
+    goal = p->prec;
     mag_init(tol);
 
     acb_calc_integrate_opt_init(options);
-    mag_set_ui_2exp_si(tol, 1, -prec);
+    mag_set_ui_2exp_si(tol, 1, -p->prec);
 
-    acb_calc_integrate(res, fn_B, &p, from, to, goal, tol, options, prec);
+    acb_calc_integrate(res, fn_B, &par, from, to, goal, tol, options, p->prec);
 }
 
 /* void */
@@ -403,31 +405,30 @@ quadb (acb_t res,
 
 void
 quadc (acb_t res,
-       const arb_t alpha,
-       const arb_t beta,
        const acb_t z,
        const arb_t rho,
        const acb_t from,
-       const acb_t to)
+       const acb_t to,
+       void * ctx)
 {
-    slong prec, goal;
+    ctx_t* p = (ctx_t*) ctx;
+    slong goal;
     mag_t tol;
     acb_calc_integrate_opt_t options;
-    integ_params_t p  = {
-        .alpha = alpha,
-        .beta = beta,
+    integ_params_t par  = {
+        .alpha = p->alpha,
+        .beta = p->beta,
         .z = z,
         .c = rho
     };
 
-    prec = PREC;
-    goal = prec;
+    goal = p->prec;
     mag_init(tol);
 
     acb_calc_integrate_opt_init(options);
-    mag_set_ui_2exp_si(tol, 1, -prec);
+    mag_set_ui_2exp_si(tol, 1, -p->prec);
 
-    acb_calc_integrate(res, fn_C, &p, from, to, goal, tol, options, prec);
+    acb_calc_integrate(res, fn_C, &par, from, to, goal, tol, options, p->prec);
 }
 
 /* void */
