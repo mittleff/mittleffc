@@ -36,6 +36,11 @@
 #include "log.h"
 #endif
 
+#include <flint/acb_hypgeom.h>
+
+void
+asymptotic_series (acb_t res, const acb_t z, void * ctx);
+
 /* static void */
 /* asymptotic_series (acb_t res, */
 /*                    const acb_t z, */
@@ -48,8 +53,8 @@ mittleff0 (acb_t res, const acb_t z, void * ctx)
     ctx_t* p = (ctx_t*) ctx;
     //double a, b;
     int k, kmax;
-    arb_t one, aux, absz, k1, k2, eps;
-    acb_t  sum, tmp, fac1, fac2;
+    arb_t one, aux, absz, k1, k2, eps, tmp1, tmp2;
+    acb_t sum, tmp, fac1, fac2, aux2;
 
 #ifdef DEBUG
         log_info("\n[\033[1;33m%s\033[0m] Called with parameters:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n ",
@@ -65,6 +70,9 @@ mittleff0 (acb_t res, const acb_t z, void * ctx)
     acb_init(tmp);
     acb_init(sum);
     arb_init(aux);
+	acb_init(aux2);
+	arb_init(tmp1);
+	arb_init(tmp2);
 
     arb_one(one);
 
@@ -81,12 +89,12 @@ mittleff0 (acb_t res, const acb_t z, void * ctx)
     arb_div(aux, aux, p->alpha, p->prec);
     arb_ceil(aux, aux, p->prec);
     arb_add(k1, aux, one, p->prec);
-    
-    arb_sub(fac1, one, absz, p->prec);
-    arb_mul(fac1, fac1, eps, p->prec);
-    arb_log(fac1, fac1, p->prec);
-    arb_log(fac2, absz, p->prec);
-    arb_div(aux, fac1, fac2, p->prec);
+
+    arb_sub(tmp1, one, absz, p->prec);
+    arb_mul(tmp1, tmp1, eps, p->prec);
+    arb_log(tmp1, tmp1, p->prec);
+    arb_log(tmp2, absz, p->prec);
+    arb_div(aux, tmp1, tmp2, p->prec);
     arb_ceil(aux, aux, p->prec);
     arb_add(k2, aux, one, p->prec);
     
@@ -124,6 +132,9 @@ mittleff0 (acb_t res, const acb_t z, void * ctx)
     arb_clear(one);
     arb_clear(k1);
     arb_clear(k2);
+	acb_clear(aux2);
+	arb_clear(tmp1);
+	arb_clear(tmp2);
 }
 
 /* compute eq. (2.4) */
@@ -219,6 +230,10 @@ mittleff3_4 (acb_t res,
 {
 		ctx_t* p = (ctx_t*) ctx;
 		acb_t c, one, J, pi, aux, th, fac, fac1, fac2, fac3, fac4;
+		arb_t aux2;
+
+		arb_init(aux2);
+
 
 		acb_init(c);
 		acb_init(one);
@@ -240,8 +255,9 @@ mittleff3_4 (acb_t res,
 		acb_set_arb(th, p->alpha);
 		acb_inv(th, th, p->prec);
 		acb_pow(th, z, th, p->prec);
-		acb_arg(th, th, p->prec);
-		acb_sub(th, th, pi, p->prec);
+		acb_arg(aux2, th, p->prec);
+		acb_set_arb(aux, aux2);
+		acb_sub(th, aux, pi, p->prec);
 		acb_mul(aux, J, th, p->prec);
 		acb_exp(c, aux, p->prec);
 		acb_sub(c, aux, c, p->prec);
@@ -264,7 +280,8 @@ mittleff3_4 (acb_t res,
 
 		acb_set_arb(aux, p->alpha);
 		acb_inv(aux, aux, p->prec);
-		acb_abs(fac4, z, p->prec);
+		acb_abs(aux2, z, p->prec);
+		acb_set_arb(fac4, aux2);
 		acb_pow(aux, fac4, aux, p->prec);
 		acb_set_d(fac4, 0.5);
 		acb_mul(fac4, aux, fac4, p->prec);
@@ -294,6 +311,7 @@ mittleff3_4 (acb_t res,
 		acb_clear(th);
 		acb_clear(fac1);
 		acb_clear(fac2);
+		arb_clear(aux2);
 }
 
 void
@@ -470,7 +488,7 @@ mittleff5_6 (acb_t res,
                  __func__, arbtod(p->alpha), arbtod(p->beta), acb_real_d(z), acb_imag_d(z));
 #endif  
 
-		arb_t zero, one;
+		arb_t zero, one, aux2;
 		acb_t rmax, from, to, aux, int1, int2, integ;
 
 		acb_init(rmax);
@@ -482,13 +500,15 @@ mittleff5_6 (acb_t res,
 		acb_init(integ);
 		arb_init(zero);
 		arb_init(one);
+		arb_init(aux2);
 
-		compute_rmax(rmax, z, ctx);
+		compute_rmax(aux2, z, ctx);
+		acb_set_arb(rmax, aux2);
 
 		arb_zero(zero);
 		arb_one(one);
 		fn_A(aux, z, p->alpha, p->beta, zero);
-		acb_mul(aux, aux, c2, p->prec);
+		acb_mul_arb(aux, aux, c2, p->prec);
 
 		if (arb_le(p->beta, one)) {
 				acb_set_d(from, 0.0);
@@ -501,8 +521,11 @@ mittleff5_6 (acb_t res,
 				acb_mul(to, to, rmax, p->prec);
 				quadb(int1, z, phi, from, to, ctx);
 
-				arb_neg(from, phi);
-				arb_set(to, phi);
+				arb_neg(aux2, phi);
+				acb_set_arb(from, aux2);
+				
+				//arb_neg(from, phi);
+				acb_set_arb(to, phi);
 				quadc(int2, z, phi, from, to, ctx);
 
 				acb_add(integ, int1, int2, p->prec);
@@ -517,6 +540,7 @@ mittleff5_6 (acb_t res,
 		acb_clear(int1);
 		acb_clear(int2);
 		acb_clear(integ);
+		arb_clear(aux2);
 }
 
 /* apply eqs. (4.25) and (4.26) */

@@ -45,7 +45,7 @@ acbtod (double* res, const acb_t x)
     res[1] = arbtod(i);
 
     arb_clear(r);
-    acb_clear(i);
+    arb_clear(i);
 }
 
 void

@@ -32,6 +32,8 @@
 
 #include <stdbool.h>
 
+#include <flint/acb_hypgeom.h>
+
 #ifdef DEBUG
 #include "log.h"
 #endif
@@ -74,7 +76,7 @@ mittleff_cmplx (double* ret,
 		acbtod(ret, res);
 
 		acb_clear(z);
-		arb_clear(res);
+		acb_clear(res);
 		arb_clear(ctx.alpha);
 		arb_clear(ctx.beta);
     
@@ -87,7 +89,11 @@ static void
 compute_mittleff (acb_t res, const acb_t z, void * ctx)
 {
 		ctx_t* p = (ctx_t*) ctx;
-		
+
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] Called with parameters:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n ",
+                 __func__, arbtod(p->alpha), arbtod(p->beta), acb_real_d(z), acb_imag_d(z));
+#endif		
     
 		arb_t zero, one, two, half;
 
@@ -103,36 +109,32 @@ compute_mittleff (acb_t res, const acb_t z, void * ctx)
     
 		/* Test special cases */
 		if (acb_is_zero(z)) { /* z = 0 */
+#ifdef DEBUG
+				log_info("\n[\033[1;33m%s\033[0m] Special case z = 0", __func__);
+#endif				
 				acb_t b;
 				acb_init(b);
 				acb_set_arb(b, p->beta);
 				acb_hypgeom_rgamma(res, b, p->prec);
-
-				/* printf("z = "); */
-				/* acb_printn(z, 10, 10); */
-				/* printf("\n"); */
-				/* printf("alpha = "); */
-				/* arb_printd(p->alpha, 10); */
-				/* printf("\n"); */
-				/* printf("beta = "); */
-				/* arb_printd(p->beta, 10); */
-				/* printf("prec = %d", p->prec);				 */
-				/* printf("\n"); */
-				
-				/* printf("res = "); */
-				/* acb_printd(res, 10); */
-				/* printf("\n"); */
-				
 				acb_clear(b);
 		}
-		else if (arb_eq(p->alpha, one) && arb_eq(p->beta, one)) { 
+		else if (arb_eq(p->alpha, one) && arb_eq(p->beta, one)) {
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] Special case alpha = beta = 1", __func__);
+#endif				
 				acb_exp(res, z, p->prec);
 		}
-		else if (arb_eq(p->alpha, two) && arb_eq(p->beta, one)) { 
+		else if (arb_eq(p->alpha, two) && arb_eq(p->beta, one)) {
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] Special case alpha = 2, beta = 1", __func__);
+#endif				
 				acb_sqrt(res, z, p->prec);
 				acb_cosh(res, res, p->prec);
 		}
 		else if (arb_eq(p->alpha, half) && arb_eq(p->beta, one)) {
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] Special case alpha = 0.5, beta = 1", __func__);
+#endif				
 				acb_t exp_z2, erfc_z;
         
 				acb_init(exp_z2);
@@ -148,7 +150,10 @@ compute_mittleff (acb_t res, const acb_t z, void * ctx)
 				acb_clear(exp_z2);
 				acb_clear(erfc_z);
 		}
-		else if (arb_eq(p->alpha, two) && arb_eq(p->beta, two)) { 
+		else if (arb_eq(p->alpha, two) && arb_eq(p->beta, two)) {
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] Special case alpha = 2, beta = 2", __func__);
+#endif				
 				acb_t n, d;
 
 				acb_init(n);
@@ -163,6 +168,9 @@ compute_mittleff (acb_t res, const acb_t z, void * ctx)
 				acb_clear(d);
 		}
 		else if (in_region_G0(z, ctx)) {
+#ifdef DEBUG
+				log_info("\n[\033[1;33m%s\033[0m] (%+.6e %+.6e * I) in G0", __func__, acb_real_d(z), acb_imag_d(z));
+#endif				
 				mittleff0(res, z, ctx);
 		}
 		else if (arb_gt(p->alpha, one)) { /* apply recursive relation (2.2) */
@@ -221,18 +229,42 @@ compute_mittleff (acb_t res, const acb_t z, void * ctx)
 				acb_clear(zp);
 				acb_clear(aux);
 		} else { /* alpha <= 1 */
-				if (in_region_G1(z, ctx)) 
+				if (in_region_G1(z, ctx)) {
+#ifdef DEBUG
+						log_info("\n[\033[1;33m%s\033[0m] (%+.6e %+.6e * I) in G1", __func__, acb_real_d(z), acb_imag_d(z));
+#endif						
 						mittleff1(res, z, ctx);
-				else if (in_region_G2(z, ctx))            
+				}
+				else if (in_region_G2(z, ctx)) {
+#ifdef DEBUG
+						log_info("\n[\033[1;33m%s\033[0m] (%+.6e %+.6e * I) in G2", __func__, acb_real_d(z), acb_imag_d(z));
+#endif						
 						mittleff2(res, z, ctx);
-				else if (in_region_G3(z, ctx))              
+				}
+				else if (in_region_G3(z, ctx)) {
+#ifdef DEBUG
+						log_info("\n[\033[1;33m%s\033[0m] (%+.6e %+.6e * I) in G3", __func__, acb_real_d(z), acb_imag_d(z));
+#endif						
 						mittleff3(res, z, ctx);
-				else if (in_region_G4(z, ctx))             
+				}
+				else if (in_region_G4(z, ctx)) {
+#ifdef DEBUG
+						log_info("\n[\033[1;33m%s\033[0m] (%+.6e %+.6e * I) in G4", __func__, acb_real_d(z), acb_imag_d(z));
+#endif						
 						mittleff4(res, z, ctx);
-				else if (in_region_G5(z, ctx))             
+				}
+				else if (in_region_G5(z, ctx)) {
+#ifdef DEBUG
+						log_info("\n[\033[1;33m%s\033[0m] (%+.6e %+.6e * I) in G5", __func__, acb_real_d(z), acb_imag_d(z));
+#endif						
 						mittleff5(res, z, ctx);
-				else if (in_region_G6(z, ctx))       
+				}
+				else if (in_region_G6(z, ctx)) {
+#ifdef DEBUG
+						log_info("\n[\033[1;33m%s\033[0m] (%+.6e %+.6e * I) in G6", __func__, acb_real_d(z), acb_imag_d(z));
+#endif						
 						mittleff6(res, z, ctx);
+				}
 				else
 						fprintf(stderr, "None of the regions");
 		}

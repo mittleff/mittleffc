@@ -28,7 +28,7 @@
 //#include "quad.h
 
 void
-A (acb_t res,
+fn_A (acb_t res,
    const acb_t z,
    const arb_t alpha,
    const arb_t beta,
@@ -67,5 +67,21 @@ A (acb_t res,
 /*              const num_t rho, */
 /*              const num_t from, */
 /*              const num_t to); */
+
+void
+quadb (acb_t res,
+       const acb_t z,
+       const arb_t phi,
+       const acb_t from,
+       const acb_t to,
+       void * ctx);
+
+void
+quadc (acb_t res,
+       const acb_t z,
+       const arb_t phi,
+       const acb_t from,
+       const acb_t to,
+       void * ctx); 
 
 #endif  /* __INTEGRATE_H__ */

@@ -25,11 +25,6 @@
 
 #include <flint/acb_calc.h>
 
-//#include "quad.h"
-//#include "new.h"
-//#include "num.h"
-//#include "utils.h"
-
 #include "types.h"
 
 #include <math.h>
@@ -42,32 +37,6 @@ typedef struct {
     acb_t z;
     arb_t c;
 } integ_params_t;
-
-/* /\* Parameters for integrating B *\/ */
-/* typedef struct { */
-/*     num_t alpha; */
-/*     num_t beta; */
-/*     num_t z; */
-/*     num_t phi; */
-/* } parameters_B; */
-
-/* /\* Parameters for integrating C *\/ */
-/* typedef struct { */
-/*     num_t alpha; */
-/*     num_t beta; */
-/*     num_t z; */
-/*     num_t rho; */
-/* } parameters_C; */
-
-/* void */
-/* f_wrap_B(num_t res, */
-/*          const num_t z, */
-/*          void * ctx); */
-
-/* void */
-/* f_wrap_C(num_t res, */
-/*          const num_t z, */
-/*          void * ctx); */
 
 void
 fn_A (acb_t res,
@@ -106,44 +75,23 @@ fn_A (acb_t res,
     acb_clear(fac2);
     acb_clear(fac3);
     acb_init(aux);
-
-    /* acb_t zp, cosxa, expz; */
-    /* acb_init(zp); */
-    /* acb_init(cosxa)= new(num), cosxa = new(num), expz = new(num); */
-
-    /* /\* compute z**((1-beta)/alpha) *\/ */
-    /* num_set_num(zp, z); */
-    /* num_pow_d(zp, zp, (1.0 - num_to_d(beta))/num_to_d(alpha)); */
-    /* /\* compute cos(x/alpha) *\/ */
-    /* num_div(cosxa, x, alpha); */
-    /* //num_set_d(cosxa, cosxa); */
-    /* num_cos(cosxa, cosxa); */
-    /* /\* compute exp(z**(1/alpha) * cos(x/alpha)) *\/ */
-    /* //num_set_d_d(expz, rez, imz); */
-    /* num_pow_d(expz, z, 1.0/num_to_d(alpha)); */
-    /* num_mul(expz, expz, cosxa); */
-    /* num_exp(expz, expz); */
-
-    /* num_mul(res, zp, expz); */
-    /* num_mul_d(res, res, 1.0/num_to_d(alpha)); */
-       
-    /* delete(zp), delete(cosxa), delete(expz); */
 }
 
 static void
-omega(arb_t res,
+omega(acb_t res,
       const arb_t x,
       const arb_t y,
       const arb_t alpha,
       const arb_t beta)
 {
     /* x**(1.0/alpha) * sin(y/alpha) + y * (1.0 + (1.0 - beta)/alpha) */
-    arb_t fac1, fac2, aux1, aux2;
+    arb_t _res, fac1, fac2, aux1, aux2;
 
     arb_init(fac1);
     arb_init(fac2);
     arb_init(aux1);
     arb_init(aux2);
+    arb_init(_res);
     
     arb_inv(aux2, alpha, PREC);
 
@@ -159,64 +107,78 @@ omega(arb_t res,
     arb_add(fac2, fac2, aux1, PREC);
     arb_mul(fac2, fac2, y, PREC);
 
-    arb_add(res, fac1, fac2, PREC);
+    arb_add(_res, fac1, fac2, PREC);
+    acb_set_arb(res, _res);
 
     arb_clear(fac1);
     arb_clear(fac2);
     arb_clear(aux1);
     arb_clear(aux2);
+    arb_clear(_res);
 }
 
 int
 fn_B (acb_ptr res, const acb_t r, void * param, slong order, slong prec)
 {
+    if (order > 1)
+        flint_abort();  /* Would be needed for Taylor method. */
+    
     integ_params_t* p = (integ_params_t*) param;
 
-    arb_t w, pi;
-    acb_t aval, fac1, fac2, aux, aux2;
+    arb_t pi, rr;
+    acb_t w, aval, fac1, fac2, aux, aux2, phi;
 
-    arb_init(w);
+    acb_init(w);
     arb_init(pi);
     acb_init(aval);
     acb_init(fac1);
     acb_init(fac2);
     acb_init(aux);
     acb_init(aux2);
+    arb_init(rr);
+    acb_init(phi);
+
+    acb_set_arb(phi, p->c);
 
     fn_A (aval, r, p->alpha, p->beta, p->c /* phi */);
-    omega(w, r, p->c /* phi */, p->alpha, p->beta);
+    acb_get_real(rr, r);
+    omega(w, rr, p->c /* phi */, p->alpha, p->beta);
 
-    acb_sub(aux, w, p->c, PREC);
-    acb_sin(aux, aux, PREC);
-    acb_mul(fac1, r, aux, PREC);
-    acb_sin(aux, w, PREC);
-    acb_mul(aux, aux, p->z, PREC);
-    acb_sub(fac1, fac1, aux, PREC);
+    acb_sub(aux, w, phi, prec);
+    acb_sin(aux, aux, prec);
+    acb_mul(fac1, r, aux, prec);
+    acb_sin(aux, w, prec);
+    acb_mul(aux, aux, p->z, prec);
+    acb_sub(fac1, fac1, aux, prec);
 
-    acb_sqr(fac2, r, PREC);
-    acb_sqr(aux, p->z, PREC);
-    acb_add(fac2, fac2, aux, PREC);
-    acb_cos(aux2, p->c, PREC);
-    acb_mul(aux2, aux2, p->z, PREC);
-    acb_mul(aux2, aux2, r, PREC);
+    acb_sqr(fac2, r, prec);
+    acb_sqr(aux, p->z, prec);
+    acb_add(fac2, fac2, aux, prec);
+    acb_cos(aux2, phi, prec);
+    acb_mul(aux2, aux2, p->z, prec);
+    acb_mul(aux2, aux2, r, prec);
     acb_set_d(aux, -2.0);
-    acb_mul(aux, aux, aux2, PREC);
-    acb_add(fac2, fac2, aux, PREC);
+    acb_mul(aux, aux, aux2, prec);
+    acb_add(fac2, fac2, aux, prec);
 
-    arb_const_pi(pi, PREC);
+    arb_const_pi(pi, prec);
 
     acb_set_arb(res, pi);
-    acb_inv(res, res, PREC);
-    acb_mul(res, res, aval, PREC);
-    acb_mul(res, res, fac1, PREC);
-    acb_div(res, res, fac2, PREC);
+    acb_inv(res, res, prec);
+    acb_mul(res, res, aval, prec);
+    acb_mul(res, res, fac1, prec);
+    acb_div(res, res, fac2, prec);
     
-    arb_clear(w);
+    acb_clear(w);
     arb_clear(pi);
     acb_clear(aux);
     acb_clear(aux2);
     acb_clear(fac1);
     acb_clear(fac2);
+    arb_clear(rr);
+    acb_clear(phi);
+
+    return 0;
 }
 
 /* void */
@@ -261,12 +223,14 @@ fn_B (acb_ptr res, const acb_t r, void * param, slong order, slong prec)
 int
 fn_C (acb_ptr res, const acb_t ph, void * param, slong order, slong prec)
 {
+    if (order > 1)
+        flint_abort();  /* Would be needed for Taylor method. */
     integ_params_t* p = (integ_params_t*) param;
 
-    arb_t w, pi, phi;
-    acb_t aval, fac1, fac2, aux, aux2, I;
+    arb_t pi, phi;
+    acb_t w, aval, fac1, fac2, aux, aux2, I, rho;
     
-    arb_init(w);
+    acb_init(w);
     arb_init(pi);
     acb_init(aval);
     acb_init(fac1);
@@ -275,36 +239,38 @@ fn_C (acb_ptr res, const acb_t ph, void * param, slong order, slong prec)
     acb_init(aux2);
     acb_init(I);
     arb_init(phi);
+    acb_init(rho);
 
-    arb_const_pi(pi, PREC);
+    arb_const_pi(pi, prec);
     acb_onei(I);
     acb_get_real(phi, ph);
+    acb_set_arb(rho, p->c);
 
-    fn_A (aval, p->c /* rho */, p->alpha, p->beta, phi);
+    fn_A (aval, rho, p->alpha, p->beta, phi);
     omega(w, p->c /* rho */, phi, p->alpha, p->beta);
 
-    acb_mul(aux, w, I, PREC);
-    acb_exp(fac1, aux, PREC);
+    acb_mul(aux, w, I, prec);
+    acb_exp(fac1, aux, prec);
 
-    acb_mul(aux, phi, I, PREC);
-    acb_exp(fac2, aux, PREC);
-    acb_mul(fac2, fac2, p->c /* rho */, PREC);
-    acb_sub(fac2, fac2, p->z, PREC);
+    acb_mul_arb(aux, I, phi, prec);
+    acb_exp(fac2, aux, prec);
+    acb_mul(fac2, fac2, rho, prec);
+    acb_sub(fac2, fac2, p->z, prec);
 
     acb_set_d(res, 2.0);
-    acb_mul(res, pi, res, PREC);
-    acb_inv(res, res, PREC);
-    acb_mul(res, res, p->c /* rho */, PREC);
-    acb_mul(res, res, aval, PREC);
-    acb_mul(res, res, fac1, PREC);
-    acb_div(res, res, fac2, PREC);
+    acb_mul_arb(res, res, pi, prec);
+    acb_inv(res, res, prec);
+    acb_mul_arb(res, res, p->c /* rho */, prec);
+    acb_mul(res, res, aval, prec);
+    acb_mul(res, res, fac1, prec);
+    acb_div(res, res, fac2, prec);
 
-    acb_inv(res, res, PREC);
-    acb_mul(res, res, aval, PREC);
-    acb_mul(res, res, fac1, PREC);
-    acb_div(res, res, fac2, PREC);
+    acb_inv(res, res, prec);
+    acb_mul(res, res, aval, prec);
+    acb_mul(res, res, fac1, prec);
+    acb_div(res, res, fac2, prec);
     
-    arb_clear(w);
+    acb_clear(w);
     arb_clear(pi);
     acb_clear(I);
     acb_clear(aux);
@@ -312,6 +278,8 @@ fn_C (acb_ptr res, const acb_t ph, void * param, slong order, slong prec)
     acb_clear(fac1);
     acb_clear(fac2);
     arb_clear(phi);
+
+    return 0;
 }
 
 /* void */
@@ -367,12 +335,23 @@ quadb (acb_t res,
     slong goal;
     mag_t tol;
     acb_calc_integrate_opt_t options;
-    integ_params_t par = {
-        .alpha = p->alpha,
-        .beta = p->beta,
-        .z = z,
-        .c = phi
-    };
+    /* integ_params_t par = { */
+    /*     .alpha = p->alpha, */
+    /*     .beta = p->beta, */
+    /*     .z = z, */
+    /*     .c = phi */
+    /* }; */
+    integ_params_t par;
+
+    arb_init(par.alpha);
+    arb_init(par.beta);
+    acb_init(par.z);
+    arb_init(par.c);
+
+    arb_set(par.alpha, p->alpha);
+    arb_set(par.beta, p->beta);
+    acb_set(par.z, z);
+    arb_set(par.c, phi);
 
     goal = p->prec;
     mag_init(tol);
@@ -381,6 +360,11 @@ quadb (acb_t res,
     mag_set_ui_2exp_si(tol, 1, -p->prec);
 
     acb_calc_integrate(res, fn_B, &par, from, to, goal, tol, options, p->prec);
+
+    arb_clear(par.alpha);
+    arb_clear(par.beta);
+    acb_clear(par.z);
+    arb_clear(par.c);
 }
 
 /* void */
@@ -415,12 +399,23 @@ quadc (acb_t res,
     slong goal;
     mag_t tol;
     acb_calc_integrate_opt_t options;
-    integ_params_t par  = {
-        .alpha = p->alpha,
-        .beta = p->beta,
-        .z = z,
-        .c = rho
-    };
+    /* integ_params_t par  = { */
+    /*     .alpha = p->alpha, */
+    /*     .beta = p->beta, */
+    /*     .z = z, */
+    /*     .c = rho */
+    /* }; */
+    integ_params_t par;
+
+    arb_init(par.alpha);
+    arb_init(par.beta);
+    acb_init(par.z);
+    arb_init(par.c);
+
+    arb_set(par.alpha, p->alpha);
+    arb_set(par.beta, p->beta);
+    acb_set(par.z, z);
+    arb_set(par.c, rho);
 
     goal = p->prec;
     mag_init(tol);
@@ -429,6 +424,11 @@ quadc (acb_t res,
     mag_set_ui_2exp_si(tol, 1, -p->prec);
 
     acb_calc_integrate(res, fn_C, &par, from, to, goal, tol, options, p->prec);
+
+    arb_clear(par.alpha);
+    arb_clear(par.beta);
+    acb_clear(par.z);
+    arb_clear(par.c);
 }
 
 /* void */
