@@ -200,93 +200,123 @@ mittleff1 (acb_t res, const acb_t z, void * ctx)
 void
 mittleff2 (acb_t res, const acb_t z, void * ctx) 
 {
-    acb_zero(res);
-    /* UNUSED(acc); */
-    /* asymptotic_series(res, z, alpha, beta); */
+		ctx_t* p = (ctx_t*) ctx;
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] Called with parameters:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n ",
+                 __func__, arbtod(p->alpha), arbtod(p->beta), acb_real_d(z), acb_imag_d(z));
+#endif 		
+		//acb_zero(res);
+		/* UNUSED(acc); */
+		asymptotic_series(res, z, ctx);
 }
 
 /* Apply eq. (2.6) */
 void
 mittleff3_4 (acb_t res,
-             const arb_t alpha,
-             const arb_t beta,
              const acb_t z,
-             const acb_t acc,
+			 void * ctx,
              const int flag) 
 {
-    acb_zero(res);
-    /* UNUSED(acc); */
-    /* num_t c, one, J, pi, aux, th, fac, fac1, fac2, fac3, fac4; */
+		ctx_t* p = (ctx_t*) ctx;
+		acb_t c, one, J, pi, aux, th, fac, fac1, fac2, fac3, fac4;
 
-    /* c = new(num), one = new(num); */
-    /* pi = new(num), J = new(num), aux = new(num); */
-    /* fac = new(num), fac3 = new(num), fac4 = new(num); */
-    /* th = new(num), fac1 = new(num), fac2 = new(num); */
+		acb_init(c);
+		acb_init(one);
+		acb_init(pi);
+		acb_init(J);
+		acb_init(aux);
+		acb_init(fac);
+		acb_init(fac3);
+		acb_init(fac4);
+		acb_init(th);
+		acb_init(fac1);
+		acb_init(fac2);
 
-    /* num_set_d(one, 1.0); */
-    /* num_set_d(pi, M_PI); */
-    /* num_set_d_d(J, 0.0, 1.0); */
+		acb_one(one);
+		acb_const_pi(pi, p->prec);
+		acb_onei(J);
 
-    /* /\* compute c(theta) *\/ */
-    /* num_inv(th, alpha); */
-    /* num_pow(th, z, th); */
-    /* num_arg(th, th); */
-    /* num_sub(th, th, pi); */
-    /* num_mul(aux, J, th); */
-    /* num_exp(c, aux); */
-    /* num_sub(c, aux, c); */
-    /* num_add(c, c, one); */
-    /* num_mul_d(c, c, 2.0); */
-    /* num_sqrt(c, c); */
+		/* compute c(theta) */
+		acb_set_arb(th, p->alpha);
+		acb_inv(th, th, p->prec);
+		acb_pow(th, z, th, p->prec);
+		acb_arg(th, th, p->prec);
+		acb_sub(th, th, pi, p->prec);
+		acb_mul(aux, J, th, p->prec);
+		acb_exp(c, aux, p->prec);
+		acb_sub(c, aux, c, p->prec);
+		acb_add(c, c, one, p->prec);
+		acb_set_d(aux, 2.0);
+		acb_mul(c, c, aux, p->prec);
+		acb_sqrt(c, c, p->prec);
 
-    /* if (flag == 4) */
-    /*     num_neg(c, c); */
+		if (flag == 4)
+				acb_neg(c, c);
 
-    /* num_sub(aux, one, beta); */
-    /* num_div(aux, aux, alpha); */
-    /* num_pow(fac1, z, aux); */
+		acb_sub_arb(aux, one, p->beta, p->prec);
+		acb_div_arb(aux, aux, p->alpha, p->prec);
+		acb_pow(fac1, z, aux, p->prec);
 
-    /* num_inv(aux, alpha); */
-    /* num_pow(aux, z, aux); */
-    /* num_exp(fac2, aux); */
+		acb_set_arb(aux, p->alpha);
+		acb_inv(aux, aux, p->prec);
+		acb_pow(aux, z, aux, p->prec);
+		acb_exp(fac2, aux, p->prec);
 
-    /* num_inv(aux, alpha); */
-    /* num_abs(fac4, z); */
-    /* num_pow(aux, fac4, aux); */
-    /* num_mul_d(fac4, aux, 0.5); */
+		acb_set_arb(aux, p->alpha);
+		acb_inv(aux, aux, p->prec);
+		acb_abs(fac4, z, p->prec);
+		acb_pow(aux, fac4, aux, p->prec);
+		acb_set_d(fac4, 0.5);
+		acb_mul(fac4, aux, fac4, p->prec);
 
-    /* num_sqrt(aux, fac4); */
-    /* num_mul(aux, c, aux); */
-    /* num_erfc(fac3, aux); */
+		acb_sqrt(aux, fac4, p->prec);
+		acb_mul(aux, c, aux, p->prec);
+		acb_hypgeom_erfc(fac3, aux, p->prec);
 
-    /* num_mul(fac, fac1, fac2); */
-    /* num_mul(fac, fac, fac3); */
-    /* num_div(fac, fac, alpha); */
-    /* num_mul_d(fac, fac, 0.5); */
+		acb_mul(fac, fac1, fac2, p->prec);
+		acb_mul(fac, fac, fac3, p->prec);
+		acb_div_arb(fac, fac, p->alpha, p->prec);
+		acb_set_d(aux, 0.5);
+		acb_mul(fac, fac, aux, p->prec);
 
-    /* asymptotic_series(aux, z, alpha, beta); */
+		asymptotic_series(aux, z, ctx);
 
-    /* num_add(res, fac, aux); */
+		acb_add(res, fac, aux, p->prec);
 
-    /* delete(c), delete(one); */
-    /* delete(pi), delete(J), delete(aux); */
-    /* delete(fac), delete(fac3), delete(fac4); */
-    /* delete(th), delete(fac1), delete(fac2); */
+		acb_clear(c);
+		acb_clear(one);
+		acb_clear(pi);
+		acb_clear(J);
+		acb_clear(aux);
+		acb_clear(fac);
+		acb_clear(fac3);
+		acb_clear(fac4);
+		acb_clear(th);
+		acb_clear(fac1);
+		acb_clear(fac2);
 }
 
 void
 mittleff3 (acb_t res, const acb_t z, void * ctx) 
 
 {
-    acb_zero(res);
-    //mittleff3_4(res, alpha, beta, z, acc, 3);
+		ctx_t* p = (ctx_t*) ctx;
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] Called with parameters:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n ",
+                 __func__, arbtod(p->alpha), arbtod(p->beta), acb_real_d(z), acb_imag_d(z));
+#endif 		
+		mittleff3_4(res, z, ctx, 3);
 }
 
 void
 mittleff4 (acb_t res, const acb_t z, void * ctx)
 {
-     acb_zero(res);
-     //mittleff3_4 (res, alpha, beta, z, acc, 4);
+		ctx_t* p = (ctx_t*) ctx;
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] Called with parameters:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n ",
+                 __func__, arbtod(p->alpha), arbtod(p->beta), acb_real_d(z), acb_imag_d(z));
+#endif 		
+	 mittleff3_4(res, z, ctx, 4);
 }
 
 /* static void */
@@ -473,6 +503,11 @@ mittleff5_6 (acb_t res,
 void
 mittleff5 (acb_t res, const acb_t z, void * ctx)
 {
+		ctx_t* p = (ctx_t*) ctx;
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] Called with parameters:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n ",
+                 __func__, arbtod(p->alpha), arbtod(p->beta), acb_real_d(z), acb_imag_d(z));
+#endif 	
     acb_zero(res);
     /* num_t phi, c2; */
     /* phi = new(num), c2 = new(num); */
@@ -485,6 +520,11 @@ mittleff5 (acb_t res, const acb_t z, void * ctx)
 void
 mittleff6 (acb_t res, const acb_t z, void * ctx)
 {
+		ctx_t* p = (ctx_t*) ctx;
+#ifdef DEBUG
+        log_info("\n[\033[1;33m%s\033[0m] Called with parameters:\n\t    \033[1;32malpha\033[0m = %g\n\t    \033[1;32mbeta\033[0m  = %g\n\t    \033[1;32mz\033[0m = %+.14e%+.14e*I\n ",
+                 __func__, arbtod(p->alpha), arbtod(p->beta), acb_real_d(z), acb_imag_d(z));
+#endif 	
     acb_zero(res);
     /* num_t phi, c2; */
     /* phi = new(num), c2 = new(num); */
