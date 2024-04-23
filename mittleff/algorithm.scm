@@ -35,10 +35,9 @@
 (define omega (pointer->procedure
                complex-double (dynamic-func "omega" libalgorithm) `(,complex-double ,complex-double ,double ,double)))
 
-(define (fn-b r a b z phi)
-  (let ((w (omega r phi a b)))
-    (* (/ pi) (fn-a r a b phi) (/ (- (* r (sin (- w phi))) (* z (sin w)))
-                                  (+ (expt r 2) (* -2 r z (cos phi)) (expt z 2))))))
+(define fn-b
+  (pointer->procedure
+   complex-double (dynamic-func "fn_b" libalgorithm) `(,double ,double ,double ,complex-double ,double)))
 
 (define (fn-c ph a b z rho)
   (let ((w (omega rho ph a b)))

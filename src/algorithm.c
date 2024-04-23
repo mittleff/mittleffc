@@ -150,6 +150,31 @@ omega (double complex x,
 }
 
 /* double complex */
+/* fn_a (double complex z, */
+/*       double a, */
+/*       double b, */
+/*       double complex x) */
+double complex
+fn_b (double r,
+      double a,
+      double b,
+      double complex z,
+      double phi)
+{
+    double complex res;
+    double complex w, fac1, fac2;
+
+    w = omega(r, phi, a, b);
+
+    fac1 = (r * csin(w - phi)) - (z * csin(w));
+    fac2 = r*r - 2*r*z*cos(phi) + z*z;
+
+    res = (1.0/M_PI) * fn_a(r, a, b, phi) * fac1/fac2;
+
+    return res;
+}
+
+/* double complex */
 /* fn_c (double ph, */
 /*       double a, */
 /*       double b, */
