@@ -28,11 +28,9 @@
           complex-double (dynamic-func "asymptotics" libalgorithm) `(,double ,double ,complex-double ,double))))
     (asymptoticss a b z acc)))
 
-(define (fn-a z a b x)
-  (* (/ a) (expt z (/ (- 1 b) a)) (exp (* (expt z (/ a)) (cos (/ x a))))))
-;; (define fn-a
-;;   (pointer->procedure
-;;    complex-double (dynamic-func "fn_a" libalgorithm) `(,complex-double ,double ,double ,complex-double)))
+(define fn-a
+  (pointer->procedure
+   complex-double (dynamic-func "fn_a" libalgorithm) `(,complex-double ,double ,double ,complex-double)))
 
 (define omega (pointer->procedure
                complex-double (dynamic-func "omega" libalgorithm) `(,complex-double ,complex-double ,double ,double)))

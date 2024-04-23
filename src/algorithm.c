@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <math.h>
 #include <complex.h>
+#include <flint/acb.h>
+#include <flint/arb.h>
+
+extern double complex acbtocmplx (acb_t z);
 
 extern double complex
 ml_erfc (double complex x, double eps);
@@ -67,16 +71,74 @@ rho_i (int i, double complex z, double alpha, double acc)
     
 }
 
-/* double complex */
-/* fn_a (double complex z, */
-/*       double a, */
-/*       double b, */
-/*       double complex x) */
-/* { */
-/*     /\* double complex tmp = (1.0 / a) * cpow(z, (1 - b)/a) * cexp(cpow(z, 1/a) * ccos(x/a)); *\/ */
-/*     /\* printf("x, a = (%g %g)\n", creal(tmp), cimag(tmp));//return 0; *\/ */
-/*     return (1.0 / a) * cpow(z, (1 - b)/a) * cexp(cpow(z, 1/a) * ccos(x/a)); */
-/* } */
+double complex
+fn_a (double complex z,
+      double a,
+      double b,
+      double complex x)
+{
+    double eps = 1e-15;
+    double complex res;
+
+    slong prec;
+    acb_t zz, xx, fac1, fac2, fac3, tmp2, _res;
+    arb_t alpha, beta, one_over_alpha, tmp1;
+
+    prec = ceil(fabs(log(eps)/log(2)));
+
+    acb_init(_res);
+    acb_init(zz);
+    acb_init(xx);
+    acb_init(fac1);
+    acb_init(fac2);
+    acb_init(fac3);
+    arb_init(alpha);
+    arb_init(beta);
+    arb_init(one_over_alpha);
+    arb_init(tmp1);
+    acb_init(tmp2);
+
+    arb_set_d(alpha, a);
+    arb_set_d(beta, b);
+    acb_set_d_d(zz, creal(z), cimag(z));
+    acb_set_d_d(xx, creal(x), cimag(x));
+    acb_one(_res);
+    arb_inv(one_over_alpha, alpha, prec);
+
+    // fac1
+    acb_set_arb(fac1, one_over_alpha);
+    // fac2
+    arb_one(tmp1);
+    arb_sub(tmp1, tmp1, beta, prec);
+    arb_div(tmp1, tmp1, alpha, prec);
+    acb_pow_arb(fac2, zz, tmp1, prec);
+    // fac3
+    acb_div_arb(fac3, xx, alpha, prec);
+    acb_cos(fac3, fac3, prec);
+    acb_pow_arb(tmp2, zz, one_over_alpha, prec);
+    acb_mul(fac3, fac3, tmp2, prec);
+    acb_exp(fac3, fac3, prec);
+        
+    acb_mul(_res, _res, fac1, prec);
+    acb_mul(_res, _res, fac2, prec);
+    acb_mul(_res, _res, fac3, prec);
+
+    res = acbtocmplx(_res);
+
+    acb_clear(zz);
+    acb_clear(xx);
+    acb_clear(fac1);
+    acb_clear(fac2);
+    acb_clear(fac3);
+    arb_clear(alpha);
+    arb_clear(beta);
+    arb_clear(one_over_alpha);
+    arb_clear(tmp1);
+    acb_clear(tmp2);
+    acb_clear(_res);
+    
+    return res;
+}
 
 double complex
 omega (double complex x,
@@ -86,6 +148,21 @@ omega (double complex x,
 {
     return (cpow(x, 1.0/a) * csin(y/a)) + (y * (1 + ((1.0 - b)/a)));
 }
+
+/* double complex */
+/* fn_c (double ph, */
+/*       double a, */
+/*       double b, */
+/*       double complex z, */
+/*       double rho) */
+/* { */
+/*     double complex w; */
+
+/*     w = omega(rho, ph, a, b); */
+/*     return (rho/(2.0 * M_PI)) * () */
+
+    
+/* } */
 
 double complex
 asymptotics_aux (const double alpha,
