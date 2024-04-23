@@ -1,0 +1,16 @@
+for fname in tt_mittleff*.txt; do
+#fname="tt_mittleff_c0001.txt"
+
+    #nfile=$(printf "%04d" $(echo $fname | sed 's/tt_mittleff_c//' | sed 's/\.txt//' | bc))
+#out="tt_mittleff_c${nfile}.txt"
+
+#ab=$(head -n 1 ${fname} | cut -d' ' -f3,4)
+tmpfile=$(mktemp)
+mv ${fname} ${tmpfile}
+echo "# alpha beta z expected dE_dz" > $fname
+gawk -v ab="$(head -n 1 ${tmpfile} | cut -d' ' -f3,4)" 'NR>1{print ab " " $0}' ${tmpfile} >> $fname
+rm ${tmpfile}
+    #sed 's/ \+/ /g;s/^ /+/g;s/\([0-9]\) \([0-9]\)/\1 +\2/g' $fname > $out
+    #rm $fname
+done
+
