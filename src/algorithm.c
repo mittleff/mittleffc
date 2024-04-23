@@ -174,20 +174,25 @@ fn_b (double r,
     return res;
 }
 
-/* double complex */
-/* fn_c (double ph, */
-/*       double a, */
-/*       double b, */
-/*       double complex z, */
-/*       double rho) */
-/* { */
-/*     double complex w; */
+double complex
+fn_c (double ph,
+      double a,
+      double b,
+      double complex z,
+      double rho)
+{
+    double complex w, fac1, fac2, fac3, res;
 
-/*     w = omega(rho, ph, a, b); */
-/*     return (rho/(2.0 * M_PI)) * () */
+    w = omega(rho, ph, a, b);
 
+    fac1 = (rho/(2.0 * M_PI));
+    fac2 = fn_a(rho, a, b, ph);
+    fac3 = cexp(I * w)/(rho * cexp(I * ph) - z);
+
+    res = fac1 * fac2 * fac3;
     
-/* } */
+    return res;
+}
 
 double complex
 asymptotics_aux (const double alpha,
