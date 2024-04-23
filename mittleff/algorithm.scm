@@ -30,9 +30,12 @@
 
 (define (fn-a z a b x)
   (* (/ a) (expt z (/ (- 1 b) a)) (exp (* (expt z (/ a)) (cos (/ x a))))))
+;; (define fn-a
+;;   (pointer->procedure
+;;    complex-double (dynamic-func "fn_a" libalgorithm) `(,complex-double ,double ,double ,complex-double)))
 
-(define (omega x y a b)
-  (+ (* (expt x (/ a)) (sin (/ y a))) (* y (+ 1 (/ (- 1 b) a)))))
+(define omega (pointer->procedure
+               complex-double (dynamic-func "omega" libalgorithm) `(,complex-double ,complex-double ,double ,double)))
 
 (define (fn-b r a b z phi)
   (let ((w (omega r phi a b)))
@@ -59,5 +62,6 @@
   (let ((Ai (cond ((= region 5) (fn-a z a b 0)) ((= region 6) 0)))
         (Bi (quad (lambda (r) (fn-b r a b z (Phi region a))) (Rho b) (Rib region a b z acc)))
         (Ci (if (> b 1) (quad (lambda (ph) (fn-c ph a b z 1/2)) (- (Phi region a)) (Phi region a)) 0)))
+    ;;(format #t "~a | ~a | ~a\n" Ai Bi Ci)
     (+ Ai Bi Ci)))
 

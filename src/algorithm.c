@@ -67,6 +67,26 @@ rho_i (int i, double complex z, double alpha, double acc)
     
 }
 
+/* double complex */
+/* fn_a (double complex z, */
+/*       double a, */
+/*       double b, */
+/*       double complex x) */
+/* { */
+/*     /\* double complex tmp = (1.0 / a) * cpow(z, (1 - b)/a) * cexp(cpow(z, 1/a) * ccos(x/a)); *\/ */
+/*     /\* printf("x, a = (%g %g)\n", creal(tmp), cimag(tmp));//return 0; *\/ */
+/*     return (1.0 / a) * cpow(z, (1 - b)/a) * cexp(cpow(z, 1/a) * ccos(x/a)); */
+/* } */
+
+double complex
+omega (double complex x,
+       double complex y,
+       double a,
+       double b)
+{
+    return (cpow(x, 1.0/a) * csin(y/a)) + (y * (1 + ((1.0 - b)/a)));
+}
+
 double complex
 asymptotics_aux (const double alpha,
                  const double beta,
