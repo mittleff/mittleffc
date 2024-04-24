@@ -300,6 +300,34 @@ Rib (int region, double a, double b,
     return res;
 }
 
+extern double complex
+quad(double complex (*fn)(double x, void * params), double a, double b);
+
+struct B_C_params
+{
+    double a;
+    double b;
+    double complex z;
+    double c;
+};
+
+
+// (lambda (r) (fn-b r a b z (Phi region a)))
+double complex
+B_fn (double r, void *params)
+{
+    struct B_C_params *p = (struct B_C_params *)params;
+    return fn_b(r, p->a, p->b, p->z, p->c);
+}
+
+// (lambda (ph) (fn-c ph a b z 1/2))
+double complex
+C_fn (double ph, void *params)
+{
+    struct B_C_params *p = (struct B_C_params *)params;
+    return fn_c(ph, p->a, p->b, p->z, p->c);
+}
+
 double complex
 integral_rep_aux (const double alpha,
                  const double beta,
@@ -307,7 +335,24 @@ integral_rep_aux (const double alpha,
                  const int region,
                  const double acc)
 {
-    return 0;
+    B_C_params b_params, c_params;
+    double complex Ai, Bi, Ci, res;
+
+    if (region == 5)
+        Ai = fn_a(z, a, b, 0);
+    else if (region == 6)
+        Ai = 0;
+
+    Bi = quad(&B_fn, Rho_Beta(beta), Rib(region, alpha, beta, z, acc));
+
+    if (beta > 1)
+        Ci = quad(&C_fn, -Phi_i(region, alpha), Phi_i(region, alpha));
+    else
+        Ci = 0;
+
+    res = Ai + Bi + Ci;
+    
+    return res;
 }
 
 double complex
