@@ -44,12 +44,17 @@
    complex-double (dynamic-func "fn_c" libalgorithm) `(,double ,double ,double ,complex-double ,double)))
 
 (define* (integral-rep a b z  #:key (region 5) (acc *default-precision*) (radius *taylor-radius*))
-  (integral-rep-aux a b z #:region
+  (let ((integral-rep-aux (pointer->procedure
+                           complex-double (dynamic-func "integral_rep_aux" libalgorithm) `(,double ,double ,complex-double ,int ,double))))
+    (integral-rep-aux a b z
                     (cond
                      ((in-region-G5? z a #:acc acc #:radius radius) 5)
-                     ((in-region-G6? z a #:acc acc #:radius radius) 6)) #:acc acc))
+                     ((in-region-G6? z a #:acc acc #:radius radius) 6)) acc)
+    )
+  
+  )
 
-(define* (integral-rep-aux a b z  #:key (region 5) (acc *default-precision*))
+(define* (integral-rep-auxa a b z  #:key (region 5) (acc *default-precision*))
   (define Phi (pointer->procedure
                double (dynamic-func "Phi_i" libalgorithm) `(,int ,double)))
   (define Rho (pointer->procedure

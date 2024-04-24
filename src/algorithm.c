@@ -4,6 +4,16 @@
 #include <complex.h>
 #include <flint/acb.h>
 #include <flint/arb.h>
+ #include <gsl/gsl_integration.h>
+
+struct B_C_params
+{
+    double a;
+    double b;
+    double complex z;
+    double c;
+};
+
 
 extern double complex acbtocmplx (acb_t z);
 
@@ -303,13 +313,6 @@ Rib (int region, double a, double b,
 extern double complex
 quad(double complex (*fn)(double x, void * params), double a, double b);
 
-struct B_C_params
-{
-    double a;
-    double b;
-    double complex z;
-    double c;
-};
 
 
 // (lambda (r) (fn-b r a b z (Phi region a)))
@@ -328,14 +331,42 @@ C_fn (double ph, void *params)
     return fn_c(ph, p->a, p->b, p->z, p->c);
 }
 
+// (lambda (r) (fn-b r a b z (Phi region a)))
+static double
+Bre (double r, void *params)
+{
+    struct B_C_params *p = (struct B_C_params *)params;
+    return creal(fn_b(r, p->a, p->b, p->z, p->c));
+}
+
+static double
+Bim (double r, void *params)
+{
+    struct B_C_params *p = (struct B_C_params *)params;
+    return cimag(fn_b(r, p->a, p->b, p->z, p->c));
+}
+
+static double
+Cre (double r, void *params)
+{
+    struct B_C_params *p = (struct B_C_params *)params;
+    return creal(fn_c(r, p->a, p->b, p->z, p->c));
+}
+static double
+Cim (double r, void *params)
+{
+    struct B_C_params *p = (struct B_C_params *)params;
+    return cimag(fn_c(r, p->a, p->b, p->z, p->c));
+}
+
+
 double complex
-integral_rep_aux (const double alpha,
-                 const double beta,
+integral_rep_aux (const double a,
+                 const double b,
                  const double complex z,
                  const int region,
                  const double acc)
 {
-    B_C_params b_params, c_params;
     double complex Ai, Bi, Ci, res;
 
     if (region == 5)
@@ -343,10 +374,41 @@ integral_rep_aux (const double alpha,
     else if (region == 6)
         Ai = 0;
 
-    Bi = quad(&B_fn, Rho_Beta(beta), Rib(region, alpha, beta, z, acc));
+    gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
+    double err;
 
-    if (beta > 1)
-        Ci = quad(&C_fn, -Phi_i(region, alpha), Phi_i(region, alpha));
+
+    gsl_function B_fn_re, B_fn_im;
+    gsl_function C_fn_re, C_fn_im;
+    double Bi_re, Bi_im, Ci_re, Ci_im;
+    
+    struct B_C_params b_params = { .a = a, .b = b, .z = z, .c = Phi_i(region, a)};
+    B_fn_re.function = &Bre;    
+    B_fn_im.function = &Bim;
+    B_fn_re.params = &b_params;
+    B_fn_im.params = &b_params;
+    gsl_integration_qags(&B_fn_re, Rho_beta(b), Rib(region, a, b, z, acc), 0, 1e-7, 1000, w, &Bi_re, &err);
+    gsl_integration_qags(&B_fn_im, Rho_beta(b), Rib(region, a, b, z, acc), 0, 1e-7, 1000, w, &Bi_im, &err);
+    //Bi_re = quad(&B_fn_re, Rho_Beta(beta), Rib(region, alpha, beta, z, acc));
+    //Bi_im = quad(&B_fn_im, Rho_Beta(beta), Rib(region, alpha, beta, z, acc));
+    Bi = Bi_re + I * Bi_im;
+
+    if (b > 1)
+    {
+            
+            struct B_C_params c_params = { .a = a, .b = b, .z = z, .c = 0.5};
+            C_fn_re.function = &Cre;    
+            C_fn_im.function = &Cim;
+            C_fn_re.params = &c_params;
+            C_fn_im.params = &c_params;
+            gsl_integration_qags(&C_fn_re, -Phi_i(region, a), Phi_i(region, a), 0, 1e-7, 1000, w, &Ci_re, &err);
+            gsl_integration_qags(&C_fn_im, -Phi_i(region, a), Phi_i(region, a), 0, 1e-7, 1000, w, &Ci_im, &err);
+            /* Ci_re = quad(&C_fn_re, Rho_Beta(beta), Rib(region, alpha, beta, z, acc)); */
+            /* Ci_im = quad(&C_fn_im, Rho_Beta(beta), Rib(region, alpha, beta, z, acc)); */
+            Ci = Ci_re + I * Ci_im;
+
+            //Ci = quad(&C_fn, -Phi_i(region, alpha), Phi_i(region, alpha));
+    }
     else
         Ci = 0;
 

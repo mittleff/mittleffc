@@ -1,7 +1,7 @@
 CC:=gcc
 SHELL:=/bin/bash
 CFLAGS=-Wall -Werror
-LDFLAGS=-lm -lflint
+LDFLAGS=-lm -lflint -lgsl -lgslcblas
 
 .PHONY: clean
 
