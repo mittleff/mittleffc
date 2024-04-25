@@ -5,7 +5,7 @@ LDFLAGS=-lm -lflint -lgsl -lgslcblas
 
 .PHONY: clean
 
-shared: build/libmittleff.so
+shared: build/libmittleff.so build/libpartition.so build/libalgorithm.so
 
 SRCS=$(wildcard src/*.c)
 OBJS=$(SRCS:.c=.o)
@@ -15,10 +15,9 @@ OBJS=$(SRCS:.c=.o)
 
 build/libmittleff.so: $(OBJS)
 	$(CC) -fPIC -shared $(CFLAGS) $^ -o $@ $(LDFLAGS)
-
 build/libpartition.so: src/partition.o
 	$(CC) -fPIC -shared $(CFLAGS) $^ -o $@ $(LDFLAGS)
-build/libalgorithm.so: src/rgamma.o src/partition.o src/algorithm.o
+build/libalgorithm.so: src/rgamma.o src/partition.o src/algorithm.o src/quad.o
 	$(CC) -fPIC -shared $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:
