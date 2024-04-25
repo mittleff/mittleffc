@@ -448,8 +448,12 @@ compute_kmin_kmax(int *s, int *kmin, int *kmax,
         *s = +1;
         *kmin = 0;
 
-        k1 = (int)(ceil((2+beta)/alpha) + 1);
-        k2 = (int)(ceil(log(acc * (1-cabs(z)))/log(cabs(z))) + 1);
+        k1 = (int)(ceil(fabs((1-beta)/alpha)) + 1);
+        if (cabs(z) < acc)
+            k2 = 1;
+        else
+            k2 = (int)(ceil(fabs(log(acc * (1 - cabs(z)))/log(cabs(z)))) + 1);
+        //k2 = (int)(ceil(log(acc * (1-cabs(z)))/log(cabs(z))) + 1);
         *kmax = (k1 > k2) ? k1 : k2;        
     }
 }
@@ -466,18 +470,29 @@ series (const double alpha,
     int k, kmin, kmax, s;
 
     compute_kmin_kmax(&s, &kmin, &kmax, alpha, beta, z, acc, asymptotic);
+    //printf("kmin, kmax, s = %d %d %d\n", kmin, kmax, s);
 
-    res = 0;
-    for (k = kmin; k <= kmax; k++)
+    if (asymptotic)
+        res = 0;
+    else
+    {
+        res = rgamma(beta, acc);
+        kmin++;
+    }
+    for (k = kmin; k < kmax; k++)
     {
         zk = cpow(z, s*k);
         rg = rgamma(alpha * s * k + beta, acc);
+
+        //printf("zk = %g %g\n", creal(zk), cimag(zk));
+        //printf("rg = %g\n", rg);
 
         if (cabs(zk) == 0 || fabs(rg) == 0)
             res += 0;
         else 
             res += zk * rg;
     }
+    //printf("res = %g %g\n", creal(res), cimag(res));
     
     return res;
 }

@@ -35,7 +35,15 @@ mittleff (double alpha, double beta, double complex z, double acc, double taylor
         if (alpha > 1) // alpha > 1
         {
             // Recursive
+            int m = (int)(ceil(0.5 * (alpha - 1)) + 1);
+            double aa = alpha/(2*m+1.);            
             res = 0;
+            for (int l = -m; l <= m; l++)
+            {
+                double complex zz = cpow(z, 1.0/(2*m+1)) * cexp(2*M_PI*I*l/(2*m+1.));
+                res += mittleff_aux(aa, beta, zz, acc, r0);
+            }
+            res *= 1.0/(2*m+1);
         }
         else
         {
