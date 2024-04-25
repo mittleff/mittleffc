@@ -24,7 +24,7 @@ mittleff_aux (const double alpha,
     double r1;
 
     r1 = compute_r1(alpha, acc);
-    printf("r1 = %g\n", r1);
+    //printf("r1 = %g\n", r1);
     
     if (cabs(z) >= r1) // 1-4        
         res = asymptotics(alpha, beta, z, acc);

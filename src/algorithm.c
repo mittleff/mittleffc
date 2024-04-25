@@ -4,8 +4,11 @@
 #include <complex.h>
 #include <flint/acb.h>
 #include <flint/arb.h>
- #include <gsl/gsl_integration.h>
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_math.h>
 
+extern double quad (gsl_function* f, double a, double b, double eps);
+    
 struct B_C_params
 {
     double a;
@@ -310,11 +313,6 @@ Rib (int region, double a, double b,
     return res;
 }
 
-extern double complex
-quad(double complex (*fn)(double x, void * params), double a, double b);
-
-
-
 // (lambda (r) (fn-b r a b z (Phi region a)))
 double complex
 B_fn (double r, void *params)
@@ -374,10 +372,6 @@ integral_rep_aux (const double a,
     else if (region == 6)
         Ai = 0;
 
-    gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
-    double err;
-
-
     gsl_function B_fn_re, B_fn_im;
     gsl_function C_fn_re, C_fn_im;
     double Bi_re, Bi_im, Ci_re, Ci_im;
@@ -387,8 +381,8 @@ integral_rep_aux (const double a,
     B_fn_im.function = &Bim;
     B_fn_re.params = &b_params;
     B_fn_im.params = &b_params;
-    gsl_integration_qags(&B_fn_re, Rho_beta(b), Rib(region, a, b, z, acc), 0, 1e-7, 1000, w, &Bi_re, &err);
-    gsl_integration_qags(&B_fn_im, Rho_beta(b), Rib(region, a, b, z, acc), 0, 1e-7, 1000, w, &Bi_im, &err);
+    Bi_re = quad(&B_fn_re, Rho_beta(b), Rib(region, a, b, z, acc), 1e-15);
+    Bi_im = quad(&B_fn_im, Rho_beta(b), Rib(region, a, b, z, acc), 1e-15);
     //Bi_re = quad(&B_fn_re, Rho_Beta(beta), Rib(region, alpha, beta, z, acc));
     //Bi_im = quad(&B_fn_im, Rho_Beta(beta), Rib(region, alpha, beta, z, acc));
     Bi = Bi_re + I * Bi_im;
@@ -401,8 +395,8 @@ integral_rep_aux (const double a,
             C_fn_im.function = &Cim;
             C_fn_re.params = &c_params;
             C_fn_im.params = &c_params;
-            gsl_integration_qags(&C_fn_re, -Phi_i(region, a), Phi_i(region, a), 0, 1e-7, 1000, w, &Ci_re, &err);
-            gsl_integration_qags(&C_fn_im, -Phi_i(region, a), Phi_i(region, a), 0, 1e-7, 1000, w, &Ci_im, &err);
+            Ci_re = quad(&C_fn_re, -Phi_i(region, a), Phi_i(region, a), 1e-15);
+            Ci_im = quad(&C_fn_im, -Phi_i(region, a), Phi_i(region, a), 1e-15);
             /* Ci_re = quad(&C_fn_re, Rho_Beta(beta), Rib(region, alpha, beta, z, acc)); */
             /* Ci_im = quad(&C_fn_im, Rho_Beta(beta), Rib(region, alpha, beta, z, acc)); */
             Ci = Ci_re + I * Ci_im;

@@ -26,7 +26,7 @@ mittleff (double alpha, double beta, double complex z, double acc, double taylor
 
     if (cabs(z) <= r0)
     {
-        printf("aaa\n");
+        //printf("aaa\n");
         // Taylor
         res = taylor(alpha, beta, z, acc);
     }
@@ -39,7 +39,7 @@ mittleff (double alpha, double beta, double complex z, double acc, double taylor
         }
         else
         {
-            printf("bbb\n");
+            //printf("bbb\n");
             // Main algorithm
             res = mittleff_aux(alpha, beta, z, acc, r0);
         }
