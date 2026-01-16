@@ -1,0 +1,19 @@
+mittleff Release Notes
+=======================
+
+Version 0.1 (Pre-release) - 2026-01-14
+--------------------------------------
+
+Initial pre-release version.
+
+Features:
+- Basic utility library with hello() function
+- Shared and static library builds
+- pkg-config support
+- Symbol visibility control
+- Namespaced header installation (mittleff/mittleff.h)
+
+Notes:
+- This is a pre-release version (0.x)
+- API may change in future versions
+- Not recommended for production use yet
