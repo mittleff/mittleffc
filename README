@@ -1,0 +1,237 @@
+mittleff - Mittleff C Library
+================================
+
+A professional, distributable shared library built with autotools, demonstrating
+best practices for C library development.
+
+Version: 0.1 (Pre-release)
+License: MIT
+Author: Victor P. Santos
+
+
+FEATURES
+--------
+
+* Shared and static library builds
+* Namespaced header installation (mittleff/mittleff.h)
+* pkg-config support for easy integration
+* Symbol visibility control for clean ABI
+* Comprehensive API documentation
+* Unit tests using Check framework
+* Example programs included
+* Full autotools build system
+
+
+REQUIREMENTS
+------------
+
+Build Requirements:
+  - C compiler (GCC, Clang, etc.)
+  - GNU Autotools (autoconf, automake, libtool)
+  - pkg-config
+  - Check framework >= 0.9.4 (for tests)
+
+Runtime Requirements:
+  - Standard C library
+
+
+BUILDING FROM SOURCE
+--------------------
+
+1. If building from git (not from a release tarball), first run:
+
+   $ autoreconf -fi
+
+2. Configure the build:
+
+   $ ./configure
+
+   Common configure options:
+   --prefix=/usr/local     Installation prefix (default: /usr/local)
+   --enable-shared         Build shared libraries (default: yes)
+   --enable-static         Build static libraries (default: yes)
+   --disable-shared        Build only static libraries
+   --disable-static        Build only shared libraries
+
+3. Build the library:
+
+   $ make
+
+4. Run the test suite:
+
+   $ make check
+
+5. Install (may require root/sudo):
+
+   $ make install
+
+   Or to a staging directory:
+
+   $ make install DESTDIR=/tmp/staging
+
+
+BUILDING A DISTRIBUTION TARBALL
+-------------------------------
+
+To create a distributable source tarball:
+
+  $ make dist
+
+This creates mittleff-0.1.tar.gz
+
+To verify the distribution is complete and builds correctly:
+
+  $ make distcheck
+
+
+INSTALLATION LAYOUT
+-------------------
+
+After installation, files are placed as follows:
+
+  ${prefix}/lib/
+    libmittleff.so.0.0.0       Shared library
+    libmittleff.so.0           SONAME symlink
+    libmittleff.so             Development symlink
+    libmittleff.a              Static library
+    libmittleff.la             Libtool library
+    pkgconfig/mittleff.pc     pkg-config file
+
+  ${prefix}/include/mittleff/
+    mittleff.h                 Public header
+
+  ${prefix}/share/doc/mittleff/
+    README, AUTHORS, NEWS, ChangeLog, COPYING
+
+
+USING THE LIBRARY
+-----------------
+
+Include the header in your C code:
+
+    #include <mittleff/mittleff.h>
+
+    int main(void) {
+        int result = hello();
+        return 0;
+    }
+
+Compile with pkg-config (recommended):
+
+    $ gcc -o myapp myapp.c $(pkg-config --cflags --libs mittleff)
+
+Or manually specify flags:
+
+    $ gcc -o myapp myapp.c -I/usr/local/include -L/usr/local/lib -lmittleff
+
+For more examples, see the examples/ directory.
+
+
+API DOCUMENTATION
+-----------------
+
+The library currently provides:
+
+  int hello(void)
+    Prints a hello message with library version information.
+    Returns: 5
+
+For detailed API documentation, see the header file:
+  /usr/local/include/mittleff/mittleff.h
+
+
+RUNNING TESTS
+-------------
+
+The test suite uses the Check framework. Run tests with:
+
+  $ make check
+
+To run tests with verbose output:
+
+  $ make check VERBOSE=1
+
+
+UNINSTALLING
+------------
+
+To remove installed files:
+
+  $ make uninstall
+
+
+VERSIONING
+----------
+
+This library follows semantic versioning principles:
+  - Version 0.x indicates pre-release/unstable API
+  - API may change between 0.x versions
+  - Version 1.0 will mark the first stable API release
+
+The library uses libtool versioning (version-info):
+  - Current: 0 - API interface number
+  - Revision: 0 - Implementation revision
+  - Age: 0 - Number of backward-compatible interfaces
+
+
+CONTRIBUTING
+------------
+
+For bug reports and feature requests, please contact:
+  your-email@example.com
+
+See AUTHORS file for contributor information.
+
+
+LICENSE
+-------
+
+This software is released under the MIT License.
+See COPYING file for full license text.
+
+
+ADDITIONAL DOCUMENTATION
+------------------------
+
+- NEWS: Release notes and version history
+- ChangeLog: Detailed change log
+- AUTHORS: Contributor list
+- examples/README.md: Example usage guide
+
+
+PROJECT STRUCTURE
+-----------------
+
+  mittleff/
+  ├── src/
+  │   └── mittleff/       Library source code
+  ├── tests/              Unit tests
+  ├── examples/           Example programs
+  ├── configure.ac        Autoconf configuration
+  ├── Makefile.am         Automake makefile
+  └── mittleff.pc.in     pkg-config template
+
+
+TROUBLESHOOTING
+---------------
+
+If 'make check' fails to find the library:
+  $ export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+
+If pkg-config can't find mittleff:
+  $ export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
+
+On some systems, you may need to run ldconfig after installation:
+  $ sudo ldconfig
+
+
+MORE INFORMATION
+----------------
+
+For more information about GNU Autotools:
+  $ info Automake
+  $ info Autoconf
+  $ info Libtool
+
+For pkg-config documentation:
+  $ man pkg-config

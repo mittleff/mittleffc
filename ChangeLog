@@ -1,0 +1,10 @@
+2026-01-14  Victor P. Santos  <your-email@example.com>
+
+	* Version 0.1 (Initial pre-release)
+	* Added libutils with hello() function
+	* Implemented autotools build system
+	* Added pkg-config support (mittleff.pc)
+	* Added symbol visibility control
+	* Added namespaced header installation
+	* Added unit tests using Check framework
+	* Added MIT license
